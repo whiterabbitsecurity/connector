@@ -14,4 +14,3 @@ BEGIN {
 }
 
 require_ok( 'Connector' );
-
