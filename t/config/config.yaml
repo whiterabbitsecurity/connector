@@ -1,4 +1,5 @@
 test:
-  foo: 1234
-  bar: 5678
+  entry:
+    foo: 1234
+    bar: 5678
 

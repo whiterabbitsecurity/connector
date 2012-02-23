@@ -13,14 +13,13 @@ use Config::Std;
 use Data::Dumper;
 
 use Moose;
-
 extends 'Connector::Proxy';
 
 sub _build_config {
     my $self = shift;
 
     my $config;
-    read_config($self->SOURCE(), $config);
+    read_config($self->LOCATION(), $config);
     $self->_config($config);
 }
 
@@ -28,7 +27,14 @@ sub get {
     my $self = shift;
     my $arg = shift;
 
-    return $self->_config()->{$self->KEY()}->{$arg};
+    my $path = $self->_build_path($arg);
+    my $delimiter = $self->DELIMITER();
+    # Config::Std does not allow nested data structures, emulate that
+    # by separating last element from path and using that as key
+    # in the section defined by the remaining prefix
+    my ($section, $key) = ($path =~ m{ (.*) [$delimiter] (.*) }xms);
+
+    return $self->_config()->{$section}->{$key};
 }
 
 no Moose;

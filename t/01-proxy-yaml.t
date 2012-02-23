@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 5;
+use Test::More tests => 8;
 
 diag "LOAD MODULE\n";
 
@@ -18,15 +18,21 @@ require_ok( 'Connector::Proxy::YAML' );
 
 diag "Connector::Proxy::YAML tests\n";
 ###########################################################################
-my $yaml_config = Connector::Proxy::YAML->new(
+my $conn = Connector::Proxy::YAML->new(
     {
-	SOURCE    => 't/config/config.yaml',
-	KEY       => 'test',
+	LOCATION  => 't/config/config.yaml',
+	PREFIX    => 'test.entry',
     });
 
-is($yaml_config->get('foo'), '1234');
-is($yaml_config->get('bar'), '5678');
+is($conn->get('foo'), '1234');
+is($conn->get('bar'), '5678');
 
-is($yaml_config->get('nonexistent'), undef);
+is($conn->get('nonexistent'), undef);
 
+# try full path access
+is($conn->PREFIX(''), '');
+
+# and repeat above tests
+is($conn->get('test.entry.foo'), '1234');
+is($conn->get('test.entry.bar'), '5678');
 

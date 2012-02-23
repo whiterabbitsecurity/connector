@@ -12,18 +12,32 @@ use strict;
 use warnings;
 use English;
 use Carp qw( confess );
-use Moose;
+use Data::Dumper;
 
-has SOURCE => (
+use Moose;
+use Connector::Types;
+
+has LOCATION => (
     is => 'ro',
-    isa => 'Str',
+    isa => 'Connector::Types::Location',
     required => 1,
     );
 
-has KEY => (
-    is => 'ro',
-    required => 1,
-    isa => 'Str',
+has PREFIX => (
+    is => 'rw',
+    isa => 'Connector::Types::Key',
+    # build and store an array of the prefix in _prefix_path
+    trigger => sub {
+	my ($self, $prefix, $old_prefix) = @_;
+	my @path = $self->_build_path($prefix);
+	$self->__prefix_path(\@path);
+    }
+    );
+
+has DELIMITER => (
+    is => 'rw',
+    isa => 'Connector::Types::Char',
+    default => '.',
     );
 
 # internal representation of the instance configuration
@@ -37,8 +51,40 @@ has _config => (
     builder  => '_build_config',
     );
 
+# this instance variable is set in the trigger function of PREFIX.
+# it contains an array representation of PREFIX (assumed to be delimited
+# by the DELIMITER character)
+has _prefix_path => (
+    is       => 'rw',
+    init_arg => undef,
+    writer   => '__prefix_path',
+    );
+
+
 # subclasses must implement this to initialize _config
 sub _build_config { return undef };
+
+# _build_path 
+sub _build_path {
+    my $self = shift;
+    my $arg  = shift || '';
+
+    my $prefix    = $self->PREFIX() || '';
+    my $delimiter = $self->DELIMITER();
+
+    my $path = '';
+    if (length($prefix) && length($arg)) {
+	$path = $prefix . $delimiter . $arg;
+    } else {
+	$path = $prefix . $arg;
+    }
+
+    if (wantarray) {
+	return split(/[$delimiter]/, $path);
+    } else {
+	return $path;
+    }
+}
 
 # subclasses must implement get and/or set in order to do something useful
 sub get { confess "No get() method defined.";  };

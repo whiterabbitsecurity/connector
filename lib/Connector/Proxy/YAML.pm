@@ -13,19 +13,37 @@ use YAML;
 use Data::Dumper;
 
 use Moose;
-
 extends 'Connector::Proxy';
 
 sub _build_config {
     my $self = shift;
-    $self->_config(YAML::LoadFile($self->SOURCE()));
+
+    my $config = YAML::LoadFile($self->LOCATION());
+    $self->_config($config);
 }
+
 
 sub get {
     my $self = shift;
     my $arg = shift;
 
-    return $self->_config()->{$self->KEY()}->{$arg};
+    my @path = $self->_build_path($arg);
+
+    my $ptr = $self->_config();
+    while (scalar @path > 1) {
+	my $entry = shift @path;
+	if (exists $ptr->{$entry}) {
+	    if (ref $ptr->{$entry} eq 'HASH') {
+		$ptr = $ptr->{$entry};
+	    } else {
+		confess('Invalid data type in path: ' . ref $ptr->{$entry});
+	    }
+	} else {
+	    confess('Invalid data type');
+	}
+    }
+    
+    return $ptr->{shift @path};
 }
 
 no Moose;
