@@ -23,14 +23,19 @@ has LOCATION => (
     required => 1,
     );
 
+# In order to clear the prefix, call the accessor with undef as argument
 has PREFIX => (
     is => 'rw',
-    isa => 'Connector::Types::Key',
+    isa => 'Connector::Types::Key|Undef',
     # build and store an array of the prefix in _prefix_path
     trigger => sub {
 	my ($self, $prefix, $old_prefix) = @_;
-	my @path = $self->_build_path($prefix);
-	$self->__prefix_path(\@path);
+	if (defined $prefix) {
+	    my @path = $self->_build_path($prefix);
+	    $self->__prefix_path(\@path);
+	} else {
+	    $self->__prefix_path([]);
+	}
     }
     );
 
@@ -57,6 +62,7 @@ has _config => (
 has _prefix_path => (
     is       => 'rw',
     init_arg => undef,
+    default  => sub { [] },
     writer   => '__prefix_path',
     );
 
@@ -64,26 +70,37 @@ has _prefix_path => (
 # subclasses must implement this to initialize _config
 sub _build_config { return undef };
 
-# _build_path 
+# helper function: build a path from the given input. does not take PREFIX
+# into account
 sub _build_path {
     my $self = shift;
-    my $arg  = shift || '';
+    my @arg = @_;
 
-    my $prefix    = $self->PREFIX() || '';
+    my @path;
+
     my $delimiter = $self->DELIMITER();
-
-    my $path = '';
-    if (length($prefix) && length($arg)) {
-	$path = $prefix . $delimiter . $arg;
-    } else {
-	$path = $prefix . $arg;
+    foreach my $item (@arg) {
+ 	if (ref $item eq '') {
+	    push @path, split(/[$delimiter]/, $item);
+ 	} elsif (ref $item eq 'ARRAY') {
+ 	    push @path, @{$item};
+ 	} else {
+ 	    confess "Invalid data type passed in argument to _build_path";
+ 	}
     }
 
     if (wantarray) {
-	return split(/[$delimiter]/, $path);
+	return @path;
     } else {
-	return $path;
+	return join($self->DELIMITER(), @path);
     }
+}
+
+# same as _build_config, but prepends PREFIX
+sub _build_path_with_prefix {
+    my $self = shift;
+
+    return $self->_build_path(@{$self->_prefix_path()}, @_);
 }
 
 # subclasses must implement get and/or set in order to do something useful

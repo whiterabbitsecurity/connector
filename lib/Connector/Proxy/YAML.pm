@@ -25,11 +25,10 @@ sub _build_config {
 
 sub get {
     my $self = shift;
-    my $arg = shift;
-
-    my @path = $self->_build_path($arg);
+    my @path = $self->_build_path_with_prefix(@_);
 
     my $ptr = $self->_config();
+
     while (scalar @path > 1) {
 	my $entry = shift @path;
 	if (exists $ptr->{$entry}) {

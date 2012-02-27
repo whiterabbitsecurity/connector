@@ -25,14 +25,13 @@ sub _build_config {
 
 sub get {
     my $self = shift;
-    my $arg = shift;
-
-    my $path = $self->_build_path($arg);
-    my $delimiter = $self->DELIMITER();
+    my @path = $self->_build_path_with_prefix(@_);
+    
     # Config::Std does not allow nested data structures, emulate that
     # by separating last element from path and using that as key
     # in the section defined by the remaining prefix
-    my ($section, $key) = ($path =~ m{ (.*) [$delimiter] (.*) }xms);
+    my $key = pop @path;
+    my $section = $self->_build_path(@path);
 
     return $self->_config()->{$section}->{$key};
 }

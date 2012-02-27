@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 diag "LOAD MODULE\n";
 
@@ -20,11 +20,11 @@ diag "Connector::Proxy::File::Simple tests\n";
 ###########################################################################
 my $conn = Connector::Proxy::File::Simple->new(
     {
-	LOCATION  => '',
-	PREFIX    => 't/config',
+	LOCATION  => 't/config/file',
     });
 
-is($conn->get('file'), 'test');
-is($conn->get('nonexistent'), undef);
+is($conn->get(), 'test');
+is($conn->get('foo'), 'test');
+is($conn->get('bar'), 'test');
 
 

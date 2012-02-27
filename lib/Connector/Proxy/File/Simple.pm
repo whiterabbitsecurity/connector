@@ -17,22 +17,27 @@ extends 'Connector::Proxy';
 
 sub _build_config {
     my $self = shift;
+
+    if (! -r $self->{LOCATION}) {
+	confess("Cannot open input file " . $self->{LOCATION} . " for reading.");
+    }
     
     return 1;
 }
 
+# this method always returns the file contents, regardless of the specified
+# key
 sub get {
     my $self = shift;
     my $arg = shift;
 
-    my $path = File::Spec->catfile($self->_build_path($arg));
-    my $content;
+    my $filename = $self->{LOCATION};
 
-    print "path: $path\n";
-    if (-r $path) {
-      $content = do {
+    my $content;
+    if (-r $filename) {
+	$content = do {
 	  local $INPUT_RECORD_SEPARATOR;
-	  open my $fh, '<', $path;
+	  open my $fh, '<', $filename;
 	  <$fh>;
       };
     }

@@ -30,7 +30,9 @@ is($conn->get('bar'), '5678');
 is($conn->get('nonexistent'), undef);
 
 # try full path access
-is($conn->PREFIX(''), '');
+diag('Tests without PREFIX');
+$conn->PREFIX(undef);
+is($conn->PREFIX(), undef, 'Accessor test');
 
 # and repeat above tests
 is($conn->get('test.entry.foo'), '1234');

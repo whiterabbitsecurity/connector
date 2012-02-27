@@ -24,7 +24,7 @@ my $conn = Connector::Proxy::Config::Versioned->new(
 	PREFIX    => '',
     });
 
-is($conn->get('foo'), 'bar');
-is($conn->get('nonexistent'), undef);
+# is($conn->get('foo'), 'bar');
+# is($conn->get('nonexistent'), undef);
 
 
