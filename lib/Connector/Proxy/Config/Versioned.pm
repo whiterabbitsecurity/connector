@@ -15,25 +15,27 @@ use Data::Dumper;
 use Moose;
 extends 'Connector::Proxy';
 
+has '+_config' => (
+#    isa => 'Config::Versioned',
+    lazy => 0,
+);
+
 sub _build_config {
     my $self = shift;
 
-#     my $config = Config::Versioned->new(
-# 	{
-# 	    dbpath => $self->LOCATION(),
-# 	});
+    my $config = Config::Versioned->new( { dbpath => $self->LOCATION(), } );
 
+    if ( not defined $config ) {
+        return; # try to throw exception
+    }
     $self->_config($config);
 }
 
-
 sub get {
     my $self = shift;
-    my $arg = shift;
+    my $arg  = shift;
 
-    # TBD
-
-    return;
+    return $self->_config()->get($arg);
 }
 
 no Moose;
