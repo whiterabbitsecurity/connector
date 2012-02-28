@@ -11,7 +11,6 @@ our $VERSION = '0.01';
 use strict;
 use warnings;
 use English;
-use Carp qw( confess );
 use Data::Dumper;
 
 use Moose;
@@ -85,7 +84,7 @@ sub _build_path {
  	} elsif (ref $item eq 'ARRAY') {
  	    push @path, @{$item};
  	} else {
- 	    confess "Invalid data type passed in argument to _build_path";
+ 	    die "Invalid data type passed in argument to _build_path";
  	}
     }
 
@@ -104,8 +103,8 @@ sub _build_path_with_prefix {
 }
 
 # subclasses must implement get and/or set in order to do something useful
-sub get { confess "No get() method defined.";  };
-sub set { confess "No set() method defined.";  };
+sub get { die "No get() method defined.";  };
+sub set { die "No set() method defined.";  };
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
