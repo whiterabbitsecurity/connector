@@ -33,9 +33,8 @@ sub _build_config {
 
 sub get {
     my $self = shift;
-    my $arg  = shift;
 
-    return $self->_config()->get($arg);
+    return $self->_config()->get(@_);
 }
 
 no Moose;
