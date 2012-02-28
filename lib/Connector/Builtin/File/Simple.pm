@@ -1,10 +1,10 @@
-# Connector::Proxy::File::Simple
+# Connector::Builtin::File::Simple
 #
 # Proxy class for accessing simple filex
 #
 # Written by Martin Bartosch for the OpenXPKI project 2012
 #
-package Connector::Proxy::File::Simple;
+package Connector::Builtin::File::Simple;
 
 use strict;
 use warnings;
@@ -13,7 +13,7 @@ use File::Spec;
 use Data::Dumper;
 
 use Moose;
-extends 'Connector::Proxy';
+extends 'Connector::Builtin';
 
 sub _build_config {
     my $self = shift;
@@ -53,7 +53,7 @@ __END__
 
 =head 1 Name
 
-Connector::Proxy::File::Simple
+Connector::Builtin::File::Simple
 
 =head 1 Description
 
