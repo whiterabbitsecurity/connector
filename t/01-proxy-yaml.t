@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 diag "LOAD MODULE\n";
 
@@ -37,4 +37,8 @@ is($conn->PREFIX(), undef, 'Accessor test');
 # and repeat above tests
 is($conn->get('test.entry.foo'), '1234');
 is($conn->get('test.entry.bar'), '5678');
+
+# check for completely wrong entry
+is($conn->get('test1.entry.bar'), undef, 'handle completely wrong entry gracefully');
+
 
