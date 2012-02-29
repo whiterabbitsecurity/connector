@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Try::Tiny;
 
-use Test::More tests => 14;
+use Test::More tests => 18;
 
 diag "LOAD MODULE\n";
 
@@ -33,7 +33,7 @@ my $conn = Connector::Proxy::Proc::SafeExec->new(
 ok(defined $conn);
 
 SKIP: {
-    skip "Proc::SafeExec not installed", 12 if $req_err;
+    skip "Proc::SafeExec not installed", 16 if $req_err;
 
     is($conn->get(), 'foo', 'Simple invocation');
 
@@ -72,6 +72,28 @@ SKIP: {
     is($conn->get('foo', 'bar'), 'abcfoo123barxyz', 'Multiple parameters from get arguments');
 
     ###
+    # environment tests
+    $ENV{MYVAR} = '';
+    $conn->args( [ '--printenv', 'MYVAR' ] );
+    is($conn->get('foo'), '', 'Environment variable test: no value');
+
+    $ENV{MYVAR} = 'bar';
+    is($conn->get('foo'), 'bar', 'Environment variable test: externally set');
+
+    $ENV{MYVAR} = '';
+    $conn->env(
+	{
+	    MYVAR => '1234',
+	});
+    is($conn->get('foo'), '1234', 'Environment variable test: internally set to static value');
+
+    $conn->env(
+	{
+	    MYVAR => '1234[% ARG.0 %]',
+	});
+    is($conn->get('foo'), '1234foo', 'Environment variable test: internally set with template');
+
+    ###
     # stdin tests
     $conn->stdin('54321');
     $conn->args( [ '--' ] );
@@ -84,5 +106,7 @@ SKIP: {
     $conn->stdin( [ '1234[% ARG.0 %]abc', '4321[% ARG.1 %]def' ]);
     is ($conn->get('foo', 'bar'), '1234fooabc
 4321bardef', 'Passing multiple lines via STDIN');
+
+
 }
 

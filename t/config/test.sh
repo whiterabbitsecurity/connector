@@ -27,6 +27,11 @@ while [ -n "$1" ] ; do
 	    shift
 	    shift
 	    ;;
+	--printenv)
+	    eval echo \$$2
+	    shift
+	    shift
+	    ;;
 	--)
 	    shift
 	    cat

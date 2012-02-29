@@ -42,6 +42,11 @@ has stdin => (
     isa => 'Str|ArrayRef[Str]|Undef',
     );
 
+has env => (
+    is => 'rw',
+    isa => 'HashRef[Str]',
+    );
+
 sub _build_config {
     my $self = shift;
 
@@ -87,12 +92,22 @@ sub get {
 	}
 	foreach my $line (@raw_stdin_data) {
 	    my $value;
-	    $template->process(\$line, $template_vars, \$value) || die "Error processing argument template.";
+	    $template->process(\$line, $template_vars, \$value) || die "Error processing stdin template.";
 	    push @feed_to_stdin, $value;
 	}
 	
 	# we have data to pipe to stdin, create a filehandle
 	$filehandles{stdin} = 'new';
+    }
+
+    if (defined $self->env()) {
+	if (ref $self->env() eq 'HASH') {
+	    foreach my $key (keys %{$self->env()}) {
+		my $value;
+		$template->process(\$self->env()->{$key}, $template_vars, \$value) || die "Error processing environment template.";
+		$ENV{$key} = $value;
+	    }
+	}
     }
     
     my $stdout = File::Temp->new();
@@ -124,9 +139,7 @@ sub get {
 	if ($_ eq "alarm\n") {
 	    die "System command timed out after " . $self->timeout() . " seconds";
 	}
-	if ($_ ne "Child was already waited on without calling the wait method\n") {
-	    die $_;
-	}
+	die $_;
     } finally {
 	alarm 0;
     };
