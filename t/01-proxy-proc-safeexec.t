@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Try::Tiny;
 
-use Test::More tests => 10;
+use Test::More tests => 14;
 
 diag "LOAD MODULE\n";
 
@@ -33,7 +33,7 @@ my $conn = Connector::Proxy::Proc::SafeExec->new(
 ok(defined $conn);
 
 SKIP: {
-    skip "Proc::SafeExec not installed", 8 if $req_err;
+    skip "Proc::SafeExec not installed", 12 if $req_err;
 
     is($conn->get(), 'foo', 'Simple invocation');
 
@@ -71,5 +71,18 @@ SKIP: {
     $conn->args( [ 'abc[% ARG.0 %]123[% ARG.1 %]xyz' ] );
     is($conn->get('foo', 'bar'), 'abcfoo123barxyz', 'Multiple parameters from get arguments');
 
+    ###
+    # stdin tests
+    $conn->stdin('54321');
+    $conn->args( [ '--' ] );
+    is($conn->get('foo'), '54321', 'Passing scalar data via STDIN 1/2');
+    is($conn->get('bar'), '54321', 'Passing scalar data via STDIN 2/2');
+    
+    $conn->stdin('54321[% ARG.0 %]abc');
+    is($conn->get('foo'), '54321fooabc', 'Passing data via STDIN with template');
+
+    $conn->stdin( [ '1234[% ARG.0 %]abc', '4321[% ARG.1 %]def' ]);
+    is ($conn->get('foo', 'bar'), '1234fooabc
+4321bardef', 'Passing multiple lines via STDIN');
 }
 

@@ -37,6 +37,10 @@ has chomp_output => (
     default => 1,
     );
 
+has stdin => (
+    is => 'rw',
+    isa => 'Str|ArrayRef[Str]|Undef',
+    );
 
 sub _build_config {
     my $self = shift;
@@ -70,26 +74,50 @@ sub get {
 	$template->process(\$item, $template_vars, \$value) || die "Error processing argument template.";
 	push @cmd_args, $value;
     }
-    
+
+    my %filehandles;
+
+    my @feed_to_stdin;
+    if (defined $self->stdin()) {
+	my @raw_stdin_data;
+	if (ref $self->stdin() eq '') {
+	    push @raw_stdin_data, $self->stdin();
+	} elsif (ref $self->stdin() eq 'ARRAY') {
+	    push @raw_stdin_data, @{$self->stdin()};
+	}
+	foreach my $line (@raw_stdin_data) {
+	    my $value;
+	    $template->process(\$line, $template_vars, \$value) || die "Error processing argument template.";
+	    push @feed_to_stdin, $value;
+	}
+	
+	# we have data to pipe to stdin, create a filehandle
+	$filehandles{stdin} = 'new';
+    }
     
     my $stdout = File::Temp->new();
+    $filehandles{stdout} = \*$stdout;
+
     my $stderr = File::Temp->new();
+    $filehandles{stderr} = \*$stderr;
+
 
     # compose the system command to execute
     my @cmd;
     push @cmd, $self->{LOCATION};
     push @cmd, @cmd_args;
-    
+
     my $command = Proc::SafeExec->new(
 	{
 	    exec => \@cmd,
-#	    stdin  => 'new',
-	    stdout => \*$stdout,
-	    stderr => \*$stderr,
+	    %filehandles,
 	});
-
     try {
 	local $SIG{ALRM} = sub { die "alarm\n" };
+	if (scalar @feed_to_stdin) {
+	    my $stdin = $command->stdin();
+	    print $stdin join("\n", @feed_to_stdin);
+	}
 	alarm $self->timeout();
 	$command->wait();
     } catch {
