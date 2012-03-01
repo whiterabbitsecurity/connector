@@ -151,7 +151,7 @@ sub get {
     };
 
     if ($command->exit_status() != 0) {
- 	die "System command exited with return code " . ($command->exit_status() >> 8) . ". STDERR: $stderr";
+ 	die "System command exited with return code " . ($command->exit_status() >> 8) . ". STDERR: $stderr_content";
     }
 
     my $stdout_content = do {
