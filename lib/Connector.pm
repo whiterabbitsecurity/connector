@@ -65,6 +65,40 @@ has _prefix_path => (
     writer   => '__prefix_path',
     );
 
+# This is the foo that allows us to just milk the connector config from
+# the settings fetched from another connector.
+
+around BUILDARGS => sub {
+    my $orig = shift;
+    my $class = shift;
+
+    my $args = $_[0];
+
+    if (    ref($args) eq 'HASH'
+            && defined($args->{CONNECTOR})
+            && defined($args->{TARGET}) ) {
+
+        my $conn = $args->{CONNECTOR};
+        delete $args->{CONNECTOR};
+        my $targ = $args->{TARGET};
+        delete $args->{TARGET};
+        my $meta = __PACKAGE__->meta;
+
+        for my $attr ( $meta->get_all_attributes ) {
+            my $attrname = $attr->name();
+            next if $attrname =~ m/^_/; # skip apparently internal params
+            # allow caller to override params in CONNECTOR
+            if ( not exists($args->{$attrname}) ) {
+                my $val = $conn->get($targ . $conn->DELIMITER() . $attrname);
+                if ( defined $val ) {
+                    $args->{$attrname} = $val;
+                }
+            }
+        }
+    }
+    return $class->$orig(@_);
+};
+
 
 # subclasses must implement this to initialize _config
 sub _build_config { return undef };
