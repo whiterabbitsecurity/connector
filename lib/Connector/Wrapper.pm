@@ -4,6 +4,9 @@
 #
 # Written by Oliver Welter for the OpenXPKI project 2012
 #
+# TODO: To make this really transparent it need to be inherited 
+# from Connector and implement the prefix stuff 
+
 package Connector::Wrapper;
 
 use strict;

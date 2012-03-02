@@ -16,7 +16,7 @@ extends 'Connector';
 
 has LOOPBACK => (
     is => 'ro',
-    isa => 'Connector::Wrapper',
+    isa => 'Connector|Connector::Wrapper',
     reader => 'conn',
     required => 0,
 );
