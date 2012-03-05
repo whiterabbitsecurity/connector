@@ -54,19 +54,20 @@ foreach my $data ( @test_data ) {
 
 
 ###########################################################################
-my $base = Connector::Proxy::Config::Versioned->new({
-	LOCATION  => $test_data[0]->{dbpath},
-});
-
-is($base->get('smartcards.tokens.token_1.status'), 'ACTIVATED',
-    'check base connector (1)');
-is($base->get('smartcards.owners.joe.tokenid'), 'token_1',
-    'check base connector (2)');
-is($base->get('smartcards.tokens.token_1.nonexistent'), undef,
-    'check base connector (3)');
+#my $base = Connector::Proxy::Config::Versioned->new({
+#	LOCATION  => $test_data[0]->{dbpath},
+#});
+#
+#is($base->get('smartcards.tokens.token_1.status'), 'ACTIVATED',
+#    'check base connector (1)');
+#is($base->get('smartcards.owners.joe.tokenid'), 'token_1',
+#    'check base connector (2)');
+#is($base->get('smartcards.tokens.token_1.nonexistent'), undef,
+#    'check base connector (3)');
 
 my $conn = Connector::Multi->new( {
-    BASECONNECTOR => $base,
+    BASECONNECTOR => 'Connector::Proxy::Config::Versioned',
+    LOCATION => $test_data[0]->{dbpath},
     });
 
 is($conn->get('smartcards.tokens.token_1.status'), 'ACTIVATED',

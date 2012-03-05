@@ -22,7 +22,14 @@ sub _build_config {
 
     # Our config is merely a hash of connector instances
     my $config = {};
-    $config->{''} = $self->BASECONNECTOR();
+    my $baseconn = $self->BASECONNECTOR();
+
+    if ( ref($baseconn) ) { # if it's a ref, assume that it's a Connector
+    } else {
+        require $baseconn or die "Error require'ing $baseconn: $@";
+        $baseconn = $baseconn->new({ LOCATION => $self->LOCATION() });
+    }
+    $config->{''} = $baseconn;
     $self->_config($config);
 }
 
@@ -193,6 +200,10 @@ entry in the tree.
 
 =head1 SYNOPSIS
 
+The parameter BASECONNECTOR may either be a class instance or
+the name of the class, in which case the additional arguments
+(e.g.: LOCATION) are passed to the base connector.
+
   use Connector::Proxy::Config::Versioned;
   use Connector::Multi;
 
@@ -202,6 +213,17 @@ entry in the tree.
 
   my $multi = Connector::Multi->new( {
     BASECONNECTOR => $base,
+  });
+
+  my $tok = $multi->get('smartcard.owners.bob.tokenid');
+
+or...
+
+  use Connector::Multi;
+
+  my $multi = Connector::Multi->new( {
+    BASECONNECTOR => 'Connector::Proxy::Config::Versioned',
+    LOCATION => $path_to_internal_config_git_repo,
   });
 
   my $tok = $multi->get('smartcard.owners.bob.tokenid');
