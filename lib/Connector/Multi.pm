@@ -46,9 +46,14 @@ sub get {
     if ( ! $conn ) {
         die "ERR: no default connector for Connector::Multi";
     }
+    
+    if (ref $location) {
+        $location = join (".", @{$location});
+    }
+    
     my @prefix = ();
     my @suffix = split(/[$delim]/, $location);
-
+    
     while ( @suffix > 1 ) { # always treat the last section as non-symlink
         my $node = shift @suffix;
         push @prefix, $node;
@@ -85,12 +90,58 @@ sub get {
     }
 }
 
+
+sub set {
+    my $self = shift;
+    my $location = shift;
+    my $value = shift;
+
+    my $delim = $self->DELIMITER();
+
+    my $conn = $self->BASECONNECTOR();  # get default connector
+    if ( ! $conn ) {
+        die "ERR: no default connector for Connector::Multi";
+    }
+    
+    if (ref $location) {
+        $location = join (".", @{$location});
+    }
+    
+    my @prefix = ();
+    my @suffix = split(/[$delim]/, $location);
+    
+    while ( @suffix > 1 ) { # always treat the last section as non-symlink
+        my $node = shift @suffix;
+        push @prefix, $node;
+        my $val = $conn->get(join($delim, @prefix));
+        if ( defined($val) and ( ref($val) eq 'SCALAR' ) ) {
+            if ( ${ $val } =~ m/^([^:]+):(.+)$/ ) {
+                my $schema = $1;
+                my $target = $2;
+                if ( $schema eq 'connector' ) {
+                    $conn = $self->get_connector($target);
+                    if ( ! $conn ) {
+                        die "Connector::Multi: error creating connector for '$target': $@";
+                    }                    
+                    return $conn->set(join($delim, @suffix), $value );                    
+                } else {
+                    die "Connector::Multi: unsupported schema for symlink: $schema";
+                }
+            } else {
+                # redirect
+                @prefix = split(/[$delim]/, $val);
+            }
+        }
+    }    
+    return scalar $conn->set($location, $value );    
+}
+
 sub get_connector {
     my $self = shift;
     my $target = shift;
     my $delim = $self->DELIMITER();
 
-    my $conn = $self->_config()->{$target};
+    my $conn = $self->_config()->{$target};    
     if ( ! $conn ) {
         # use the 'root' connector instance
         my $class = $self->BASECONNECTOR()->get($target . $delim . 'class');
@@ -230,6 +281,10 @@ or...
   });
 
   my $tok = $multi->get('smartcard.owners.bob.tokenid');
+  
+You can also pass the path as an arrayref, where each element can be a path itself
+
+  my $tok = $multi->get( [ 'smartcard.owners', 'bob.tokenid' ]);
 
 =head1 OPTIONS
 
