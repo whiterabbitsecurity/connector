@@ -23,13 +23,15 @@ sub _build_config {
     # Our config is merely a hash of connector instances
     my $config = {};
     my $baseconn = $self->BASECONNECTOR();
+    my $baseref;
 
     if ( ref($baseconn) ) { # if it's a ref, assume that it's a Connector
+        $baseref = $baseconn;
     } else {
-        require $baseconn or die "Error require'ing $baseconn: $@";
-        $baseconn = $baseconn->new({ LOCATION => $self->LOCATION() });
+        eval "use $baseconn;1" or die "Error use'ing $baseconn: $@";
+        $baseref = $baseconn->new({ LOCATION => $self->LOCATION() });
     }
-    $config->{''} = $baseconn;
+    $config->{''} = $baseref;
     $self->_config($config);
 }
 
@@ -39,7 +41,8 @@ sub get {
 
     my $delim = $self->DELIMITER();
 
-    my $conn = $self->BASECONNECTOR();  # get default connector
+#    my $conn = $self->BASECONNECTOR();  # get default connector
+    my $conn = $self->_config()->{''};  # get default connector
     if ( ! $conn ) {
         die "ERR: no default connector for Connector::Multi";
     }

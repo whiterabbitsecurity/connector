@@ -16,7 +16,6 @@ use Moose;
 extends 'Connector::Proxy';
 
 has '+_config' => (
-#    isa => 'Config::Versioned',
     lazy => 0,
 );
 

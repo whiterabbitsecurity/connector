@@ -9,6 +9,8 @@ use Test::More tests => 22;
 use Path::Class;
 use DateTime;
 
+my ($base, $conn);
+
 BEGIN {
     use_ok( 'Config::Versioned' ); 
     use_ok( 'Connector::Multi' ); 
@@ -65,7 +67,7 @@ foreach my $data ( @test_data ) {
 #is($base->get('smartcards.tokens.token_1.nonexistent'), undef,
 #    'check base connector (3)');
 
-my $conn = Connector::Multi->new( {
+$conn = Connector::Multi->new( {
     BASECONNECTOR => 'Connector::Proxy::Config::Versioned',
     LOCATION => $test_data[0]->{dbpath},
     });
