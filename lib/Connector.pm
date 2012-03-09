@@ -82,19 +82,19 @@ around BUILDARGS => sub {
         delete $args->{CONNECTOR};
         my $targ = $args->{TARGET};
         delete $args->{TARGET};
-        my $meta = __PACKAGE__->meta;
-
+        my $meta = $class->meta;
+        
         for my $attr ( $meta->get_all_attributes ) {
-            my $attrname = $attr->name();
+            my $attrname = $attr->name();            
             next if $attrname =~ m/^_/; # skip apparently internal params
             # allow caller to override params in CONNECTOR
-            if ( not exists($args->{$attrname}) ) {
+            if ( not exists($args->{$attrname}) ) {                
                 my $val = $conn->get($targ . $conn->DELIMITER() . $attrname);
                 if ( defined $val ) {
                     $args->{$attrname} = $val;
                 }
             }
-        }
+        }        
     }
     return $class->$orig(@_);
 };
