@@ -16,7 +16,7 @@ use Moose;
 extends 'Connector::Proxy';
 
 has '+_config' => (
-    lazy => 0,
+    lazy => 1,
 );
 
 sub _build_config {
