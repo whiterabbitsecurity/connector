@@ -32,7 +32,7 @@ sub get {
     while (scalar @path > 1) {
 	my $entry = shift @path;
 	if (exists $ptr->{$entry}) {
-	    if (ref $ptr->{$entry} eq 'HASH') {
+	    if (ref $ptr->{$entry} eq 'HASH') {	
 		$ptr = $ptr->{$entry};
 	    } else {
 		confess('Invalid data type in path: ' . ref $ptr->{$entry});
@@ -42,7 +42,12 @@ sub get {
 	}
     }
     
-    return $ptr->{shift @path};
+    my $entry = $ptr->{shift @path};
+    # return the keys if it is a subtree
+    if (ref $entry eq 'HASH') {
+        return keys %{$entry};
+    }
+    return $entry;
 }
 
 no Moose;
