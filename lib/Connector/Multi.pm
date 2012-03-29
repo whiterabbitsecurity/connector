@@ -10,6 +10,7 @@ use strict;
 use warnings;
 use English;
 use Moose;
+use Connector::Wrapper;
 
 extends 'Connector';
 
@@ -96,12 +97,12 @@ sub get {
             $ptr_cache->{$path} = 1;
         }
     }
-
+    
     if ( wantarray ) {
         # coerce the connector's get to return a list
-        return ( $conn->get(join($delim, @prefix, @suffix)) );
-    } else {
-        return scalar $conn->get(join($delim, @prefix, @suffix));
+        return ($conn->get(join($delim, @prefix, @suffix)));
+    } else {        
+        return scalar $conn->get(join($delim, @prefix, @suffix));        
     }
 }
 
