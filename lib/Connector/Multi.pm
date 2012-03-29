@@ -17,6 +17,14 @@ has 'BASECONNECTOR' => ( is => 'ro', required => 1 );
 
 has '+LOCATION' => ( required => 0 );
 
+has '_cache' => ( is => 'rw', required => 0, isa => 'HashRef',  default => sub{  return {}; } );
+
+
+sub _init_cache {
+    my $self = shift;
+    $self->_cache( Connector::Builtin::Memory->new() ); 
+}
+
 sub _build_config {
     my $self = shift;
 
@@ -47,17 +55,22 @@ sub get {
         die "ERR: no default connector for Connector::Multi";
     }
     
-    if (ref $location) {
-        $location = join (".", @{$location});
-    }
-    
     my @prefix = ();
     my @suffix = split(/[$delim]/, $location);
+    my $ptr_cache = $self->_cache();
     
     while ( @suffix > 1 ) { # always treat the last section as non-symlink
         my $node = shift @suffix;
         push @prefix, $node;
-        my $val = $conn->get(join($delim, @prefix));
+
+        # Easy Cache - skip all inner nodes, that are not a connector
+        my $path = join($delim, @prefix);
+        if (exists $ptr_cache->{$path}) {
+            next;
+        }
+            
+        my $val = $conn->get($path);
+        
         if ( defined($val) and ( ref($val) eq 'SCALAR' ) ) {
             if ( ${ $val } =~ m/^([^:]+):(.+)$/ ) {
                 my $schema = $1;
@@ -79,6 +92,8 @@ sub get {
                 # redirect
                 @prefix = split(/[$delim]/, $val);
             }
+        } else {
+            $ptr_cache->{$path} = 1;
         }
     }
 
@@ -90,6 +105,14 @@ sub get {
     }
 }
 
+sub getWrapper() {
+    
+    my $self = shift;
+    my $location = shift;
+    
+    return Connector::Wrapper->new({ CONNECTOR => $self, TARGET => $location });
+    
+}
 
 sub set {
     my $self = shift;
@@ -110,10 +133,19 @@ sub set {
     my @prefix = ();
     my @suffix = split(/[$delim]/, $location);
     
+    my $ptr_cache = $self->_cache();    
+    
     while ( @suffix > 1 ) { # always treat the last section as non-symlink
         my $node = shift @suffix;
         push @prefix, $node;
-        my $val = $conn->get(join($delim, @prefix));
+        
+        # Easy Cache - skip all inner nodes, that are not a connector
+        my $path = join($delim, @prefix);
+        if (exists $ptr_cache->{$path}) {
+            next;
+        }            
+        my $val = $conn->get($path);
+        
         if ( defined($val) and ( ref($val) eq 'SCALAR' ) ) {
             if ( ${ $val } =~ m/^([^:]+):(.+)$/ ) {
                 my $schema = $1;
@@ -131,6 +163,8 @@ sub set {
                 # redirect
                 @prefix = split(/[$delim]/, $val);
             }
+        } else {
+            $ptr_cache->{$path} = 1;
         }
     }    
     return scalar $conn->set($location, $value );    
