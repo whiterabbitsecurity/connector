@@ -150,7 +150,7 @@ sub set {
             if ( ${ $val } =~ m/^([^:]+):(.+)$/ ) {
                 my $schema = $1;
                 my $target = $2;
-                if ( $schema eq 'connector' ) {
+                if ( $schema eq 'connector' ) {                    
                     $conn = $self->get_connector($target);
                     if ( ! $conn ) {
                         die "Connector::Multi: error creating connector for '$target': $@";
@@ -180,6 +180,7 @@ sub get_connector {
         # use the 'root' connector instance
         my $class = $self->BASECONNECTOR()->get($target . $delim . 'class');
         $conn = $class->new( { CONNECTOR => $self->BASECONNECTOR(), TARGET => $target } );
+        $self->_config()->{$target} = $conn;
     }
     return $conn;
 }
