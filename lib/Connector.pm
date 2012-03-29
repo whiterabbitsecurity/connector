@@ -136,25 +136,9 @@ sub _build_path_with_prefix {
     return $self->_build_path(@{$self->_prefix_path()}, @_);
 }
 
-# Transparently add support for arrayref pathspec
-around get => sub {
-    my $orig = shift;
-    my $class = shift;
-     
-    my $path = shift;
-      
-    # TODO - might be possible to have different delimiters
-    if (ref $path) {
-        $path = join( $class->DELIMITER() , @{$path} );
-    }
-     
-    return $class->$orig($path);
-    
-};
-
 # subclasses must implement get and/or set in order to do something useful
 sub get { die "No get() method defined.";  };
-sub set { shift; my $loc = shift;  die "No set() method defined (Path $loc).";  };
+sub set { die "No set() method defined.";  };
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
