@@ -39,21 +39,6 @@ around BUILDARGS => sub {
     
 };
 
-# Transparently add support for arrayref pathspec
-around get => sub {
-    my $orig = shift;
-    my $class = shift;
-     
-    my $path = shift;
-      
-    # TODO - might be possible to have different delimiters
-    if (ref $path) {
-        $path = join( $class->DELIMITER() , @{$path} );
-    }
-     
-    return $class->$orig($path);
-    
-};
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
