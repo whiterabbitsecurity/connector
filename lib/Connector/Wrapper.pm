@@ -34,6 +34,24 @@ sub get {
     return $self->BASECONNECTOR()->get( $path );        
 }
 
+sub set {
+    
+    my $self = shift;
+    my $path = shift;
+    my $value = shift;
+       
+    if (ref $path) {
+        unshift @{$path}, $self->_prefix();
+        $path = join(".", @{$path} );
+    } elsif ($path) {
+        $path = $self->_prefix() . $self->BASECONNECTOR()->DELIMITER() .  $path;
+    } else {
+        $path = $self->_prefix();
+    }
+     
+    return $self->BASECONNECTOR()->set( $path, $value );        
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
