@@ -137,8 +137,8 @@ sub _build_path_with_prefix {
 }
 
 # subclasses must implement get and/or set in order to do something useful
-sub get { die "No get() method defined.";  };
-sub set { die "No set() method defined.";  };
+sub get { shift; die "No get() method defined as " . shift;  };
+sub set { shift;  die "No set() method defined at " . shift;  };
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
