@@ -5,6 +5,9 @@
 # Written by Scott Hardin, Martin Bartosch and Oliver Welter 
 # for the OpenXPKI project 2012
 #
+# THIS IS NOT WORKING IN A FORKING ENVIRONMENT!
+
+
 package Connector::Builtin::Memory;
 
 use strict;
