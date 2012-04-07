@@ -18,12 +18,12 @@ has 'BASECONNECTOR' => ( is => 'ro', required => 1 );
 
 has '+LOCATION' => ( required => 0 );
 
-has '_cache' => ( is => 'rw', required => 0, isa => 'HashRef',  default => sub{  return {}; } );
-
+has '_cache' => ( is => 'rw', required => 0, isa => 'HashRef',  builder => \&_init_cache );
 
 sub _init_cache {
     my $self = shift;
-    $self->_cache( Connector::Builtin::Memory->new() ); 
+    
+    $self->_cache( { 'node' => {} } ); 
 }
 
 sub _build_config {
@@ -56,9 +56,13 @@ sub get {
         die "ERR: no default connector for Connector::Multi";
     }
     
+    if (ref $location) {
+        $location = join( $delim, @{$location} );
+    }
+    
     my @prefix = ();
     my @suffix = split(/[$delim]/, $location);
-    my $ptr_cache = $self->_cache();
+    my $ptr_cache = $self->_cache()->{node};
     
     while ( @suffix > 1 ) { # always treat the last section as non-symlink
         my $node = shift @suffix;
@@ -134,7 +138,7 @@ sub set {
     my @prefix = ();
     my @suffix = split(/[$delim]/, $location);
     
-    my $ptr_cache = $self->_cache();    
+    my $ptr_cache = $self->_cache()->{node};
     
     while ( @suffix > 1 ) { # always treat the last section as non-symlink
         my $node = shift @suffix;
@@ -178,8 +182,9 @@ sub get_connector {
 
     my $conn = $self->_config()->{$target};    
     if ( ! $conn ) {
-        # use the 'root' connector instance
+        # use the 'root' connector instance        
         my $class = $self->BASECONNECTOR()->get($target . $delim . 'class');
+        eval "use $class;1" or die "Error use'ing $class: $@";
         $conn = $class->new( { CONNECTOR => $self->BASECONNECTOR(), TARGET => $target } );
         $self->_config()->{$target} = $conn;
     }
