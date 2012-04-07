@@ -15,6 +15,13 @@ use Data::Dumper;
 use Moose;
 extends 'Connector::Proxy';
 
+has 'allowhash' => (
+    is  => 'ro',
+    isa => 'Bool',    
+    default => 0,
+);
+
+
 sub _build_config {
     my $self = shift;
 
@@ -43,10 +50,20 @@ sub get {
     }
     
     my $entry = $ptr->{shift @path};
-    # return the keys if it is a subtree
+    
+    # Inner Node    
     if (ref $entry eq 'HASH') {
-        return keys %{$entry};
+        # List context - return keys
+        if (wantarray) {
+            return keys %{$entry};  
+        # Scalar but hash allowed - return Hash  
+        } elsif ($self->allowhash()) {
+            return $entry;
+        } 
+        # Default - size of keys
+        return scalar keys %{$entry};        
     }
+    
     return $entry;
 }
 
