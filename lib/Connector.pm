@@ -143,7 +143,7 @@ sub get_size { shift; die "No get_size() method defined at " . shift;  };
 sub get_hash { shift; die "No get_hash() method defined at " . shift;  };
 sub get_keys { shift; die "No get_keys() method defined at " . shift;  };
 sub set { shift;  die "No set() method defined at " . shift;  };
-sub meta { shift; die "No meta() method defined as " . shift;  };
+sub get_meta { shift; die "No get_meta() method defined as " . shift;  };
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -233,7 +233,7 @@ operation and can be undef if not needed.
 
 =head 1 Structural Methods
  
-=head 2 meta
+=head 2 get_meta
 
 This method returns some structural information about the current node as  
 hash ref. At minimum it must return the type of node at the current path.
