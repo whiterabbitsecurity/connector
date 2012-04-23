@@ -241,3 +241,12 @@ hash ref. At minimum it must return the type of node at the current path.
 Valid values are I<scalar, list, hash> which correspond to the accessor 
 methods given above. Implemenations may introduced other values.   
 
+=head 1 Implementation Guidelines
+
+=head 2 path building
+
+You should alwayd pass the first parameter to the private C<_build_path> 
+method. This method converts any valid path spec representation to a valid
+path. In scalar context, you get a single string joined with the configured 
+delimiter. In list context, you get an array with one path item per array 
+element.  
