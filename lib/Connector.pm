@@ -64,6 +64,15 @@ has _prefix_path => (
     default  => sub { [] },
     writer   => '__prefix_path',
     );
+    
+# weather to die on undef or just fail silently
+# implemented in _node_not_exists
+has 'die_on_undef' => (
+    is  => 'rw',
+    isa => 'Bool',    
+    default => 0,
+);
+    
 
 # This is the foo that allows us to just milk the connector config from
 # the settings fetched from another connector.
@@ -116,7 +125,7 @@ sub _build_path {
  	if (ref $item eq '') {
 	    push @path, split(/[$delimiter]/, $item);
  	} elsif (ref $item eq 'ARRAY') {
- 	    push @path, @{$item};
+ 	    push @path, $self->_build_path( @{$item} );
  	} else {
  	    die "Invalid data type passed in argument to _build_path";
  	}
@@ -133,7 +142,7 @@ sub _build_path {
 sub _build_path_with_prefix {
     my $self = shift;
 
-    return $self->_build_path(@{$self->_prefix_path()}, @_);
+    return $self->_build_path(@{$self->_prefix_path()}, @_ );
 }
 
 # This is a helper to handle non exisiting nodes
@@ -143,7 +152,9 @@ sub _node_not_exists {
     my $self = shift;
     my $path = shift;
     
-    # Todo: implement die/confess
+    if ($self->die_on_undef()) {
+        confess("Node does not exist at " . $path );
+    }
     
     return undef;
 }
@@ -173,6 +184,13 @@ This is the base class for all Connector implementations. It provides
 common helper methods and performs common sanity checking.
 
 Usually this class should not be instantiated directly.
+
+=head 1 Configuration
+
+=head 2 die_on_undef
+
+Set to true if you want the connector to die when a query reaches a non-exisiting 
+node. This will not affect an explicit set "undef" value. 
 
 =head 1 Accessor Methods
 

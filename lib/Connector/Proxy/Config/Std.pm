@@ -25,7 +25,7 @@ sub _build_config {
 
 sub get {
     my $self = shift;
-    my @path = $self->_build_path_with_prefix(@_);
+    my @path = $self->_build_path_with_prefix( shift );
     
     # Config::Std does not allow nested data structures, emulate that
     # by separating last element from path and using that as key

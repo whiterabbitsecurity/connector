@@ -32,7 +32,7 @@ sub _build_config {
 
 sub get {
     my $self = shift;
-    my @path = $self->_build_path_with_prefix(@_);
+    my @path = $self->_build_path_with_prefix( shift );
 
     my $ptr = $self->_config();
 
