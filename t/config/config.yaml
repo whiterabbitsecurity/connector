@@ -3,3 +3,9 @@ test:
     foo: 1234
     bar: 5678
 
+list:
+  test:
+   - first
+   - second
+   - third
+   - last
