@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 diag "LOAD MODULE\n";
 
@@ -21,11 +21,12 @@ diag "Connector::Proxy::YAML tests\n";
 my $conn = Connector::Proxy::YAML->new(
     {
 	LOCATION  => 't/config/config.yaml',
-	PREFIX    => 'test.entry',
+	PREFIX    => 'test.entry',	
     });
 
 is($conn->get('foo'), '1234');
 is($conn->get('bar'), '5678');
+
 
 is($conn->get('nonexistent'), undef);
 
@@ -37,6 +38,10 @@ is($conn->PREFIX(), undef, 'Accessor test');
 # and repeat above tests
 is($conn->get('test.entry.foo'), '1234');
 is($conn->get('test.entry.bar'), '5678');
+
+# test with array ref path
+is($conn->get( [ 'test.entry.foo' ] ), '1234');
+is($conn->get( [ 'test.entry','bar' ] ), '5678');
 
 # check for completely wrong entry
 is($conn->get('test1.entry.bar'), undef, 'handle completely wrong entry gracefully');

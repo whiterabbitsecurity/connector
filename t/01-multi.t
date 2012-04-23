@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 19;
+use Test::More tests => 23;
 use Path::Class;
 use DateTime;
 
@@ -103,4 +103,14 @@ is($conn->get('smartcards.tokens.token_1.status'), 'ACTIVATED',
 is($conn->get('smartcards.owners.joe.tokenid'), 'token_1',
     'multi with symlink simple config (2)');
 is($conn->get('smartcards.tokens.token_1.nonexistent'), undef, 'multi with symlink simple config (3)');
+
+# Do Tests using array ref notation 
+is($conn->get([ 'smartcards.tokens.token_1.status' ]), 'ACTIVATED',
+    'multi with symlink config and array ref path (1)');
+is($conn->get([ 'smartcards.tokens','token_1.status' ]), 'ACTIVATED',
+    'multi with symlink config and array ref path (2)');
+is($conn->get([ 'smartcards.tokens.token_1','status' ]), 'ACTIVATED',
+    'multi with symlink config and array ref path (3)');
+is($conn->get([ 'smartcards','tokens','token_1','status' ]), 'ACTIVATED',
+    'multi with symlink config and array ref path (4)');
 
