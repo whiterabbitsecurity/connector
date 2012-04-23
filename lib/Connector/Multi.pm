@@ -18,7 +18,7 @@ has 'BASECONNECTOR' => ( is => 'ro', required => 1 );
 
 has '+LOCATION' => ( required => 0 );
 
-has '_cache' => ( is => 'rw', required => 0, isa => 'HashRef',  builder => \&_init_cache );
+has '_cache' => ( is => 'rw', required => 0, isa => 'HashRef',  builder => '_init_cache' );
 
 sub _init_cache {
     my $self = shift;
@@ -50,18 +50,14 @@ sub get {
 
     my $delim = $self->DELIMITER();
 
-#    my $conn = $self->BASECONNECTOR();  # get default connector
-    my $conn = $self->_config()->{''};  # get default connector
+    my $conn = $self->_config()->{''};  
+   
     if ( ! $conn ) {
         die "ERR: no default connector for Connector::Multi";
     }
-    
-    if (ref $location) {
-        $location = join( $delim, @{$location} );
-    }
-    
+
     my @prefix = ();
-    my @suffix = split(/[$delim]/, $location);
+    my @suffix = $self->_build_path( $location );
     my $ptr_cache = $self->_cache()->{node};
     
     while ( @suffix > 1 ) { # always treat the last section as non-symlink
@@ -126,17 +122,14 @@ sub set {
 
     my $delim = $self->DELIMITER();
 
-    my $conn = $self->BASECONNECTOR();  # get default connector
+    my $conn = $self->_config()->{''};  
+   
     if ( ! $conn ) {
         die "ERR: no default connector for Connector::Multi";
     }
-    
-    if (ref $location) {
-        $location = join (".", @{$location});
-    }
-    
+        
     my @prefix = ();
-    my @suffix = split(/[$delim]/, $location);
+    my @suffix = $self->_build_path( $location );
     
     my $ptr_cache = $self->_cache()->{node};
     
