@@ -136,6 +136,18 @@ sub _build_path_with_prefix {
     return $self->_build_path(@{$self->_prefix_path()}, @_);
 }
 
+# This is a helper to handle non exisiting nodes
+# By default we just return undef but you can configure the connector
+# to die with an error  
+sub _node_not_exists {    
+    my $self = shift;
+    my $path = shift;
+    
+    # Todo: implement die/confess
+    
+    return undef;
+}
+
 # subclasses must implement get and/or set in order to do something useful
 sub get { shift; die "No get() method defined at " . shift;  };
 sub get_list { shift; die "No get_list() method defined at " . shift;  };

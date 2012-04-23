@@ -42,10 +42,10 @@ sub get {
 	    if (ref $ptr->{$entry} eq 'HASH') {	
 		$ptr = $ptr->{$entry};
 	    } else {
-		confess('Invalid data type in path: ' . ref $ptr->{$entry});
+		  return $self->_node_not_exists(ref $ptr->{$entry} );
 	    }
 	} else {
-	    confess('Invalid data type');
+	    return $self->_node_not_exists( $entry );	    
 	}
     }
     
