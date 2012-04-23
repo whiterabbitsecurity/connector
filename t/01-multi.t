@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 22;
+use Test::More tests => 19;
 use Path::Class;
 use DateTime;
 
