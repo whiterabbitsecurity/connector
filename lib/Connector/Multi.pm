@@ -44,9 +44,55 @@ sub _build_config {
     $self->_config($config);
 }
 
-sub get {
+# Proxy calls
+sub get {    
+    my $self = shift;        
+    unshift @_, 'get'; 
+    return $self->_route_call( @_ );     
+}
+
+sub get_list {    
+    my $self = shift;        
+    unshift @_, 'get_list'; 
+    return $self->_route_call( @_ );     
+}
+
+sub get_size {    
+    my $self = shift;        
+    unshift @_, 'get_size'; 
+    return $self->_route_call( @_ );     
+}
+
+sub get_hash {    
+    my $self = shift;        
+    unshift @_, 'get_hash'; 
+    return $self->_route_call( @_ );     
+}
+
+sub get_keys {    
+    my $self = shift;        
+    unshift @_, 'get_keys'; 
+    return $self->_route_call( @_ );     
+}
+
+sub set {    
+    my $self = shift;        
+    unshift @_, 'set'; 
+    return $self->_route_call( @_ );     
+}
+
+sub get_meta {    
+    my $self = shift;        
+    unshift @_, 'get_meta'; 
+    return $self->_route_call( @_ );     
+}
+
+sub _route_call {
+    
     my $self = shift;
+    my $call = shift;
     my $location = shift;
+    my @args = @_;
 
     my $delim = $self->DELIMITER();
 
@@ -81,10 +127,12 @@ sub get {
                     if ( ! $conn ) {
                         die "Connector::Multi: error creating connector for '$target': $@";
                     }
+                    # Push path on top of the argument array
+                    unshift @args, join($delim, @suffix); 
                     if ( wantarray ) {
-                        return ( $conn->get(join($delim, @suffix)) );
+                        return ( $conn->$call( @args ) );
                     } else {
-                        return scalar $conn->get(join($delim, @suffix));
+                        return scalar $conn->$call( @args );
                     }
                 } else {
                     die "Connector::Multi: unsupported schema for symlink: $schema";
@@ -98,11 +146,14 @@ sub get {
         }
     }
     
+    # Push path on top of the argument array
+    unshift @args, join($delim, @prefix, @suffix); 
+    
     if ( wantarray ) {
         # coerce the connector's get to return a list
-        return ($conn->get(join($delim, @prefix, @suffix)));
+        return ($conn->$call( @args ) );
     } else {        
-        return scalar $conn->get(join($delim, @prefix, @suffix));        
+        return scalar $conn->$call( @args );        
     }
 }
 
@@ -113,59 +164,6 @@ sub getWrapper() {
     
     return Connector::Wrapper->new({ CONNECTOR => $self, TARGET => $location });
     
-}
-
-sub set {
-    my $self = shift;
-    my $location = shift;
-    my $value = shift;
-
-    my $delim = $self->DELIMITER();
-
-    my $conn = $self->_config()->{''};  
-   
-    if ( ! $conn ) {
-        die "ERR: no default connector for Connector::Multi";
-    }
-        
-    my @prefix = ();
-    my @suffix = $self->_build_path( $location );
-    
-    my $ptr_cache = $self->_cache()->{node};
-    
-    while ( @suffix > 1 ) { # always treat the last section as non-symlink
-        my $node = shift @suffix;
-        push @prefix, $node;
-        
-        # Easy Cache - skip all inner nodes, that are not a connector
-        my $path = join($delim, @prefix);
-        if (exists $ptr_cache->{$path}) {
-            next;
-        }            
-        my $val = $conn->get($path);
-        
-        if ( defined($val) and ( ref($val) eq 'SCALAR' ) ) {
-            if ( ${ $val } =~ m/^([^:]+):(.+)$/ ) {
-                my $schema = $1;
-                my $target = $2;
-                if ( $schema eq 'connector' ) {                    
-                    $conn = $self->get_connector($target);
-                    if ( ! $conn ) {
-                        die "Connector::Multi: error creating connector for '$target': $@";
-                    }                    
-                    return $conn->set(join($delim, @suffix), $value );                    
-                } else {
-                    die "Connector::Multi: unsupported schema for symlink: $schema";
-                }
-            } else {
-                # redirect
-                @prefix = split(/[$delim]/, $val);
-            }
-        } else {
-            $ptr_cache->{$path} = 1;
-        }
-    }    
-    return scalar $conn->set($location, $value );    
 }
 
 sub get_connector {
