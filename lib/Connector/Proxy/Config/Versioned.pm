@@ -32,9 +32,61 @@ sub _build_config {
 
 sub get {
     my $self = shift;
+    my $path = $self->_build_path_with_prefix( shift );
 
-    return $self->_config()->get(@_);
+    return $self->_config()->get( $path );
 }
+
+sub get_size { 
+
+    my $self = shift;
+    my $path = $self->_build_path_with_prefix( shift );   
+    return $self->_config()->get( $path ) || 0;
+
+};
+
+sub get_list { 
+    
+    my $self = shift;
+    my $path = $self->_build_path_with_prefix( shift );
+    
+    my $item_count = $self->_config()->get( $path ) || $self->_node_not_exists( $path );
+    
+    my @list;
+    for (my $index = 0; $index < $item_count; $ index++) {  
+        push @list, $self->_config()->get( $path.$self->DELIMITER().$index );        
+    } 
+    return \@list;
+};
+
+sub get_keys { 
+
+    my $self = shift;
+    my $path = $self->_build_path_with_prefix( shift );   
+    
+    my @keys = $self->_config()->get( $path );
+    
+    return $self->_node_not_exists( $path ) unless(@keys);
+    
+    return \@keys;
+
+}; 
+
+sub get_hash { 
+    
+    my $self = shift;
+    my $path = $self->_build_path_with_prefix( shift );
+    
+    my @keys = $self->_config()->get( $path );
+    
+    $self->_node_not_exists( $path ) unless(@keys);
+    my $data = {};
+    foreach my $key (@keys) {  
+        $data->{$key} = $self->_config()->get( $path.$self->DELIMITER().$key );
+    }    
+    return $data;
+};
+ 
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
