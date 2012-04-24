@@ -54,6 +54,10 @@ sub get {
 sub get_list {    
     my $self = shift;        
     unshift @_, 'get_list'; 
+    
+    if ( wantarray ) {
+        return @{$self->_route_call( @_ )};    
+    }    
     return $self->_route_call( @_ );     
 }
 
@@ -71,7 +75,11 @@ sub get_hash {
 
 sub get_keys {    
     my $self = shift;        
-    unshift @_, 'get_keys'; 
+    unshift @_, 'get_keys';
+    
+    if ( wantarray ) {
+        return @{$self->_route_call( @_ )};    
+    } 
     return $self->_route_call( @_ );     
 }
 

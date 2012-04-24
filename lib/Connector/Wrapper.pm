@@ -20,11 +20,13 @@ has 'BASECONNECTOR' => (
     init_arg => 'CONNECTOR'     
 );
 
-sub _assemble_path {
+sub _route_call {
     
     my $self = shift;
+    my $call = shift;
     my $path = shift;
-       
+    my @args = @_;
+           
     # TODO - might be possible to have different delimiters   
     if (ref $path) {
         unshift @{$path}, $self->_prefix();
@@ -35,45 +37,60 @@ sub _assemble_path {
         $path = $self->_prefix();
     }
     
-    return $path;    
+    unshift @args, $path; 
+    
+    return $self->BASECONNECTOR()->$call( @args );       
 }
 
-# Proxy Methods 
-sub get {
-    my $self = shift;
-    return $self->BASECONNECTOR()->get( $self->_assemble_path( shift ), shift );        
+
+# Proxy calls
+sub get {    
+    my $self = shift;        
+    unshift @_, 'get'; 
+    return $self->_route_call( @_ );     
 }
 
-sub get_list {
-    my $self = shift;            
-    return $self->BASECONNECTOR()->get( $self->_assemble_path( shift ), shift );        
+sub get_list {    
+    my $self = shift;        
+    unshift @_, 'get_list';
+    if ( wantarray ) {
+        return @{$self->_route_call( @_ )};    
+    } 
+    return $self->_route_call( @_ );     
 }
 
-sub get_size {
-    my $self = shift;            
-    return $self->BASECONNECTOR()->get( $self->_assemble_path( shift ), shift );        
+sub get_size {    
+    my $self = shift;        
+    unshift @_, 'get_size'; 
+    return $self->_route_call( @_ );     
 }
 
-sub get_hash {
-    my $self = shift;            
-    return $self->BASECONNECTOR()->get( $self->_assemble_path( shift ), shift );        
+sub get_hash {    
+    my $self = shift;        
+    unshift @_, 'get_hash'; 
+    return $self->_route_call( @_ );     
 }
 
-sub get_keys {
-    my $self = shift;            
-    return $self->BASECONNECTOR()->get( $self->_assemble_path( shift ), shift );        
+sub get_keys {    
+    my $self = shift;        
+    unshift @_, 'get_keys'; 
+    if ( wantarray ) {
+        return @{$self->_route_call( @_ )};    
+    }
+    return $self->_route_call( @_ );     
 }
 
-sub set {
-    my $self = shift;            
-    return $self->BASECONNECTOR()->set( $self->_assemble_path( shift ), shift, shift );        
+sub set {    
+    my $self = shift;        
+    unshift @_, 'set'; 
+    return $self->_route_call( @_ );     
 }
 
-sub get_meta {
-    my $self = shift;            
-    return $self->BASECONNECTOR()->meta( $self->_assemble_path( shift ) );        
+sub get_meta {    
+    my $self = shift;        
+    unshift @_, 'get_meta'; 
+    return $self->_route_call( @_ );     
 }
- 
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -93,3 +110,5 @@ This provides a wrapper to the connector with a fixed prefix.
 
 get, get_list, get_size, get_hash, get_keys, set, meta
 
+The return value of get_list and get_keys is auto-dereferenced when called 
+in list context.
