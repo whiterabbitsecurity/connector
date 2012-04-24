@@ -50,7 +50,9 @@ sub get_list {
     my $self = shift;
     my $path = $self->_build_path_with_prefix( shift );
     
-    my $item_count = $self->_config()->get( $path ) || $self->_node_not_exists( $path );
+    my $item_count = $self->_config()->get( $path );
+    
+    $self->_node_not_exists( $path ) unless( $item_count );
     
     my @list;
     for (my $index = 0; $index < $item_count; $ index++) {  
