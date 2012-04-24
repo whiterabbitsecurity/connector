@@ -47,12 +47,15 @@ is($conn->get( [ 'test.entry','bar' ] ), '5678');
 is($conn->get('test1.entry.bar'), undef, 'handle completely wrong entry gracefully');
 
 diag "Test List functionality\n";
+my @data = $conn->get_list('list.test'); 
+
 is( $conn->get_size('list.test'), 4, 'Check size of list');
-is( ref $conn->get_list('list.test'), 'ARRAY', 'Check if return is array ref');
-is( $conn->get_list('list.test')->[0], 'first', 'Check element');
+is( ref \@data, 'ARRAY', 'Check if return is array ref');
+is( shift @data, 'first', 'Check element');
 
 diag "Test Hash functionality\n";
-is( ref $conn->get_keys('test.entry'), 'ARRAY', 'Check if get_keys is array ');
+my @keys = $conn->get_keys('test.entry');
+is( ref \@keys, 'ARRAY', 'Check if get_keys is array ');
 is( ref $conn->get_hash('test.entry'), 'HASH', 'Check if get_hash is hash');
 is( $conn->get_hash('test.entry')->{bar}, '5678', 'Check element');
 

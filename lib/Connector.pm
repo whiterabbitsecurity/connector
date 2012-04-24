@@ -216,10 +216,10 @@ I<params>, which is a hash ref of key => value pairs.
 =head2 get_list
 
 This method is only valid if it is called on a "n-1" depth node representing 
-an ordered list of items (array). The return value is an array ref with all 
+an ordered list of items (array). The return value is an array with all 
 values present below the node.
   
-  my @items = @{$connector->get( [ 'smartcard.owners.tokenid', 'bob' ] )};
+  my @items = $connector->get( [ 'smartcard.owners.tokenid', 'bob' ] );
  
 
 =head2 get_size
@@ -241,10 +241,10 @@ a key => value list (hash). The return value is a hash ref.
 =head2 get_keys
 
 This method is only valid if it is called on a "n-1" depth node representing 
-a key => value list (hash). The return value is an array ref holding the
+a key => value list (hash). The return value is an array holding the
 values of all keys (including undef elements if they are explicitly given).
   
-  my @keys = @{$connector->get( [ 'smartcard.owners.tokens', 'bob' ] )};
+  my @keys = $connector->get( [ 'smartcard.owners.tokens', 'bob' ] );
 
 
 =head2 set
@@ -285,5 +285,4 @@ element.
 =head2 Supported methods
 
 The methods get, get_list, get_size, get_hash, get_keys, set, meta are routed 
-to the appropriate connector. The return value of get_list and get_keys is 
-auto-dereferenced when called in list context.
+to the appropriate connector. 

@@ -55,9 +55,6 @@ sub get_list {
     my $self = shift;        
     unshift @_, 'get_list'; 
     
-    if ( wantarray ) {
-        return @{$self->_route_call( @_ )};    
-    }    
     return $self->_route_call( @_ );     
 }
 
@@ -76,10 +73,7 @@ sub get_hash {
 sub get_keys {    
     my $self = shift;        
     unshift @_, 'get_keys';
-    
-    if ( wantarray ) {
-        return @{$self->_route_call( @_ )};    
-    } 
+   
     return $self->_route_call( @_ );     
 }
 
@@ -137,11 +131,7 @@ sub _route_call {
                     }
                     # Push path on top of the argument array
                     unshift @args, join($delim, @suffix); 
-                    if ( wantarray ) {
-                        return ( $conn->$call( @args ) );
-                    } else {
-                        return scalar $conn->$call( @args );
-                    }
+                    return $conn->$call( @args );                    
                 } else {
                     die "Connector::Multi: unsupported schema for symlink: $schema";
                 }
@@ -155,14 +145,8 @@ sub _route_call {
     }
     
     # Push path on top of the argument array
-    unshift @args, join($delim, @prefix, @suffix); 
-    
-    if ( wantarray ) {
-        # coerce the connector's get to return a list
-        return ($conn->$call( @args ) );
-    } else {        
-        return scalar $conn->$call( @args );        
-    }
+    unshift @args, join($delim, @prefix, @suffix);        
+    return $conn->$call( @args );        
 }
 
 sub getWrapper() {

@@ -58,7 +58,7 @@ sub get_list {
     for (my $index = 0; $index < $item_count; $ index++) {  
         push @list, $self->_config()->get( $path.$self->DELIMITER().$index );        
     } 
-    return \@list;
+    return @list;
 };
 
 sub get_keys { 
@@ -70,7 +70,7 @@ sub get_keys {
     
     return $self->_node_not_exists( $path ) unless(@keys);
     
-    return \@keys;
+    return @keys;
 
 }; 
 

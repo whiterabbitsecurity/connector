@@ -52,10 +52,7 @@ sub get {
 
 sub get_list {    
     my $self = shift;        
-    unshift @_, 'get_list';
-    if ( wantarray ) {
-        return @{$self->_route_call( @_ )};    
-    } 
+    unshift @_, 'get_list';    
     return $self->_route_call( @_ );     
 }
 
@@ -73,10 +70,7 @@ sub get_hash {
 
 sub get_keys {    
     my $self = shift;        
-    unshift @_, 'get_keys'; 
-    if ( wantarray ) {
-        return @{$self->_route_call( @_ )};    
-    }
+    unshift @_, 'get_keys';     
     return $self->_route_call( @_ );     
 }
 
@@ -109,6 +103,3 @@ This provides a wrapper to the connector with a fixed prefix.
 =head 2 Supported methods
 
 get, get_list, get_size, get_hash, get_keys, set, meta
-
-The return value of get_list and get_keys is auto-dereferenced when called 
-in list context.

@@ -65,12 +65,14 @@ is( $conn->get('group1.ldap1.uri'),
 is( $conn->get('nonexistent'), undef, 'check for nonexistent attribute' );
 
 diag "Test List functionality\n";
+my @data = $conn->get_list('list.test');
 is( $conn->get_size('list.test'), 4, 'Check size of list');
-is( ref $conn->get_list('list.test'), 'ARRAY', 'Check if return is array ref');
-is( $conn->get_list('list.test')->[0], 'first', 'Check element');
+is( ref \@data, 'ARRAY', 'Check if return is array ref');
+is( shift @data, 'first', 'Check element');
 
 diag "Test Hash functionality\n";
-is( ref $conn->get_keys('group1.ldap'), 'ARRAY', 'Check if get_keys is array ');
+my @keys = $conn->get_keys('group1.ldap');
+is( ref \@keys, 'ARRAY', 'Check if get_keys is array ');
 is( ref $conn->get_hash('group1.ldap'), 'HASH', 'Check if get_hash is hash');
 is( $conn->get_hash('group1.ldap')->{password}, 'secret', 'Check element');
  

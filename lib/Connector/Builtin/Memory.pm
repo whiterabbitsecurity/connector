@@ -92,7 +92,7 @@ sub get_list {
         die "requested value is not a list"
     }
     
-    return $node;   
+    return @{$node};
 }
 
 sub get_keys {
@@ -106,7 +106,7 @@ sub get_keys {
         die "requested value is not a hash"
     }
     
-    return [ keys %{$node} ];   
+    return keys %{$node};   
 }
 
 sub get_hash {
