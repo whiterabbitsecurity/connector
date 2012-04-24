@@ -174,18 +174,18 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
-=head1 Name
+=head1 NAME
 
 Connector
 
-=head1 Description
+=head1 DESCRIPTION
 
 This is the base class for all Connector implementations. It provides
 common helper methods and performs common sanity checking.
 
 Usually this class should not be instantiated directly.
 
-=head1 Configuration
+=head1 CONFIGURATION
 
 =head2 die_on_undef
 
@@ -261,7 +261,7 @@ The I<value> parameter holds a scalar or ref to an array/hash with the data to
 be written. I<params> is a hash ref which holds additional parameters for the 
 operation and can be undef if not needed.
 
-=head1 Structural Methods
+=head1 STRUCTURAL METHODS
  
 =head2 get_meta
 
@@ -271,7 +271,7 @@ hash ref. At minimum it must return the type of node at the current path.
 Valid values are I<scalar, list, hash> which correspond to the accessor 
 methods given above. Implemenations may introduced other values.   
 
-=head1 Implementation Guidelines
+=head1 IMPLEMENTATION GUIDELINES
 
 =head2 path building
 
