@@ -118,10 +118,10 @@ sub _route_call {
             next;
         }
             
-        my $val = $conn->get($path);
+        my $meta = $conn->get_meta($path);
         
-        if ( defined($val) and ( ref($val) eq 'SCALAR' ) ) {
-            if ( ${ $val } =~ m/^([^:]+):(.+)$/ ) {
+        if ( $meta->{TYPE} eq 'reference' ) {
+            if (  $meta->{VALUE} =~ m/^([^:]+):(.+)$/ ) {
                 my $schema = $1;
                 my $target = $2;
                 if ( $schema eq 'connector' ) {
@@ -137,7 +137,7 @@ sub _route_call {
                 }
             } else {
                 # redirect
-                @prefix = split(/[$delim]/, $val);
+                @prefix = split(/[$delim]/, $meta->{VALUE});
             }
         } else {
             $ptr_cache->{$path} = 1;

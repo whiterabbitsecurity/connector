@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 23;
+use Test::More tests => 31;
 use Path::Class;
 use DateTime;
 
@@ -72,6 +72,7 @@ $conn = Connector::Multi->new( {
     LOCATION => $test_data[0]->{dbpath},
     });
 
+
 is($conn->get('smartcards.tokens.token_1.status'), 'ACTIVATED',
     'multi with simple config (1)');
 is($conn->get('smartcards.owners.joe.tokenid'), 'token_1',
@@ -92,7 +93,7 @@ $conn = Connector::Multi->new( {
         BASECONNECTOR => $base,
 });
 
-my @leaf = sort $conn->get('smartcards');
+my @leaf = sort $conn->get_keys('smartcards');
 is($leaf[0], 'owners', 'check that we even get a record with the symlink layout');
 is(scalar @leaf, 2, 'should have received two records');
 $sym = $conn->get('smartcards.tokens');
@@ -114,3 +115,18 @@ is($conn->get([ 'smartcards.tokens.token_1','status' ]), 'ACTIVATED',
 is($conn->get([ 'smartcards','tokens','token_1','status' ]), 'ACTIVATED',
     'multi with symlink config and array ref path (4)');
 
+
+# Tests on meta data
+use Data::Dumper;
+
+diag "Testing Meta Data";
+
+is( $conn->get_meta('smartcards.tokens')->{TYPE} , 'reference', 'scalar reference');
+
+is( $conn->get_meta('meta.inner' )->{TYPE} , 'hash', 'inner hash node');
+is( $conn->get_meta('meta.inner.hash' )->{TYPE} , 'hash', 'outer hash node');
+is( $conn->get_meta('meta.inner.hash.key2' )->{TYPE} , 'scalar', 'hash leaf');
+is( $conn->get_meta('meta.inner.list' )->{TYPE} , 'list', 'outer list');
+is( $conn->get_meta('meta.inner.list.0' )->{TYPE} , 'scalar', 'scalar leaf');
+is( $conn->get_meta('meta.inner.single' )->{TYPE} , 'list', 'one item list');
+is( $conn->get_meta('meta.inner.single.0' )->{TYPE} , 'scalar', 'scalar leaf');

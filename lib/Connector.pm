@@ -92,16 +92,22 @@ around BUILDARGS => sub {
         my $targ = $args->{TARGET};
         delete $args->{TARGET};
         my $meta = $class->meta;
-        
+                
         for my $attr ( $meta->get_all_attributes ) {
             my $attrname = $attr->name();            
             next if $attrname =~ m/^_/; # skip apparently internal params
             # allow caller to override params in CONNECTOR
             if ( not exists($args->{$attrname}) ) {                
-                my $val = $conn->get($targ . $conn->DELIMITER() . $attrname);
-                if ( defined $val ) {
-                    $args->{$attrname} = $val;
+                my $meta = $conn->get_meta($targ . $conn->DELIMITER() . $attrname);                
+                next unless($meta);
+                if ($meta->{TYPE} eq 'scalar') {
+                    $args->{$attrname} = $meta->{VALUE};                    
+                } elsif ($meta->{TYPE} eq 'list') {
+                    $args->{$attrname} = $meta->{ITEMS};
+                } elsif ($meta->{TYPE} eq 'hash') {
+                    $args->{$attrname} = $conn->get_hash($targ . $conn->DELIMITER() . $attrname);                
                 }
+                                              
             }
         }        
     }
@@ -268,8 +274,12 @@ operation and can be undef if not needed.
 This method returns some structural information about the current node as  
 hash ref. At minimum it must return the type of node at the current path.
 
-Valid values are I<scalar, list, hash> which correspond to the accessor 
-methods given above. Implemenations may introduced other values.   
+Valid values are I<scalar, list, hash, reference>. Reference is a scalar
+reference which is used e.g. in Connector::Multi. The others correspond 
+to the accessor methods given above.    
+
+    my $meta = $connector->get_meta( 'smartcard.owners' );
+    my $type = $meta->{TYPE};  
 
 =head1 IMPLEMENTATION GUIDELINES
 
