@@ -174,20 +174,20 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
-=head 1 Name
+=head1 Name
 
 Connector
 
-=head 1 Description
+=head1 Description
 
 This is the base class for all Connector implementations. It provides
 common helper methods and performs common sanity checking.
 
 Usually this class should not be instantiated directly.
 
-=head 1 Configuration
+=head1 Configuration
 
-=head 2 die_on_undef
+=head2 die_on_undef
 
 Set to true if you want the connector to die when a query reaches a non-exisiting 
 node. This will not affect an explicit set "undef" value. 
@@ -197,7 +197,7 @@ node. This will not affect an explicit set "undef" value.
 Each accessor method is valid only special types of nodes. If you call them 
 on a wrong type of node, the connector dies.
 
-=head 2 get
+=head2 get
 
 Basic method to obtain a scalar value at the leaf of the config tree.
 
@@ -213,7 +213,7 @@ I<params>, which is a hash ref of key => value pairs.
   
   my $value = $connector->get( [ 'smartcard.owners.tokenid', 'bob' ], { version => 1 } );
  
-=head 2 get_list
+=head2 get_list
 
 This method is only valid if it is called on a "n-1" depth node representing 
 an ordered list of items (array). The return value is an array ref with all 
@@ -222,7 +222,7 @@ values present below the node.
   my @items = @{$connector->get( [ 'smartcard.owners.tokenid', 'bob' ] )};
  
 
-=head 2 get_size
+=head2 get_size
 
 This method is only valid if it is called on a "n-1" depth node representing 
 an ordered list of items (array). The return value is the number of elements
@@ -230,7 +230,7 @@ in this array (including undef elements if they are explicitly given).
   
   my $count = $connector->get( 'smartcard.owners.tokens.bob' );
  
-=head 2 get_hash
+=head2 get_hash
 
 This method is only valid if it is called on a "n-1" depth node representing 
 a key => value list (hash). The return value is a hash ref. 
@@ -238,16 +238,16 @@ a key => value list (hash). The return value is a hash ref.
   my %data = %{$connector->get( [ 'smartcard.owners.tokens', 'bob' ] )};
  
  
-=head 2 get_keys
+=head2 get_keys
 
 This method is only valid if it is called on a "n-1" depth node representing 
 a key => value list (hash). The return value is an array ref holding the
 values of all keys (including undef elements if they are explicitly given).
   
-  my %keys = %{$connector->get( [ 'smartcard.owners.tokens', 'bob' ] )};
+  my @keys = @{$connector->get( [ 'smartcard.owners.tokens', 'bob' ] )};
 
 
-=head 2 set
+=head2 set
 
 The set method is a "all in one" implementation, that is used for either type
 of value. If the value is not a scalar, it must be passed by reference.
@@ -261,9 +261,9 @@ The I<value> parameter holds a scalar or ref to an array/hash with the data to
 be written. I<params> is a hash ref which holds additional parameters for the 
 operation and can be undef if not needed.
 
-=head 1 Structural Methods
+=head1 Structural Methods
  
-=head 2 get_meta
+=head2 get_meta
 
 This method returns some structural information about the current node as  
 hash ref. At minimum it must return the type of node at the current path.
@@ -271,12 +271,19 @@ hash ref. At minimum it must return the type of node at the current path.
 Valid values are I<scalar, list, hash> which correspond to the accessor 
 methods given above. Implemenations may introduced other values.   
 
-=head 1 Implementation Guidelines
+=head1 Implementation Guidelines
 
-=head 2 path building
+=head2 path building
 
 You should alwayd pass the first parameter to the private C<_build_path> 
 method. This method converts any valid path spec representation to a valid
 path. In scalar context, you get a single string joined with the configured 
 delimiter. In list context, you get an array with one path item per array 
 element.  
+
+
+=head2 Supported methods
+
+The methods get, get_list, get_size, get_hash, get_keys, set, meta are routed 
+to the appropriate connector. The return value of get_list and get_keys is 
+auto-dereferenced when called in list context.
