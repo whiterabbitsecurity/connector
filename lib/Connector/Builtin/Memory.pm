@@ -13,6 +13,7 @@ package Connector::Builtin::Memory;
 use strict;
 use warnings;
 use English;
+use Data::Dumper;
 
 use Moose;
 extends 'Connector::Builtin';
@@ -25,38 +26,102 @@ sub _build_config {
 }
 
 
-sub get {
+sub _get_node {
     
     my $self = shift;
     my @path = $self->_build_path_with_prefix( shift );
 
-    if ( scalar @path == 0) {
-        return keys %{$self->_config()};
-    }
-
     my $ptr = $self->_config();
 
-    while (scalar @path > 1) {
-    my $entry = shift @path;
-    if (exists $ptr->{$entry}) {
-        if (ref $ptr->{$entry} eq 'HASH') { 
-        $ptr = $ptr->{$entry};
+    while ( scalar @path > 1 ) {
+        my $entry = shift @path;
+        if ( exists $ptr->{$entry} ) {
+            if ( ref $ptr->{$entry} eq 'HASH' ) {
+                $ptr = $ptr->{$entry};
+            }
+            else {
+                return $self->_node_not_exists( ref $ptr->{$entry} );
+            }
         } else {
-        confess('Invalid data type in path: ' . ref $ptr->{$entry});
+            return $self->_node_not_exists($entry);
         }
-    } else {
-        confess('Invalid data type');
-    }
     }
     
-    my $entry = $ptr->{shift @path};
-    # return the keys if it is a subtree
-    if (ref $entry eq 'HASH') {
-        return keys %{$entry};
-    }
-    return $entry;
+    return $ptr->{ shift @path };
+    
 }
 
+sub get {
+    
+    my $self = shift;    
+    my $value = $self->_get_node( shift );
+    
+    return undef unless (defined $value);
+    
+    if (ref $value ne '') {
+        die "requested value is not a scalar " . Dumper $value;
+    }
+    
+    return $value;
+    
+}
+
+sub get_size {
+    
+    my $self = shift;    
+    my $node = $self->_get_node( shift );
+    
+    return undef unless(defined $node);
+    
+    if ( ref $node ne 'ARRAY' ) {
+        die "requested value is not a list"
+    }
+    
+    return scalar @{$node};    
+}
+
+
+sub get_list {
+    
+    my $self = shift;    
+    my $node = $self->_get_node( shift );
+    
+    return undef unless(defined $node);
+    
+    if ( ref $node ne 'ARRAY' ) {
+        die "requested value is not a list"
+    }
+    
+    return $node;   
+}
+
+sub get_keys {
+    
+    my $self = shift;    
+    my $node = $self->_get_node( shift );
+    
+    return undef unless(defined $node);
+    
+    if ( ref $node ne 'HASH' ) {
+        die "requested value is not a hash"
+    }
+    
+    return [ keys %{$node} ];   
+}
+
+sub get_hash {
+    
+    my $self = shift;    
+    my $node = $self->_get_node( shift );
+    
+    return undef unless(defined $node);
+    
+    if ( ref $node ne 'HASH' ) {
+        die "requested value is not a hash"
+    }
+    
+    return $node;   
+} 
 
 sub set {
     
