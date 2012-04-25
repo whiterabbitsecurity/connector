@@ -6,7 +6,9 @@
 #
 package Connector;
 
-our $VERSION = '0.02';
+use 5.008_008;  # This is the earliest version we've tested on
+
+our $VERSION = '0.3';
 
 use strict;
 use warnings;
@@ -182,9 +184,38 @@ __END__
 
 =head1 NAME
 
-Connector
+Connector - a generic connection to a hierarchical-structured data set
 
 =head1 DESCRIPTION
+
+The Connector is generic connection to a data set, typically configuration
+data in a hierarchical structure. Each connector object accepts the get(KEY)
+method, which, when given a key, returns the associated value from the
+connector's data source.
+
+Typically, a connector acts as a proxy to a simple data source like
+YAML, Config::Std, Config::Versioned, or to a more complex data source
+like an LDAP server or Proc::SafeExec. The standard calling convention
+via get(KEY) makes the connectors interchangeable.
+
+In addition, a set of meta-connectors may be used to combine multiple
+connectors into more complex chains. The Connector::Multi, for example,
+allows for redirection to delegate connectors via symbolic links. If
+you have a list of connectors and want to use them in a load-balancing,
+round-robin fashion or have the list iterated until a value is found,
+use Connector::List and choose the algorithm to perform.
+
+=head1 SYNOPSIS
+
+    use Connector::MODULENAME;
+
+    my $conn = Connector::MODULENAME->new( {
+        LOCATION => $path_to_config_for_module,
+    });
+
+    my $val = $conn->get('full.name.of.key');
+
+=head2 Connector Class
 
 This is the base class for all Connector implementations. It provides
 common helper methods and performs common sanity checking.
@@ -297,3 +328,23 @@ method. This method converts any valid path spec representation to a valid
 path. In scalar context, you get a single string joined with the configured 
 delimiter. In list context, you get an array with one path item per array 
 element.  
+
+=head2 Supported methods
+
+The methods get, get_list, get_size, get_hash, get_keys, set, meta are routed 
+to the appropriate connector. 
+
+=head1 AUTHORS
+
+Scott Hardin <mrscotty@cpan.org>
+
+Martin Bartosch
+
+Oliver Welter
+
+=head1 COPYRIGHT
+
+Copyright 2012 OpenXPKI Foundation
+
+This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+

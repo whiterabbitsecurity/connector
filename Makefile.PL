@@ -1,10 +1,8 @@
 use inc::Module::Install;
 
 name     'Connector';
-abstract 'A generic connection to a hierarchical-structured data set';
 all_from 'lib/Connector.pm';
-author   'Scott T. Hardin <mrscotty@hnsc.de>';
-license  'perl';
+#license  'perl';
 
 requires   'Moose';
 
