@@ -53,7 +53,7 @@ sub get_size {
     
     my $val = $self->_config()->get( $path );
     
-    return $self->_node_not_exists( $path ) unless( $val );
+    return 0 unless( $val );
     
     die "requested path looks not like a list" unless( $val =~ /^\d+$/);
     
@@ -87,7 +87,7 @@ sub get_keys {
     
     my @keys = $self->_config()->get( $path );
     
-    return $self->_node_not_exists( $path ) unless(@keys);
+    return @{[]} unless(@keys);
     
     return @keys;
 
