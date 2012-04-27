@@ -2,7 +2,7 @@
 #
 # A generic abstraction for accessing information.
 #
-# Written by Scott Hardin and Martin Bartosch for the OpenXPKI project 2012
+# Written by Scott Hardin, Martin Bartosch and Oliver Welter for the OpenXPKI project 2012
 #
 package Connector;
 
