@@ -36,7 +36,7 @@ my $conn = Connector::Multi->new( {
 
 diag "Test Connector::Mutli is working\n";
 # Test if multi is good
-is($conn->get('test.entry.foo'), '1234');
+is($conn->get('test.entry.foo'), '1234');   
 is($conn->get('test.entry.bar'), '5678');
 
 diag "Test Wrapper\n"; 
