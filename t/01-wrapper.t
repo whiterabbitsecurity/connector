@@ -34,11 +34,15 @@ my $conn = Connector::Multi->new( {
         BASECONNECTOR => $base,
 });
 
+SKIP: {
+    skip "Connector::Multi doesn't support the Wrapper yet", 6;
+
 diag "Test Connector::Mutli is working\n";
 # Test if multi is good
 is($conn->get('test.entry.foo'), '1234');   
 is($conn->get('test.entry.bar'), '5678');
 
+    
 diag "Test Wrapper\n"; 
 my $wrapper = $conn->getWrapper('test.entry');
 is($wrapper->get('foo'), '1234');
@@ -49,4 +53,6 @@ $base->PREFIX('');
 my $wrapper_prefix = $conn->getWrapper('test.entry');
 is($wrapper_prefix->get('foo'), '1234');
 is($wrapper_prefix->get('bar'), '5678');
+
+}
 
