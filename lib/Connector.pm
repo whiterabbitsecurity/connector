@@ -196,7 +196,8 @@ Usually this class should not be instantiated directly.
 =head2 die_on_undef
 
 Set to true if you want the connector to die when a query reaches a non-exisiting 
-node. This will not affect an explicit set "undef" value. 
+node. This will affect only calls to get/get_list/get_hash and will not affect
+values that are explicitly set to undef (if supported by the connector!). 
 
 =head 1 Accessor Methods
 
@@ -235,6 +236,8 @@ an ordered list of items (array). The return value is the number of elements
 in this array (including undef elements if they are explicitly given).
   
   my $count = $connector->get( 'smartcard.owners.tokens.bob' );
+  
+If the node does not exist, 0 is returned.
  
 =head2 get_hash
 
@@ -252,6 +255,7 @@ values of all keys (including undef elements if they are explicitly given).
   
   my @keys = $connector->get( [ 'smartcard.owners.tokens', 'bob' ] );
 
+If the node does not exist, an empty list is returned.
 
 =head2 set
 
@@ -283,6 +287,9 @@ to the accessor methods given above.
 
 =head1 IMPLEMENTATION GUIDELINES
 
+If the node does not exist, undef is returned. C<get_meta> will B<NOT> die
+even if C<die_on_undef> is set, therefore you can use it to probe for a node. 
+
 =head2 path building
 
 You should alwayd pass the first parameter to the private C<_build_path> 
@@ -290,9 +297,3 @@ method. This method converts any valid path spec representation to a valid
 path. In scalar context, you get a single string joined with the configured 
 delimiter. In list context, you get an array with one path item per array 
 element.  
-
-
-=head2 Supported methods
-
-The methods get, get_list, get_size, get_hash, get_keys, set, meta are routed 
-to the appropriate connector. 

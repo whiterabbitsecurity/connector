@@ -324,3 +324,20 @@ uses at the base of all get() requests.
 
 =back
 
+=head1 Supported methods
+
+=head2 get, get_list, get_size, get_hash, get_keys, set, get_meta 
+Those are routed to the appropriate connector. 
+
+=head2 get_connector
+Return the instance of the connector at this node
+
+=head2 getWrapper
+Return a wrapper around this node. This is like setting a prefix for all
+subsequent queries.
+
+   my $wrapper = $conn->getWrapper('test.node');
+   $val = $wrapper->get('foo');
+
+Is the same as  
+    $val = $conn->getWrapper('test.node.foo');
