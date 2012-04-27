@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 17;
+use Test::More tests => 21;
 
 diag "LOAD MODULE\n";
 
@@ -46,18 +46,25 @@ is($conn->get( [ 'test.entry','bar' ] ), '5678');
 # check for completely wrong entry
 is($conn->get('test1.entry.bar'), undef, 'handle completely wrong entry gracefully');
 
+diag "Test get_meta functionality\n";
+is($conn->get_meta('list.test')->{TYPE}, 'list', 'Array');
+is($conn->get_meta('test.entry')->{TYPE}, 'hash', 'Hash');
+is($conn->get_meta('test.entry.foo')->{TYPE}, 'scalar', 'Scalar');
+is($conn->get_meta('test.entry.nonexisting'), undef, 'undef');
+
+
 diag "Test List functionality\n";
 my @data = $conn->get_list('list.test'); 
 
-is( $conn->get_size('list.test'), 4, 'Check size of list');
-is( ref \@data, 'ARRAY', 'Check if return is array ref');
-is( shift @data, 'first', 'Check element');
+is( $conn->get_size('list.test'), 4, 'size');
+is( ref \@data, 'ARRAY', 'ref');
+is( shift @data, 'first', 'element');
 
 diag "Test Hash functionality\n";
 my @keys = $conn->get_keys('test.entry');
-is( ref \@keys, 'ARRAY', 'Check if get_keys is array ');
-is( ref $conn->get_hash('test.entry'), 'HASH', 'Check if get_hash is hash');
-is( $conn->get_hash('test.entry')->{bar}, '5678', 'Check element');
+is( ref \@keys, 'ARRAY', 'keys');
+is( ref $conn->get_hash('test.entry'), 'HASH', 'hash');
+is( $conn->get_hash('test.entry')->{bar}, '5678', 'element');
 
 
  

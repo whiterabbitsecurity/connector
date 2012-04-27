@@ -67,7 +67,7 @@ sub get_size {
     my $self = shift;    
     my $node = $self->_get_node( shift );
     
-    return undef unless(defined $node);
+    return 0 unless(defined $node);
     
     if ( ref $node ne 'ARRAY' ) {
         die "requested value is not a list"
@@ -82,7 +82,7 @@ sub get_list {
     my $self = shift;    
     my $node = $self->_get_node( shift );
     
-    return undef unless(defined $node);
+    return $self->_node_not_exists() unless(defined $node);
     
     if ( ref $node ne 'ARRAY' ) {
         die "requested value is not a list"
@@ -96,7 +96,7 @@ sub get_keys {
     my $self = shift;    
     my $node = $self->_get_node( shift );
     
-    return undef unless(defined $node);
+    return @{[]} unless(defined $node);
     
     if ( ref $node ne 'HASH' ) {
         die "requested value is not a hash"
@@ -110,7 +110,7 @@ sub get_hash {
     my $self = shift;    
     my $node = $self->_get_node( shift );
     
-    return undef unless(defined $node);
+    return $self->_node_not_exists() unless(defined $node);
     
     if ( ref $node ne 'HASH' ) {
         die "requested value is not a hash"
@@ -118,6 +118,34 @@ sub get_hash {
     
     return $node;   
 } 
+
+ 
+sub get_meta {
+    
+    my $self = shift;
+    
+    my $node = $self->_get_node( shift );
+
+    if (!defined $node) {
+        return undef;
+    }
+
+    my $meta = {};
+
+    if (ref $node eq '') {
+        $meta = {TYPE  => "scalar", VALUE => $node };        
+    } elsif (ref $node eq "SCALAR") {
+        $meta = {TYPE  => "reference", VALUE => $$node };        
+    } elsif (ref $node eq "ARRAY") {
+        $meta = {TYPE  => "list", VALUE => $node };
+    } elsif (ref $node eq "HASH") {
+        my @keys = keys(%{$node});
+        $meta = {TYPE  => "hash", VALUE => \@keys };        
+    } else {
+        die "Unsupported node type";
+    }    
+    return $meta;
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
