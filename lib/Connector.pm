@@ -15,6 +15,8 @@ use warnings;
 use English;
 use Data::Dumper;
 
+use Log::Log4perl qw(get_logger);
+    
 use Moose;
 use Connector::Types;
 
@@ -56,6 +58,14 @@ has _config => (
     init_arg => undef,   # not settable via constructor
     builder  => '_build_config',
     );
+
+has _logger => (
+    is       => 'rw',
+    lazy     => 1,
+    init_arg => undef,   # not settable via constructor
+    builder  => '_build_logger',
+    );
+
 
 # this instance variable is set in the trigger function of PREFIX.
 # it contains an array representation of PREFIX (assumed to be delimited
@@ -120,6 +130,13 @@ around BUILDARGS => sub {
 # subclasses must implement this to initialize _config
 sub _build_config { return undef };
 
+sub _build_logger { 
+
+    return get_logger("connector");
+
+};
+
+
 # helper function: build a path from the given input. does not take PREFIX
 # into account
 sub _build_path {
@@ -159,6 +176,8 @@ sub _build_path_with_prefix {
 sub _node_not_exists {    
     my $self = shift;
     my $path = shift;
+    
+    $self->get_logger()->debug('Node does not exist at  ' . $path );
     
     if ($self->die_on_undef()) {
         confess("Node does not exist at " . $path );
