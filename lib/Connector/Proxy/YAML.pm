@@ -18,7 +18,15 @@ extends 'Connector::Proxy';
 sub _build_config {
     my $self = shift;
 
-    my $config = YAML::LoadFile( $self->LOCATION() );
+    # File not exist or not readable
+    my $config;
+    my $file = $self->LOCATION();
+    if ( ( -e $file ) && ( -r $file ) )  {
+        $config = YAML::LoadFile( $file );
+        $self->get_logger()->debug('Proxy::Yaml loading configuration from file '.$file);
+    } else {
+        $self->get_logger()->warn('Proxy::Yaml configuration file '.$file.' not found ');
+    }
     $self->_config($config);
 }
 

@@ -14,7 +14,8 @@ BEGIN {
 }
 
 require_ok( 'Connector::Proxy::YAML' );
-
+ 
+Log::Log4perl->easy_init( { level   => 'DEBUG' } );
 
 diag "Connector::Proxy::YAML tests\n";
 ###########################################################################
