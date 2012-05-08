@@ -88,9 +88,11 @@ sub get_size {
 sub get_list {
     
     my $self = shift;    
-    my $node = $self->_get_node( shift );
+    my $path = shift;
     
-    return $self->_node_not_exists() unless(defined $node);
+    my $node = $self->_get_node( $path );
+    
+    return $self->_node_not_exists( $path ) unless(defined $node);
     
     if ( ref $node ne 'ARRAY' ) {
         die "requested value is not a list"
@@ -102,7 +104,9 @@ sub get_list {
 sub get_keys {
     
     my $self = shift;    
-    my $node = $self->_get_node( shift );
+    my $path = shift;
+    
+    my $node = $self->_get_node( $path );
     
     return @{[]} unless(defined $node);
     
@@ -116,9 +120,11 @@ sub get_keys {
 sub get_hash {
     
     my $self = shift;    
-    my $node = $self->_get_node( shift );
+    my $path = shift;
     
-    return $self->_node_not_exists() unless(defined $node);
+    my $node = $self->_get_node( $path );
+    
+    return $self->_node_not_exists( $path ) unless(defined $node);
     
     if ( ref $node ne 'HASH' ) {
         die "requested value is not a hash"

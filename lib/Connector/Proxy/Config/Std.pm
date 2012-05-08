@@ -68,14 +68,15 @@ sub get_size {
 sub get_list {
     
     my $self = shift;
+    my $path = shift;
     
     # List is similar to scalar, the last path item is a hash key
     # in the section of the remaining prefix
         
-    my $node = $self->get( shift );
+    my $node = $self->get( $path );
     
     if (!defined $node) {
-        return $self->_node_not_exists();
+        return $self->_node_not_exists( $path );
     }
     
     if (ref $node ne "ARRAY") {
@@ -103,10 +104,12 @@ sub get_keys {
 sub get_hash {
     
     my $self = shift;
-    my $node = $self->_get_node( shift );
+    my $path = shift;
+        
+    my $node = $self->_get_node( $path );
     
     if (!defined $node) {
-        return $self->_node_not_exists();
+        return $self->_node_not_exists($path);
     }
     
     if (ref $node ne "HASH") {
