@@ -173,6 +173,7 @@ sub get_connector {
         # use the 'root' connector instance        
         my $class = $self->BASECONNECTOR()->get($target . $delim . 'class');
         eval "use $class;1" or die "Error use'ing $class: $@";
+        $self->log()->debug("Initialize connector $class at $target");        
         $conn = $class->new( { CONNECTOR => $self->BASECONNECTOR(), TARGET => $target } );
         $self->_config()->{$target} = $conn;
     }

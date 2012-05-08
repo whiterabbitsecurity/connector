@@ -15,7 +15,7 @@ use warnings;
 use English;
 use Data::Dumper;
 
-use Log::Log4perl qw(get_logger);
+use Log::Log4perl;
     
 use Moose;
 use Connector::Types;
@@ -59,7 +59,7 @@ has _config => (
     builder  => '_build_config',
     );
 
-has _logger => (
+has log => (
     is       => 'rw',
     lazy     => 1,
     init_arg => undef,   # not settable via constructor
@@ -132,7 +132,7 @@ sub _build_config { return undef };
 
 sub _build_logger { 
 
-    return get_logger("connector");
+    return Log::Log4perl->get_logger("connector");
 
 };
 
@@ -177,7 +177,7 @@ sub _node_not_exists {
     my $self = shift;
     my $path = shift;
     
-    $self->get_logger()->debug('Node does not exist at  ' . $path );
+    $self->log()->debug('Node does not exist at  ' . $path );
     
     if ($self->die_on_undef()) {
         confess("Node does not exist at " . $path );
