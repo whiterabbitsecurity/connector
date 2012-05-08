@@ -40,13 +40,13 @@ is($conn->get('test.entry.foo'), '1234');
 is($conn->get('test.entry.bar'), '5678');
 
 diag "Test Wrapper\n"; 
-my $wrapper = $conn->getWrapper('test.entry');
+my $wrapper = $conn->get_wrapper('test.entry');
 is($wrapper->get('foo'), '1234');
 is($wrapper->get('bar'), '5678');
 
 diag "Test Wrapper with Prefix\n";
 $base->PREFIX('');
-my $wrapper_prefix = $conn->getWrapper('test.entry');
+my $wrapper_prefix = $conn->get_wrapper('test.entry');
 is($wrapper_prefix->get('foo'), '1234');
 is($wrapper_prefix->get('bar'), '5678');
 

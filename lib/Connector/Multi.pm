@@ -338,12 +338,12 @@ Those are routed to the appropriate connector.
 =head2 get_connector
 Return the instance of the connector at this node
 
-=head2 getWrapper
+=head2 get_wrapper
 Return a wrapper around this node. This is like setting a prefix for all
 subsequent queries.
 
-   my $wrapper = $conn->getWrapper('test.node');
+   my $wrapper = $conn->get_wrapper('test.node');
    $val = $wrapper->get('foo');
 
 Is the same as  
-    $val = $conn->getWrapper('test.node.foo');
+    $val = $conn->get_wrapper('test.node.foo');
