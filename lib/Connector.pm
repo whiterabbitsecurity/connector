@@ -8,7 +8,7 @@ package Connector;
 
 use 5.008_008;  # This is the earliest version we've tested on
 
-our $VERSION = '0.4';
+our $VERSION = '0.6';
 
 use strict;
 use warnings;
