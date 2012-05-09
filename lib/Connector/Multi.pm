@@ -149,13 +149,18 @@ sub _route_call {
     return $conn->$call( @args );        
 }
 
-sub getWrapper() {
+sub get_wrapper() {
     
     my $self = shift;
     my $location = shift;
     
     return Connector::Wrapper->new({ CONNECTOR => $self, TARGET => $location });
-    
+}
+
+# getWrapper() is deprecated - use get_wrapper() instead
+sub getWrapper() {
+    my $self = shift;
+    $self->get_wrapper(@_);
 }
 
 sub get_connector {
