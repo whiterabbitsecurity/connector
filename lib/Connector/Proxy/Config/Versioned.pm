@@ -68,7 +68,7 @@ sub get_list {
 
     # C::V uses an array with numeric keys internally - we use this to check if this is an array    
     my @keys = $self->_config()->get( $path );    
-    $self->_node_not_exists( $path ) unless(@keys);
+    return $self->_node_not_exists( $path ) unless(@keys);
     
     my @list;
     foreach my $key (@keys) {
@@ -100,7 +100,7 @@ sub get_hash {
     
     my @keys = $self->_config()->get( $path );
     
-    $self->_node_not_exists( $path ) unless(@keys);
+    return $self->_node_not_exists( $path ) unless(@keys);
     my $data = {};
     foreach my $key (@keys) {  
         $data->{$key} = $self->_config()->get( $path.$self->DELIMITER().$key );
