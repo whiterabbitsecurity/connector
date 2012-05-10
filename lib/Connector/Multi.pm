@@ -120,7 +120,7 @@ sub _route_call {
             
         my $meta = $conn->get_meta($path);
         
-        if ( $meta->{TYPE} eq 'reference' ) {
+        if ( $meta && $meta->{TYPE} eq 'reference' ) {
             if (  $meta->{VALUE} =~ m/^([^:]+):(.+)$/ ) {
                 my $schema = $1;
                 my $target = $2;
