@@ -22,7 +22,13 @@ sub _build_config {
     my $config;
     my $file = $self->LOCATION();
     if ( ( -e $file ) && ( -r $file ) )  {
-        $config = YAML::LoadFile( $file );
+         eval {         
+            $config = YAML::LoadFile( $file );
+        };
+        if ($@) {
+            $self->log()->error('Proxy::Yaml error parsing file '.$file);
+            return $self->_node_not_exists( $file );            
+        }            
         $self->log()->debug('Proxy::Yaml loading configuration from file '.$file);
     } else {
         $self->log()->warn('Proxy::Yaml configuration file '.$file.' not found ');
