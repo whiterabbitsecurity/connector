@@ -27,6 +27,7 @@ sub _build_config {
         };
         if ($@) {
             $self->log()->error('Proxy::Yaml error parsing file '.$file);
+            $self->log()->debug( Dumper( $@ ) );
             return $self->_node_not_exists( $file );            
         }            
         $self->log()->debug('Proxy::Yaml loading configuration from file '.$file);

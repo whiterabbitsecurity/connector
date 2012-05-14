@@ -104,11 +104,11 @@ sub _route_call {
         die "ERR: no default connector for Connector::Multi";
     }
 
-    $self->log()->debug('Call '.$call.' in Multi to '.$location);
-
     my @prefix = ();
     my @suffix = $self->_build_path( $location );
     my $ptr_cache = $self->_cache()->{node};
+
+    $self->log()->debug('Call '.$call.' in Multi to '. join('.', @suffix));
     
     while ( @suffix > 1 ) { # always treat the last section as non-symlink
         my $node = shift @suffix;
