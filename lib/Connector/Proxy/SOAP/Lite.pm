@@ -35,7 +35,7 @@ has do_not_use_charset => (
     );
 
 has use_microsoft_dot_net_compatible_separator => (
-    is => 'ro'
+    is => 'rw',
     isa => 'Bool',
     default => 0,
     );
@@ -43,9 +43,37 @@ has use_microsoft_dot_net_compatible_separator => (
 # By default the SOAP call uses positional parameters. If this flag is set,
 # the argument list to the call is interpreted as a Hash
 has use_named_parameters => (
-    is => 'ro',
-    isa => 'Bool',
+    is => 'rw',
+    # FIXME
+    # isa => 'Bool',
+    isa => 'Str',
     default => 0,
+    );
+
+has certificate_file => (
+    is => 'rw',
+    isa => 'Str',
+    );
+
+has certificate_key_file => (
+    is => 'rw',
+    isa => 'Str',
+    );
+
+has certificate_p12_file => (
+    is => 'rw',
+    isa => 'Str',
+    );
+
+has certificate_p12_password => (
+    is => 'rw',
+    isa => 'Str',
+    );
+
+
+has ca_certificate_path => (
+    is => 'rw',
+    isa => 'Str',
     );
 
 sub BUILD {
@@ -63,9 +91,33 @@ sub _build_config {
 sub _soap_call {
     my $self = shift;
 
-    my $arg = shift;
+#    my $arg = shift;
 
     my $proxy = $self->LOCATION();
+
+    my %ENV_BACKUP = %ENV;
+
+    if ($self->certificate_file) {
+	if ($self->certificate_p12_file) {
+	    die "Options certificate_file and certificate_p12_file are mutually exclusive";
+	}
+	$ENV{HTTPS_CERT_FILE} = $self->certificate_file;
+    }
+
+    if ($self->certificate_key_file) {
+	$ENV{HTTPS_KEY_FILE}  = $self->certificate_key_file;
+    }
+
+    if ($self->certificate_p12_file) {
+	$ENV{HTTPS_PKCS12_FILE}  = $self->certificate_p12_file;
+    }
+    if ($self->certificate_p12_password) {
+	$ENV{HTTPS_PKCS12_PASSWORD}  = $self->certificate_p12_password;
+    }
+
+    if ($self->ca_certificate_path) {
+	$ENV{HTTPS_CA_DIR}    = $self->ca_certificate_path;
+    }
 
     my $client = SOAP::Lite
 	-> uri($self->uri)
@@ -78,16 +130,27 @@ sub _soap_call {
     my @params;
     if ($self->use_named_parameters) {
 	# names parameters
-	my %args = @_;
-	foreach my $key (keys %args) {
-	    push @params, SOAP::Data->new(name => $key, value => $args{$key});
-	}
+	# FIXME: this is what we really want:
+# 	my %args = @_;
+
+	# FIXME: only support one single named parameter, named in
+	# "use_named_parameters" for now
+	my %args = (
+		    $self->use_named_parameters => shift,
+		    );
+
+ 	foreach my $key (keys %args) {
+ 	    push @params, SOAP::Data->new(name => $key, value => $args{$key});
+ 	}
     } else {
 	@params = @_;
     }
 
-    my $som = $client->call($arg,
+    my $som = $client->call($self->method,
 			    @params);
+
+    # restore environment
+    %ENV = %ENV_BACKUP;
 
     if ($som->fault) {
 	die $som->fault->{faultstring};
