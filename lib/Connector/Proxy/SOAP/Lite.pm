@@ -127,6 +127,7 @@ sub _soap_call {
 	$client->on_action( sub { join('/', @_) } );
     }
 
+    $self->log()->debug('Performing SOAP call to method ' . $self->method . ' on service ' . $self->uri . ' via ' . $proxy);
     my @params;
     if ($self->use_named_parameters) {
 	# names parameters
@@ -141,10 +142,13 @@ sub _soap_call {
 
  	foreach my $key (keys %args) {
  	    push @params, SOAP::Data->new(name => $key, value => $args{$key});
+	    $self->log()->debug('Named parameter: ' . $key . ' => ' . $args{$key});
  	}
     } else {
 	@params = @_;
+	$self->log()->debug('Parameters: ' . join(', ', @params));
     }
+
 
     my $som = $client->call($self->method,
 			    @params);
@@ -153,6 +157,7 @@ sub _soap_call {
     %ENV = %ENV_BACKUP;
 
     if ($som->fault) {
+	$self->log()->error('SOAP call returned error: ' . $som->fault->{faultstring});
 	die $som->fault->{faultstring};
     }
 
