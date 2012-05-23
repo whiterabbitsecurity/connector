@@ -150,8 +150,16 @@ sub _soap_call {
     }
 
 
-    my $som = $client->call($self->method,
+    my $som;
+    eval {
+        $som = $client->call($self->method,
 			    @params);
+    };
+    if ($@) {
+	$self->log()->error('SOAP call died: ' . $@);
+	die 'Fatal SOAP Error: ' . $@ . " [method=" . $self->method . ", params=(" . join(', ', @params) . ")]";
+    }
+
 
     # restore environment
     %ENV = %ENV_BACKUP;
