@@ -115,7 +115,8 @@ around BUILDARGS => sub {
                 if ($meta->{TYPE} eq 'scalar') {
                     $args->{$attrname} = $meta->{VALUE};                    
                 } elsif ($meta->{TYPE} eq 'list') {
-                    $args->{$attrname} = $meta->{ITEMS};
+		    my @tmp = $conn->get_list($targ . $conn->DELIMITER() . $attrname);
+                    $args->{$attrname} = \@tmp;
                 } elsif ($meta->{TYPE} eq 'hash') {
                     $args->{$attrname} = $conn->get_hash($targ . $conn->DELIMITER() . $attrname);                
                 }
