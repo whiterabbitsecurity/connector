@@ -11,7 +11,6 @@ use warnings;
 use English;
 use Net::LDAP;
 use Template;
-use OpenXPKI::DN;
 
 use Moose;
 extends 'Connector::Proxy';
@@ -245,19 +244,17 @@ sub _getbyDN {
     my $path = $dn;
     $path =~ s/\,?$base_dn$//;  
     
-    my $dn_parser = OpenXPKI::DN->new($path);
-    my @dn_attributes = $dn_parser->get_parsed();
+    #my $dn_parser = OpenXPKI::DN->new($path);
+    my @dn_attributes = $self->_splitDN( $path );
         
-    #print Dumper( @dn_attributes );    
-           
     my $currentPath = $base_dn;
     my @nextComponent;
     my $i;
     for ($i = scalar(@dn_attributes)-1; $i >= 0; $i--) {
         
         # For the moment we just implement single value components
-        my $nextComponentKey = lc $dn_attributes[$i][0][0];
-        my $nextComponentValue = $dn_attributes[$i][0][1];
+        my $nextComponentKey = lc $dn_attributes[$i][0];
+        my $nextComponentValue = $dn_attributes[$i][1];
         
         my $nextComponent = $nextComponentKey.'='.$nextComponentValue;
         
@@ -277,8 +274,8 @@ sub _getbyDN {
                     
         # Reuse counter and list to build the missing nodes
         while ($i >= 0) {            
-            $nextComponentKey = lc $dn_attributes[$i][0][0];
-            $nextComponentValue = $dn_attributes[$i][0][1];            
+            $nextComponentKey = lc $dn_attributes[$i][0];
+            $nextComponentValue = $dn_attributes[$i][1];            
             $currentPath = $self->_createPathItem($currentPath, $nextComponentKey, $nextComponentValue);
             $i--;    
         }
@@ -338,6 +335,25 @@ sub _triggerAutoCreate {
     $self->log()->debug('Start Auto-Create for: '.$nodeDN);    
     return $self->_getbyDN( $nodeDN, { create => 1} );
     
+}
+
+sub _splitDN {
+    
+    my $self = shift;    
+    my $dn = shift;
+    
+    my @parsed;
+    while ($dn =~ /(([^=]+)=(.*?[^\\])\s*,)(.*)/) {
+        push @parsed, [ $2, $3 ];
+        $self->log()->debug(sprintf 'Split-Result: Key: %s, Value: %s, Remainder: %s ', $2, $3, $4);
+        $dn = $4;
+    };
+
+    # Split last remainder at =
+    my @last = split ("=", $dn);
+    push @parsed, \@last; 
+
+    return @parsed;    
 }
 
 no Moose;
@@ -483,4 +499,9 @@ Used internally by _getByDN to create new nodes.
 Used internally to assemble the DN for a missing node.
 Returns the ldap entry or undef if autocreation is not possible.
 
- 
+=head2 _splitDN
+
+Very simple approch to split a DN path into its components.
+Please B<does not> use quoting of path components, as this is
+not supported. RDNs must be split by a Comma, Comma inside a value
+must be escaped using a backslash character. Multivalued RDNs are not supported.
