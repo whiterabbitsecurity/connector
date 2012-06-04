@@ -33,6 +33,11 @@ sub _build_config {
     $self->_config($config);
 }
 
+sub version {
+    my $self = shift;
+    return $self->_config()->version();
+}
+
 sub get {
     my $self = shift;
     my $path = $self->_build_path_with_prefix( shift );
