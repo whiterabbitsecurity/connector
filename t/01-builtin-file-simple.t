@@ -1,4 +1,4 @@
-# Tests for Connector::Proxy::File::Simple
+# Tests for Connector::Builtin::File::Simple
 #
 
 use strict;
@@ -10,15 +10,15 @@ use Test::More tests => 5;
 diag "LOAD MODULE\n";
 
 BEGIN {
-    use_ok( 'Connector::Proxy::File::Simple' ); 
+    use_ok( 'Connector::Builtin::File::Simple' ); 
 }
 
-require_ok( 'Connector::Proxy::File::Simple' );
+require_ok( 'Connector::Builtin::File::Simple' );
 
 
 diag "Connector::Proxy::File::Simple tests\n";
 ###########################################################################
-my $conn = Connector::Proxy::File::Simple->new(
+my $conn = Connector::Builtin::File::Simple->new(
     {
 	LOCATION  => 't/config/file',
     });

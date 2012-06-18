@@ -10,19 +10,53 @@ use strict;
 use warnings;
 use English;
 use Moose;
+use Connector::Wrapper;
 
 extends 'Connector';
 
+has LOOPBACK => (
+    is => 'ro',
+    isa => 'Connector|Connector::Wrapper',
+    reader => 'conn',
+    required => 0,
+);
+
+around BUILDARGS => sub {
+    
+    my $orig = shift;
+    my $class = shift;
+
+    my $args = $_[0];
+
+    if (  ref($args) eq 'HASH'
+            && defined($args->{CONNECTOR})
+            && defined($args->{TARGET}) ) {
+                
+            $args->{LOOPBACK} = Connector::Wrapper->new( $args );                
+    }
+    
+    return $class->$orig(@_);
+    
+};
+ 
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
 1;
 __END__
 
-=head 1 Name
+=head1 Name
 
 Connector
 
-=head 1 Description
+=head1 Description
 
 This is the base class for all Connector::Proxy implementations.
+
+=head1 Developer Info
+
+When creating the connector, all class attributes that have a corresponding config
+item are initialised with the given values.
+
+All configuration options, that are denoted on the same level as the connector 
+definition are accessible inside the class using  C<$self->conn()->get()>.

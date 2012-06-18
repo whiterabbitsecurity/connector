@@ -1,0 +1,26 @@
+# Version control
+\B\.git\b
+^\.gitignore$
+
+# Makemaker generated files and dirs
+^MANIFEST\.
+^Makefile$
+^blib/
+^MakeMaker-\d
+
+# Temp files from t/
+t/.*\.git/
+
+# Local directory for saving utility scripts, etc.
+# and other stuff of mine
+^util
+^TODO
+^.synctree
+^build.txt
+
+# Temp, old, and backup files
+~$
+\.swp$
+\.old$
+\.bak$
+^Connector-
