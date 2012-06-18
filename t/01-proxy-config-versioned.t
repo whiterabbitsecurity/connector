@@ -5,10 +5,11 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 15;
+use Test::More tests => 20;
 my $gittestdir = qw( t/config/01-proxy-config-versioned.git );
 
-my $cv_ver1 = 'a8e51c5fcf13f7bf8d1bd143901b10f6efc32b3c';
+my $cv_ver2 = 'bd88045b48d3b4daf4c6c621f4a7265a072c299c';
+my $cv_ver1 = '6eebdec25d3cbf23d725c4aa48d473943e4a85f3';
 
 diag "LOAD MODULE\n";
 
@@ -44,11 +45,21 @@ my $cv = Config::Versioned->new(
                 author_mail => 'test@example.com',
             }
 );
-ok( $cv, 'create new config instance' );
 
 # Internals: check that the head really points to a commit object
 is( $cv->_git()->head->kind, 'commit', 'head should be a commit' );
 is( $cv->version, $cv_ver1, 'check version (sha1 hash) of first commit' );
+
+$cv->parser( {
+                filename    => '01-proxy-config-versioned-2.conf',
+                commit_time => DateTime->from_epoch( epoch => 1240341692 ),
+                author_name => 'Test User',
+                author_mail => 'test@example.com',
+            }
+);
+ok( $cv, 'create new config instance' );
+
+is( $cv->version, $cv_ver2, 'check version (sha1 hash) of second commit' );
 
 diag "Connector::Proxy::Config::Versioned tests\n";
 ###########################################################################
@@ -76,3 +87,10 @@ is( ref \@keys, 'ARRAY', 'Check if get_keys is array ');
 is( ref $conn->get_hash('group1.ldap'), 'HASH', 'Check if get_hash is hash');
 is( $conn->get_hash('group1.ldap')->{password}, 'secret', 'Check element');
  
+diag "Test version pointer\n";
+is( $conn->get( 'list.test.2'), 'third', 'value from current head');
+ok ( $conn->version($cv_ver1), 'Set default version');
+is( $conn->version(), $cv_ver1, 'check default version (sha1 hash)' );
+is( $conn->get( 'list.test.2'), 'last', 'value from first commit');
+
+

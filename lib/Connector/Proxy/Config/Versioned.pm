@@ -22,6 +22,13 @@ has '+_config' => (
     lazy => 1,
 );
 
+has 'version' => (
+    is => 'rw',
+    isa => 'Str',
+    required => 0,
+    builder => 'fetch_head_commit',     
+);
+
 sub _build_config {
     my $self = shift;
 
@@ -30,10 +37,12 @@ sub _build_config {
     if ( not defined $config ) {
         return; # try to throw exception
     }
-    $self->_config($config);
+    $self->version( $config->version() );     
+    return $config;
 }
 
-sub version {
+
+sub fetch_head_commit {
     my $self = shift;
     return $self->_config()->version();
 }
@@ -43,7 +52,7 @@ sub get {
     my $path = $self->_build_path_with_prefix( shift );
 
     # We need a change to C:V backend to check if this is a node or not    
-    my $val = $self->_config()->get( $path );
+    my $val = $self->_config()->get( $path, $self->version() );
     
     return $val;    
 }
@@ -56,7 +65,7 @@ sub get_size {
     # We check if the value is an integer to see if this looks like 
     # an array - This is not bullet proof but should do
     
-    my $val = $self->_config()->get( $path );
+    my $val = $self->_config()->get( $path, $self->version() );
     
     return 0 unless( $val );
     
@@ -72,7 +81,7 @@ sub get_list {
     my $path = $self->_build_path_with_prefix( shift );
 
     # C::V uses an array with numeric keys internally - we use this to check if this is an array    
-    my @keys = $self->_config()->get( $path );    
+    my @keys = $self->_config()->get( $path, $self->version() );    
     return $self->_node_not_exists( $path ) unless(@keys);
     
     my @list;
@@ -80,7 +89,7 @@ sub get_list {
         if ($key !~ /^\d+$/) {
             die "requested path looks not like a list";
         }                
-        push @list, $self->_config()->get( $path.$self->DELIMITER().$key );
+        push @list, $self->_config()->get( $path.$self->DELIMITER().$key, $self->version() );
     }    
     return @list;
 };
@@ -90,7 +99,7 @@ sub get_keys {
     my $self = shift;
     my $path = $self->_build_path_with_prefix( shift );   
     
-    my @keys = $self->_config()->get( $path );
+    my @keys = $self->_config()->get( $path, $self->version() );
     
     return @{[]} unless(@keys);
     
@@ -103,12 +112,12 @@ sub get_hash {
     my $self = shift;
     my $path = $self->_build_path_with_prefix( shift );
     
-    my @keys = $self->_config()->get( $path );
+    my @keys = $self->_config()->get( $path, $self->version() );
     
     return $self->_node_not_exists( $path ) unless(@keys);
     my $data = {};
     foreach my $key (@keys) {  
-        $data->{$key} = $self->_config()->get( $path.$self->DELIMITER().$key );
+        $data->{$key} = $self->_config()->get( $path.$self->DELIMITER().$key, $self->version() );
     }    
     return $data;
 };
@@ -120,7 +129,7 @@ sub get_meta {
     my $self = shift;
     my $path = $self->_build_path_with_prefix( shift );
     
-    my @keys = $self->_config()->get( $path );
+    my @keys = $self->_config()->get( $path, $self->version() );
     
     return unless( @keys );
         
@@ -139,7 +148,7 @@ sub get_meta {
             $meta->{VALUE} = ${$keys[0]};            
         } else {
         # probe if there is something "below"
-            my $val = $self->_config()->get(  $path . $self->DELIMITER() . $keys[0] );             
+            my $val = $self->_config()->get(  $path . $self->DELIMITER() . $keys[0], $self->version() );             
             if (!defined $val) {
                 $meta->{TYPE} = "scalar";
                 $meta->{VALUE} = $keys[0];
@@ -166,4 +175,26 @@ __END__
 Connector::Proxy::Config::Versioned
 
 =head 1 Description
+
+Fetch values ftom the underlying Config::Versioned repository.
+On init, the commit id of the head is written into the local
+version property and all further queries are done against this
+commit id. You can set the version to be used at any time by passing
+the commit id (sha1 hash) to C<version>. 
+
+To advance to the head commit of the underlying repository, use
+C<fetch_head_commit> to get the id of the head and set it using 
+C<version>
+
+=head1 methods
+
+=head2 fetch_head_commit
+
+Receive the sha1 commit id of the topmost commit of the underlying repository.
+
+=head2 version
+get/set the value of the version used for all get* requests.
+
+ 
+
 
