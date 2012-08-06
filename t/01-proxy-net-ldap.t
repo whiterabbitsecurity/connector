@@ -6,23 +6,29 @@ use warnings;
 use English;
 use Data::Dumper;
 
-use Test::More tests => 27;
-
-diag "LOAD MODULE\n";
-
 BEGIN {
+    use Test::More;
+
+    use vars qw( $req_net_ldap_err );
+    eval 'require Net::LDAP;';
+    $req_net_ldap_err = $@;
+    if ( $req_net_ldap_err ) {
+    plan skip_all => 'Net::LDAP not installed';
+    }
+
     use_ok( 'Config::Versioned' );
     use_ok( 'Connector::Multi' );
     use_ok( 'Connector::Proxy::Config::Versioned' );
-    use_ok( 'Connector::Proxy::Net::LDAP' ); 
+    use_ok( 'Connector::Proxy::Net::LDAP' ) if not $req_net_ldap_err;
 }
+
+plan tests => 27;
 
 require_ok( 'Config::Versioned' );
 require_ok( 'Connector::Multi' );
 require_ok( 'Connector::Proxy::Config::Versioned' );
 require_ok( 'Connector::Proxy::Net::LDAP' );
 
-diag "Connector::Proxy::Net::LDAP tests\n";
 ###########################################################################
 
 my $cv = Config::Versioned->new(

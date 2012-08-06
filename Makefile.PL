@@ -5,6 +5,7 @@ all_from 'lib/Connector.pm';
 #license  'perl';
 
 requires   'Moose';
+requires    'Log::Log4perl';
 
 recommends 'Config::Versioned' => '0.5';
 recommends 'Config::Std';
