@@ -437,12 +437,11 @@ the request is ignored.
 If you want the connector to autocreate missing nodes, you need to provide the
 ldap properties of each node-class.
 
-    [schema.cn] 
-    objectclass: inetOrgPerson pkiUser
-
-    [schema.cn.values]
-    sn: copy:self
-    ou: IT Department
+    create:
+        objectclass: inetOrgPerson pkiUser
+        values:
+            sn: copy:self
+            ou: IT Department
 
 You can specify multiple objectclass entries seperated by space.
 
@@ -502,6 +501,6 @@ Returns the ldap entry or undef if autocreation is not possible.
 =head2 _splitDN
 
 Very simple approch to split a DN path into its components.
-Please B<does not> use quoting of path components, as this is
+Please B<do not> use quoting of path components, as this is
 not supported. RDNs must be split by a Comma, Comma inside a value
 must be escaped using a backslash character. Multivalued RDNs are not supported.

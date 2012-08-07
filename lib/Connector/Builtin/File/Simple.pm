@@ -19,7 +19,7 @@ sub _build_config {
     my $self = shift;
 
     if (! -r $self->{LOCATION}) {
-	confess("Cannot open input file " . $self->{LOCATION} . " for reading.");
+	   confess("Cannot open input file " . $self->{LOCATION} . " for reading.");
     }
     
     return 1;

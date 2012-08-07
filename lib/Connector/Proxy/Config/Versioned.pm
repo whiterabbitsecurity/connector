@@ -82,9 +82,13 @@ sub get_list {
 
     # C::V uses an array with numeric keys internally - we use this to check if this is an array    
     my @keys = $self->_config()->get( $path, $self->version() );    
-    return $self->_node_not_exists( $path ) unless(@keys);
-    
     my @list;
+     
+    if (!@keys) {
+        $self->_node_not_exists( $path ) ;
+        return @list; 
+    };
+        
     foreach my $key (@keys) {
         if ($key !~ /^\d+$/) {
             die "requested path looks not like a list";
