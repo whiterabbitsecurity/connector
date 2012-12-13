@@ -6,9 +6,6 @@
 # vim: syntax=Makefile
 
  
-# Local installation place
-DEST=target
- 
 VERSION=$(shell perl -le "print `grep '^our $$VERSION =' lib/Connector.pm`")
 PACKAGE=Connector
 #EMAIL=$(shell git config --global user.email)
@@ -24,8 +21,6 @@ info:
 # Note: the local install works best with perlbrew (i.e.: without sudo)
 .PHONY: install
 install:
-	rm -rf ${DEST} || true
-	mkdir -p ${DEST}
 	perl Makefile.PL && make test && make install
  
  
