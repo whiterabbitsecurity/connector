@@ -1,5 +1,13 @@
 # Tests for Connector::Proxy::Proc::SafeExec
 #
+# Sooooo... this is a trick one. We found that in our Net::Server
+# environment, Proc::SafeExec returns STDOUT from the child
+# command correctly when our daemon starts. After forking and
+# switching the effective user ID, however, the STDOUT was empty.
+#
+# In this test script, we try to see if we can reproduce the problem
+# to be able to pinpoint the bug.
+#
 
 use strict;
 use warnings;
@@ -10,23 +18,46 @@ use Test::More tests => 17;
 
 #diag "LOAD MODULE\n";
 
-our $req_err;
+our $req_err_ps;
+our $req_err_ns;
 
 BEGIN {
     eval 'require Proc::SafeExec;';
-    our $req_err = $@;
-
-#    diag("SAFEXEC: req_err='$req_err'");
+    our $req_err_ps = $@;
 
     #    use_ok( 'Connector::Proxy::Proc::SafeExec' );
+    eval 'require Net::Server;';
+    our $req_err_ns = $@;
 }
+
+package MyTestServer;
+
+if ( not $req_err_ns and not $req_err_ps ) {
+    eval 'use base qw( Net::Server::MultiType );'
+        or die "Error using Net::Server::MultiType: $@";
+    eval 'use Net::Server::Daemonize qw( set_uid set_gid );'
+        or die "Error using Net::Server::Daemonize: $@";
+
+    sub new {
+        my $that  = shift;
+        my $class = ref($that) || $that;
+        my $self  = {};
+        bless $self, $class;
+        # mask isn't available by default, so let's postpone this
+        eval '$self->{umask} = mask 0007;';
+    }
+}
+
+package main;
 
 #diag "Connector::Proxy::Proc::SafeExec\n";
 ###########################################################################
 SKIP: {
-    skip "Proc::SafeExec not installed", 17 if $req_err;
+    skip "Proc::SafeExec not installed", 17 if $req_err_ps;
+    skip "Net::Server not installed",    17 if $req_err_ns;
 
     require_ok('Connector::Proxy::Proc::SafeExec');
+
     my $conn = Connector::Proxy::Proc::SafeExec->new(
         {   LOCATION => 't/config/test.sh',
             args     => ['foo'],

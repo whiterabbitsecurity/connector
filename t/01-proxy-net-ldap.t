@@ -58,18 +58,18 @@ if (!$conn->get('connectors.do_tests')) {
 }
     
 my $sSubject = sprintf "%01x.example.org", rand(10000000);
-diag "Random Subject: $sSubject\n"; 
+# diag "Random Subject: $sSubject\n"; 
 
 # Test if the connector is a symlink 
 is ( ref $conn->get('test.basic'), 'SCALAR', 'connector link is scalar ref' );
 is ( ${$conn->get('test.basic')}, 'connector:connectors.ldap', 'Name of Connector ' );
 
-diag "Test with Simple connector";
+# diag "Test with Simple connector";
 is ( $conn->get(['test.basic', $sSubject]), undef, 'Node not found in LDAP');
 is ( $conn->set(['test.basic', $sSubject], 'IT Department'), 1, 'Create Node and Attribute');
 is ( $conn->get(['test.basic', $sSubject]), 'IT Department', 'Attribute found');
 
-diag "Test with Single connector";
+# diag "Test with Single connector";
 # Set uid using Single 
 is ( $conn->set(['test.single', $sSubject], { 'ntlogin' => ['login1', 'login2'] } ), 1, 'Create Node and Attribute');
 
@@ -92,7 +92,7 @@ my @keys = $conn->get_keys(['test.single', $sSubject]);
 
 is ( @keys, 3, 'Keymap size ok');
 
-diag "Test action settings";
+# diag "Test action settings";
 
 is( $conn->set(['test.single',$sSubject], { 'usermail' => [ 'test@test.local', 'test2@test.local' ] }), 1, 'Set usermail');
 

@@ -7,7 +7,7 @@ use English;
 
 use Test::More tests => 12;
 
-diag "LOAD MODULE\n";
+# diag "LOAD MODULE\n";
 
 BEGIN {
     use_ok( 'Connector::Proxy::Config::Std' );
@@ -17,7 +17,7 @@ BEGIN {
 require_ok( 'Connector::Proxy::Config::Std' );
 require_ok( 'Connector::Multi' );
 
-diag "Connector::Proxy::Config::Std tests\n";
+# diag "Connector::Proxy::Config::Std tests\n";
 ###########################################################################
 my $base = Connector::Proxy::Config::Std->new(
     {
@@ -34,17 +34,17 @@ my $conn = Connector::Multi->new( {
         BASECONNECTOR => $base,
 });
 
-diag "Test Connector::Mutli is working\n";
+# diag "Test Connector::Mutli is working\n";
 # Test if multi is good
 is($conn->get('test.entry.foo'), '1234');   
 is($conn->get('test.entry.bar'), '5678');
 
-diag "Test Wrapper\n"; 
+# diag "Test Wrapper\n"; 
 my $wrapper = $conn->get_wrapper('test.entry');
 is($wrapper->get('foo'), '1234');
 is($wrapper->get('bar'), '5678');
 
-diag "Test Wrapper with Prefix\n";
+# diag "Test Wrapper with Prefix\n";
 $base->PREFIX('');
 my $wrapper_prefix = $conn->get_wrapper('test.entry');
 is($wrapper_prefix->get('foo'), '1234');

@@ -7,7 +7,7 @@ use English;
 
 use Test::More tests => 5;
 
-diag "LOAD MODULE\n";
+# diag "LOAD MODULE\n";
 
 BEGIN {
     use_ok( 'Connector::Builtin::File::Simple' ); 
@@ -16,7 +16,7 @@ BEGIN {
 require_ok( 'Connector::Builtin::File::Simple' );
 
 
-diag "Connector::Proxy::File::Simple tests\n";
+# diag "Connector::Proxy::File::Simple tests\n";
 ###########################################################################
 my $conn = Connector::Builtin::File::Simple->new(
     {
