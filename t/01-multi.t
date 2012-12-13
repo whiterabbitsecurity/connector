@@ -119,7 +119,7 @@ is($conn->get([ 'smartcards','tokens','token_1','status' ]), 'ACTIVATED',
 # Tests on meta data
 use Data::Dumper;
 
-diag "Testing Meta Data";
+# diag "Testing Meta Data";
 
 is( $conn->get_meta('smartcards.tokens')->{TYPE} , 'reference', 'scalar reference');
 

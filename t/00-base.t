@@ -8,7 +8,7 @@ use Data::Dumper;
 
 use Test::More tests => 23;
 
-diag "LOAD MODULE\n";
+# diag "LOAD MODULE\n";
 
 BEGIN {
     use_ok( 'Connector' ); 
@@ -25,7 +25,7 @@ ok(defined $conn, 'Connector constructor');
 
 #################################################################
 # tests for path building
-diag('_build_path tests with empty PREFIX, without arguments');
+# diag('_build_path tests with empty PREFIX, without arguments');
 
 is($conn->_build_path(), '', '_build_path: no arguments');
 is($conn->_build_path(''), '', '_build_path: empty scalar');
@@ -34,21 +34,21 @@ is_deeply( [ $conn->_build_path() ], [], '_build_path in array context: no argum
 is_deeply( [ $conn->_build_path('') ], [], '_build_path in array context: empty scalar');
 is_deeply( [ $conn->_build_path([]) ], [], '_build_path in array context: empty arrayref');
 
-diag('_build_path tests with empty PREFIX, with arguments');
+# diag('_build_path tests with empty PREFIX, with arguments');
 is($conn->_build_path('foo.bar.baz'), 'foo.bar.baz', '_build_path: string path');
 is($conn->_build_path([ 'foo', 'bar', 'baz' ]), 'foo.bar.baz', '_build_path: arrayref');
 is_deeply( [ $conn->_build_path('foo.bar.baz') ], [ 'foo', 'bar', 'baz' ], '_build_path in array context: empty scalar');
 
-diag('_build_path tests with empty PREFIX, with compound arguments');
+# diag('_build_path tests with empty PREFIX, with compound arguments');
 is($conn->_build_path([ 'foo', 'bar' ], 'baz.bla'), 'foo.bar.baz.bla', '_build_path in scalar context: compound expression');
 is_deeply( [ $conn->_build_path([ 'foo', 'bar' ], 'baz.bla') ], [ 'foo', 'bar', 'baz', 'bla' ], '_build_path in array context: compound expression');
 
 # accessor tests
-diag('Accessor tests');
+# diag('Accessor tests');
 $conn->PREFIX('this.is.a.test');
 is($conn->PREFIX(), 'this.is.a.test', 'Accessor: PREFIX');
 
-diag('Tests with PREFIX');
+# diag('Tests with PREFIX');
 # building paths with prefix
 is($conn->_build_path(), '', '_build_path without arguments');
 is($conn->_build_path_with_prefix(), 'this.is.a.test', '_build_path_with_prefix without arguments');

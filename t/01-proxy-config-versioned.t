@@ -11,7 +11,7 @@ my $gittestdir = qw( t/config/01-proxy-config-versioned.git );
 my $cv_ver2 = 'bd88045b48d3b4daf4c6c621f4a7265a072c299c';
 my $cv_ver1 = '6eebdec25d3cbf23d725c4aa48d473943e4a85f3';
 
-diag "LOAD MODULE\n";
+# diag "LOAD MODULE\n";
 
 BEGIN {
     my $gittestdir = qw( t/config/01-proxy-config-versioned.git );
@@ -33,7 +33,7 @@ BEGIN {
 
 require_ok('Connector::Proxy::Config::Versioned');
 
-diag "Connector::Proxy::Config::Versioned init\n";
+# diag "Connector::Proxy::Config::Versioned init\n";
 my $cv = Config::Versioned->new(
             {
                 dbpath      => $gittestdir,
@@ -61,7 +61,7 @@ ok( $cv, 'create new config instance' );
 
 is( $cv->version, $cv_ver2, 'check version (sha1 hash) of second commit' );
 
-diag "Connector::Proxy::Config::Versioned tests\n";
+# diag "Connector::Proxy::Config::Versioned tests\n";
 ###########################################################################
 my $conn = Connector::Proxy::Config::Versioned->new(
     {
@@ -75,19 +75,19 @@ is( $conn->get('group1.ldap1.uri'),
     'ldaps://example1.org', 'check single attribute' );
 is( $conn->get('nonexistent'), undef, 'check for nonexistent attribute' );
 
-diag "Test List functionality\n";
+# diag "Test List functionality\n";
 my @data = $conn->get_list('list.test');
 is( $conn->get_size('list.test'), 4, 'Check size of list');
 is( ref \@data, 'ARRAY', 'Check if return is array ref');
 is( shift @data, 'first', 'Check element');
 
-diag "Test Hash functionality\n";
+# diag "Test Hash functionality\n";
 my @keys = $conn->get_keys('group1.ldap');
 is( ref \@keys, 'ARRAY', 'Check if get_keys is array ');
 is( ref $conn->get_hash('group1.ldap'), 'HASH', 'Check if get_hash is hash');
 is( $conn->get_hash('group1.ldap')->{password}, 'secret', 'Check element');
  
-diag "Test version pointer\n";
+# diag "Test version pointer\n";
 is( $conn->get( 'list.test.2'), 'third', 'value from current head');
 ok ( $conn->version($cv_ver1), 'Set default version');
 is( $conn->version(), $cv_ver1, 'check default version (sha1 hash)' );

@@ -6,9 +6,6 @@
 # vim: syntax=Makefile
 
  
-# Local installation place
-DEST=target
- 
 VERSION=$(shell perl -le "print `grep '^our $$VERSION =' lib/Connector.pm`")
 PACKAGE=Connector
 #EMAIL=$(shell git config --global user.email)
@@ -21,20 +18,10 @@ info:
 	@echo "VERSION ${VERSION}"
 	@echo "PACKAGE ${PACKAGE}"
 
-.PHONY: localinst
-localinst:
-	PERL_LOCAL_LIB_ROOT="${HOME}/perl5" \
-						PERL_MB_OPT="--install_base ${HOME}/perl5" \
-						PERL_MM_OPT="INSTALL_BASE=${HOME}/perl5" \
-						PERL5LIB="${HOME}/perl5/lib/perl5:${PERL5LIB} \
-						PATH="${HOME}/perl5/bin:${PATH} \
-						perl Makefile.PL && make test && make install
-
+# Note: the local install works best with perlbrew (i.e.: without sudo)
 .PHONY: install
 install:
-	rm -rf ${DEST} || true
-	mkdir -p ${DEST}
-	perl Makefile.PL INSTALLDIRS=vendor && make && sudo make install PREFIX=target
+	perl Makefile.PL && make test && make install
  
  
 .PHONY: dist
