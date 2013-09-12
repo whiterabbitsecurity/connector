@@ -15,13 +15,43 @@ use English;
 use Moose;
 use Data::Dumper;
 
-has '_prefix' => ( is => 'ro', required => 1, init_arg => 'TARGET' );
+extends 'Connector';
 
 has 'BASECONNECTOR' => ( 
     is => 'ro', 
     required => 1, 
-    init_arg => 'CONNECTOR'     
 );
+
+has '+LOCATION' => ( required => 0 );
+
+# Build arrayref from target the first time it is required
+has _target => ( is => 'rw', isa => 'ArrayRef|Undef', writer => '__target' );
+
+has TARGET => ( 
+    is => 'ro', 
+    isa => 'Connector::Types::Key|ArrayRef|Undef', 
+    trigger => sub {
+        my ($self, $target) = @_;    
+        my @target = $self->_build_path( $target );
+        $self->__target( \@target );
+        # Force rebuild of prefix 
+        $self->PREFIX( $self->PREFIX() );
+    }
+);
+
+# override the prefix trigger to prepend the wrapper prefix
+has '+PREFIX' => (
+    trigger => sub {
+        my ($self, $prefix, $old_prefix) = @_;
+        if (defined $prefix) {
+            my @path = $self->_build_path($prefix);
+            $self->__prefix_path( [ @{$self->_target()}, @path ]);
+        } else {
+            $self->__prefix_path( $self->_target() );
+        }   
+    }
+);
+
 
 sub _route_call {
     
@@ -29,18 +59,10 @@ sub _route_call {
     my $call = shift;
     my $path = shift;
     my @args = @_;
-           
-    # TODO - might be possible to have different delimiters   
-    if (ref $path) {
-        unshift @{$path}, $self->_prefix();
-        $path = join(".", @{$path} );
-    } elsif ($path) {
-        $path = $self->_prefix() . $self->BASECONNECTOR()->DELIMITER() .  $path;
-    } else {
-        $path = $self->_prefix();
-    }
+              
+    my @fullpath = $self->_build_path_with_prefix( $path );
     
-    unshift @args, $path; 
+    unshift @args, \@fullpath; 
     
     return $self->BASECONNECTOR()->$call( @args );       
 }

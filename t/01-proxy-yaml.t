@@ -41,8 +41,8 @@ is($conn->get('test.entry.foo'), '1234');
 is($conn->get('test.entry.bar'), '5678');
 
 # test with array ref path
-is($conn->get( [ 'test.entry.foo' ] ), '1234');
-is($conn->get( [ 'test.entry','bar' ] ), '5678');
+is($conn->get( [ 'test','entry','foo' ] ), '1234');
+is($conn->get( [ ('test','entry'),'bar' ] ), '5678');
 
 # check for completely wrong entry
 is($conn->get('test1.entry.bar'), undef, 'handle completely wrong entry gracefully');

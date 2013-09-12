@@ -29,16 +29,16 @@ has LOCATION => (
 # In order to clear the prefix, call the accessor with undef as argument
 has PREFIX => (
     is => 'rw',
-    isa => 'Connector::Types::Key|Undef',
+    isa => 'Connector::Types::Key|ArrayRef|Undef',
     # build and store an array of the prefix in _prefix_path
     trigger => sub {
-	my ($self, $prefix, $old_prefix) = @_;
-	if (defined $prefix) {
-	    my @path = $self->_build_path($prefix);
-	    $self->__prefix_path(\@path);
-	} else {
-	    $self->__prefix_path([]);
-	}
+        my ($self, $prefix, $old_prefix) = @_;
+        if (defined $prefix) {
+            my @path = $self->_build_path($prefix);
+            $self->__prefix_path(\@path);
+        } else {
+            $self->__prefix_path([]);
+        }   
     }
     );
 
@@ -46,6 +46,12 @@ has DELIMITER => (
     is => 'rw',
     isa => 'Connector::Types::Char',
     default => '.',
+    );
+
+has RECURSEPATH => (
+    is => 'rw',
+    isa => 'Bool',
+    default => '0',
     );
 
 # internal representation of the instance configuration
@@ -72,9 +78,11 @@ has log => (
 # by the DELIMITER character)
 has _prefix_path => (
     is       => 'rw',
+    isa      => 'ArrayRef',
     init_arg => undef,
     default  => sub { [] },
     writer   => '__prefix_path',
+    lazy => 1
     );
     
 # weather to die on undef or just fail silently
@@ -101,8 +109,10 @@ around BUILDARGS => sub {
 
         my $conn = $args->{CONNECTOR};
         delete $args->{CONNECTOR};
-        my $targ = $args->{TARGET};
+        
+        my @targ = $conn->_build_path( $args->{TARGET} );
         delete $args->{TARGET};
+        
         my $meta = $class->meta;
                 
         for my $attr ( $meta->get_all_attributes ) {
@@ -110,15 +120,15 @@ around BUILDARGS => sub {
             next if $attrname =~ m/^_/; # skip apparently internal params
             # allow caller to override params in CONNECTOR
             if ( not exists($args->{$attrname}) ) {                
-                my $meta = $conn->get_meta($targ . $conn->DELIMITER() . $attrname);                
+                my $meta = $conn->get_meta( [ @targ , $attrname ] );                
                 next unless($meta);
                 if ($meta->{TYPE} eq 'scalar') {
                     $args->{$attrname} = $meta->{VALUE};                    
                 } elsif ($meta->{TYPE} eq 'list') {
-		    my @tmp = $conn->get_list($targ . $conn->DELIMITER() . $attrname);
+                my @tmp = $conn->get_list( [ @targ , $attrname ] );
                     $args->{$attrname} = \@tmp;
                 } elsif ($meta->{TYPE} eq 'hash') {
-                    $args->{$attrname} = $conn->get_hash($targ . $conn->DELIMITER() . $attrname);                
+                    $args->{$attrname} = $conn->get_hash( [ @targ , $attrname ] );                
                 }
                                               
             }
@@ -141,34 +151,61 @@ sub _build_logger {
 # helper function: build a path from the given input. does not take PREFIX
 # into account
 sub _build_path {
+    
     my $self = shift;
     my @arg = @_;
 
     my @path;
 
-    my $delimiter = $self->DELIMITER();
-    foreach my $item (@arg) {
- 	if (ref $item eq '') {
-	    push @path, split(/[$delimiter]/, $item);
- 	} elsif (ref $item eq 'ARRAY') {
- 	    push @path, $self->_build_path( @{$item} );
- 	} else {
- 	    die "Invalid data type passed in argument to _build_path";
- 	}
-    }
 
-    if (wantarray) {
-	return @path;
-    } else {
-	return join($self->DELIMITER(), @path);
+    # Catch old call format
+    if (scalar @arg > 1) {
+        die "Sorry, we changed the API (pass scalar or array ref but not array)";
     }
+    
+    my $location = shift @arg;
+
+    if (not $location) {
+        @path = ();
+    } elsif (ref $location eq '') {
+        # String path - split at delimiter
+        my $delimiter = $self->DELIMITER();
+        @path = split(/[$delimiter]/, $location);    
+    } elsif (ref $location ne "ARRAY") {
+        # Nothing else than arrays allowed beyond this point
+        die "Invalid data type passed in argument to _build_path";
+    } elsif ($self->RECURSEPATH()) {
+        foreach my $item (@{$location}) {
+            push @path, $self->_build_path( $item );    
+        }
+    } else {    
+        # Atomic path, the array is the result
+        @path = @{$location};       
+    }
+    
+    $self->log()->trace( Dumper @path );
+    
+    if (wantarray) {
+        return @path;
+    } elsif ($self->RECURSEPATH()) {
+        return join $self->DELIMITER(), @path;
+    } else {
+        die "Sorry, we changed the API, request a list and join yourself or set RECURSEPATH in constructor";
+    }    
+    
 }
 
 # same as _build_config, but prepends PREFIX
 sub _build_path_with_prefix {
     my $self = shift;
-
-    return $self->_build_path(@{$self->_prefix_path()}, @_ );
+    my $location = shift;
+    
+    if (not $location) {
+        return @{$self->_prefix_path()};
+    } else {        
+        return (@{$self->_prefix_path()}, ($self->_build_path( $location )));
+    }
+    
 }
 
 # This is a helper to handle non exisiting nodes
@@ -261,15 +298,17 @@ Basic method to obtain a scalar value at the leaf of the config tree.
 
   my $value = $connector->get('smartcard.owners.tokenid.bob');
   
-Each implementation SHOULD also accept an arrayref as path. The path is 
-contructed by joining the elements.
+Each implementation must also accept an arrayref as path. The path is 
+contructed from the elements. The default behaviour allows strings using 
+the delimiter character inside an array element. If you want each array
+element to be parsed, you need to pass "RECURSEPATH => 1" to the constructor.   
 
-  my $value = $connector->get( [ 'smartcard.owners.tokenid', 'bob' ] );
+  my $value = $connector->get( [ 'smartcard','owners','tokenid','bob.builder' ] );
   
 Some implementations accept control parameters, which can be passed by
 I<params>, which is a hash ref of key => value pairs.
   
-  my $value = $connector->get( [ 'smartcard.owners.tokenid', 'bob' ], { version => 1 } );
+  my $value = $connector->get( 'smartcard.owners.tokenid.bob' , { version => 1 } );
  
 =head2 get_list
 
@@ -277,7 +316,7 @@ This method is only valid if it is called on a "n-1" depth node representing
 an ordered list of items (array). The return value is an array with all 
 values present below the node.
   
-  my @items = $connector->get( [ 'smartcard.owners.tokenid', 'bob' ] );
+  my @items = $connector->get_list( 'smartcard.owners.tokenid'  );
  
 
 =head2 get_size
@@ -286,7 +325,7 @@ This method is only valid if it is called on a "n-1" depth node representing
 an ordered list of items (array). The return value is the number of elements
 in this array (including undef elements if they are explicitly given).
   
-  my $count = $connector->get( 'smartcard.owners.tokens.bob' );
+  my $count = $connector->get_size( 'smartcard.owners.tokens.bob' );
   
 If the node does not exist, 0 is returned.
  
@@ -295,7 +334,7 @@ If the node does not exist, 0 is returned.
 This method is only valid if it is called on a "n-1" depth node representing 
 a key => value list (hash). The return value is a hash ref. 
   
-  my %data = %{$connector->get( [ 'smartcard.owners.tokens', 'bob' ] )};
+  my %data = %{$connector->get_hash( 'smartcard.owners.tokens.bob' )};
  
  
 =head2 get_keys
@@ -304,7 +343,7 @@ This method is only valid if it is called on a "n-1" depth node representing
 a key => value list (hash). The return value is an array holding the
 values of all keys (including undef elements if they are explicitly given).
   
-  my @keys = $connector->get( [ 'smartcard.owners.tokens', 'bob' ] );
+  my @keys = $connector->get_keys( 'smartcard.owners.tokens.bob' );
 
 If the node does not exist, an empty list is returned.
 
@@ -314,9 +353,6 @@ The set method is a "all in one" implementation, that is used for either type
 of value. If the value is not a scalar, it must be passed by reference.
 
   $connector->set('smartcard.owners.tokenid.bob', $value, $params);
-
-If the implementation supports the array ref notation for get, it must provide
-it for set, too.
 
 The I<value> parameter holds a scalar or ref to an array/hash with the data to 
 be written. I<params> is a hash ref which holds additional parameters for the 
@@ -343,11 +379,10 @@ even if C<die_on_undef> is set, therefore you can use it to probe for a node.
 
 =head2 path building
 
-You should alwayd pass the first parameter to the private C<_build_path> 
+You should always pass the first parameter to the private C<_build_path> 
 method. This method converts any valid path spec representation to a valid
-path. In scalar context, you get a single string joined with the configured 
-delimiter. In list context, you get an array with one path item per array 
-element.  
+path. It takes care of the RECURSEPATH setting and returns the path 
+elements as list.  
 
 =head2 Supported methods
 
@@ -364,7 +399,7 @@ Oliver Welter
 
 =head1 COPYRIGHT
 
-Copyright 2012 OpenXPKI Foundation
+Copyright 2013 OpenXPKI Foundation
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 

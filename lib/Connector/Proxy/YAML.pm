@@ -39,7 +39,7 @@ sub _build_config {
 
 sub _get_node {
     
-    my $self = shift;
+    my $self = shift;    
     my @path = $self->_build_path_with_prefix( shift );
 
     my $ptr = $self->_config();

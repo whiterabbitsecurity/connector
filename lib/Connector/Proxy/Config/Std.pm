@@ -32,7 +32,7 @@ sub get {
     # by separating last element from path and using that as key
     # in the section defined by the remaining prefix
     my $key = pop @path;
-    my $section = $self->_build_path(@path);
+    my $section = $self->_build_section_name_from_path( @path); 
 
     return $self->_config()->{$section}->{$key};
 }
@@ -42,7 +42,7 @@ sub _get_node {
     my $self = shift;
     my @path = $self->_build_path_with_prefix( shift );
     
-    my $fullpath = $self->_build_path(@path);
+    my $fullpath = $self->_build_section_name_from_path( @path);
     
     return $self->_config()->{$fullpath};
 }
@@ -129,7 +129,7 @@ sub get_meta {
     # We dont have a real tree, so we look if there is a config entry
     # that has the full path as key
 
-    my $section = $self->_build_path(@path);
+    my $section = $self->_build_section_name_from_path( @path);
 
     # This is either a hash or undef
     my $node = $self->_config()->{$section};
@@ -139,7 +139,7 @@ sub get_meta {
     if (!defined $node) {
 
         my $key = pop @path;
-        my $section = $self->_build_path(@path);
+        $section = $self->_build_section_name_from_path( @path );
         $node = $self->_config()->{$section}->{$key};
                         
         if (!defined $node) {
@@ -164,6 +164,12 @@ sub get_meta {
     return $meta;
 }
 
+# might be refined to use a section delimiter different from connector
+sub _build_section_name_from_path {
+    
+    my $self = shift;    
+    return join( $self->DELIMITER() , @_ );    
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

@@ -49,7 +49,7 @@ sub fetch_head_commit {
 
 sub get {
     my $self = shift;
-    my $path = $self->_build_path_with_prefix( shift );
+    my $path = $self->_build_delimited_cv_path( shift );
 
     # We need a change to C:V backend to check if this is a node or not    
     my $val = $self->_config()->get( $path, $self->version() );
@@ -60,7 +60,7 @@ sub get {
 sub get_size { 
 
     my $self = shift;
-    my $path = $self->_build_path_with_prefix( shift ); 
+    my $path = $self->_build_delimited_cv_path( shift ); 
     
     # We check if the value is an integer to see if this looks like 
     # an array - This is not bullet proof but should do
@@ -78,7 +78,7 @@ sub get_size {
 sub get_list { 
     
     my $self = shift;
-    my $path = $self->_build_path_with_prefix( shift );
+    my $path = $self->_build_delimited_cv_path( shift );
 
     # C::V uses an array with numeric keys internally - we use this to check if this is an array    
     my @keys = $self->_config()->get( $path, $self->version() );    
@@ -101,7 +101,7 @@ sub get_list {
 sub get_keys { 
 
     my $self = shift;
-    my $path = $self->_build_path_with_prefix( shift );   
+    my $path = $self->_build_delimited_cv_path( shift );   
     
     my @keys = $self->_config()->get( $path, $self->version() );
     
@@ -114,7 +114,7 @@ sub get_keys {
 sub get_hash { 
     
     my $self = shift;
-    my $path = $self->_build_path_with_prefix( shift );
+    my $path = $self->_build_delimited_cv_path( shift );
     
     my @keys = $self->_config()->get( $path, $self->version() );
     
@@ -131,7 +131,7 @@ sub get_hash {
 sub get_meta {
     
     my $self = shift;
-    my $path = $self->_build_path_with_prefix( shift );
+    my $path = $self->_build_delimited_cv_path( shift );
     
     my @keys = $self->_config()->get( $path, $self->version() );
     
@@ -165,6 +165,15 @@ sub get_meta {
     }
     
     return $meta;
+}
+
+# return the path as string as used in C::V using the delimiter of C::V!
+sub _build_delimited_cv_path {
+    
+    my $self = shift;
+    my @path = $self->_build_path_with_prefix( shift );
+    return join ( $self->_config()->delimiter(), @path );
+    
 }
 
 

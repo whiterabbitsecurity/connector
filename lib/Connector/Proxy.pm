@@ -32,6 +32,7 @@ around BUILDARGS => sub {
             && defined($args->{CONNECTOR})
             && defined($args->{TARGET}) ) {
                 
+            $args->{'BASECONNECTOR'} = $args->{CONNECTOR};               
             $args->{LOOPBACK} = Connector::Wrapper->new( $args );                
     }
     

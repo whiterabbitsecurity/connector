@@ -105,7 +105,7 @@ sub _route_call {
     }
 
     my @prefix = ();
-    my @suffix = $self->_build_path( $location );
+    my @suffix = $self->_build_path_with_prefix( $location );
     my $ptr_cache = $self->_cache()->{node};
 
     $self->log()->debug('Call '.$call.' in Multi to '. join('.', @suffix));
@@ -115,6 +115,7 @@ sub _route_call {
         push @prefix, $node;
 
         # Easy Cache - skip all inner nodes, that are not a connector
+        # that might fail if you mix real path and complex path items
         my $path = join($delim, @prefix);
         if (exists $ptr_cache->{$path}) {
             next;
@@ -132,7 +133,7 @@ sub _route_call {
                         die "Connector::Multi: error creating connector for '$target': $@";
                     }
                     # Push path on top of the argument array
-                    unshift @args, join($delim, @suffix); 
+                    unshift @args, \@suffix; 
                     return $conn->$call( @args );                    
                 } else {
                     die "Connector::Multi: unsupported schema for symlink: $schema";
@@ -147,33 +148,32 @@ sub _route_call {
     }
     
     # Push path on top of the argument array
-    unshift @args, join($delim, @prefix, @suffix);        
+    unshift @args, [ @prefix, @suffix ];        
     return $conn->$call( @args );        
 }
 
 sub get_wrapper() {
-    
     my $self = shift;
-    my $location = shift;
-    
-    return Connector::Wrapper->new({ CONNECTOR => $self, TARGET => $location });
+    my $location = shift;    
+    return Connector::Wrapper->new({ BASECONNECTOR => $self, TARGET => $location });
 }
 
 # getWrapper() is deprecated - use get_wrapper() instead
 sub getWrapper() {
     my $self = shift;
+    warn "using deprecated call to getWrapper - use get_wrapper instead";
     $self->get_wrapper(@_);
 }
 
 sub get_connector {
     my $self = shift;
     my $target = shift;
-    my $delim = $self->DELIMITER();
 
     my $conn = $self->_config()->{$target};    
     if ( ! $conn ) {
-        # use the 'root' connector instance        
-        my $class = $self->BASECONNECTOR()->get($target . $delim . 'class');
+        # use the 'root' connector instance                
+        my @path = $self->_build_path_with_prefix( $target );          
+        my $class = $self->BASECONNECTOR()->get( [ @path, 'class' ] );
         eval "use $class;1" or die "Error use'ing $class: $@";
         $self->log()->debug("Initialize connector $class at $target");        
         $conn = $class->new( { CONNECTOR => $self->BASECONNECTOR(), TARGET => $target } );
