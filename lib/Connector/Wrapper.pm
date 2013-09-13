@@ -43,6 +43,12 @@ has TARGET => (
 has '+PREFIX' => (
     trigger => sub {
         my ($self, $prefix, $old_prefix) = @_;
+        
+        if (not $self->TARGET) {
+            $self->log()->debug( 'prefix before target - skipping!' ) ;
+            return;
+        }
+        
         if (defined $prefix) {
             my @path = $self->_build_path($prefix);
             $self->__prefix_path( [ @{$self->_target()}, @path ]);
@@ -117,14 +123,14 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
-=head 1 Name
+=head1 Name
 
 Connector
 
-=head 1 Description
+=head1 Description
 
 This provides a wrapper to the connector with a fixed prefix.
 
-=head 2 Supported methods
+=head2 Supported methods
 
 get, get_list, get_size, get_hash, get_keys, set, meta

@@ -114,13 +114,17 @@ around BUILDARGS => sub {
         delete $args->{TARGET};
         
         my $meta = $class->meta;
+        
+        my $log = Log::Log4perl->get_logger("connector");        
+        $log->trace( 'Wrapping connector - config at ' . join ".", @targ ) ;                        
                 
         for my $attr ( $meta->get_all_attributes ) {
             my $attrname = $attr->name();            
             next if $attrname =~ m/^_/; # skip apparently internal params
             # allow caller to override params in CONNECTOR
             if ( not exists($args->{$attrname}) ) {                
-                my $meta = $conn->get_meta( [ @targ , $attrname ] );                
+                my $meta = $conn->get_meta( [ @targ , $attrname ] );
+                $log->trace( ' Check for ' . $attrname . ' - meta is ' . Dumper $meta );                
                 next unless($meta);
                 if ($meta->{TYPE} eq 'scalar') {
                     $args->{$attrname} = $meta->{VALUE};                    
@@ -132,7 +136,9 @@ around BUILDARGS => sub {
                 }
                                               
             }
-        }        
+        }
+        
+        $log->trace( 'Wrapping connector - arglist ' .Dumper @_ ) ;        
     }
     return $class->$orig(@_);
 };
@@ -214,6 +220,8 @@ sub _build_path_with_prefix {
 sub _node_not_exists {    
     my $self = shift;
     my $path = shift;
+        
+    $path = join ("|", @{$path}) if (ref $path eq "ARRAY"); 
     
     $self->log()->debug('Node does not exist at  ' . $path );
     

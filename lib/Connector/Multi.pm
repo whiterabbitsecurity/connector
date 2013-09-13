@@ -134,7 +134,7 @@ sub _route_call {
                     }
                     # Push path on top of the argument array
                     unshift @args, \@suffix; 
-                    return $conn->$call( @args );                    
+                    return $conn->$call( @args );                   
                 } else {
                     die "Connector::Multi: unsupported schema for symlink: $schema";
                 }
@@ -175,7 +175,7 @@ sub get_connector {
         my @path = $self->_build_path_with_prefix( $target );          
         my $class = $self->BASECONNECTOR()->get( [ @path, 'class' ] );
         eval "use $class;1" or die "Error use'ing $class: $@";
-        $self->log()->debug("Initialize connector $class at $target");        
+        $self->log()->debug("Initialize connector $class at $target");
         $conn = $class->new( { CONNECTOR => $self->BASECONNECTOR(), TARGET => $target } );
         $self->_config()->{$target} = $conn;
     }
