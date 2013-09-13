@@ -25,7 +25,7 @@ extends 'Connector::Proxy::Net::LDAP';
 
 sub get {
     my $self = shift;    
-    my $args = shift;
+    my @args = $self->_build_path( shift );
 
     my $ldap = $self->ldap();
     
@@ -35,16 +35,16 @@ sub get {
     }
         
     my $mesg = $ldap->search(
-        $self->_build_search_options( { ARG => $args } ),
+        $self->_build_search_options( { ARGS => \@args } ),
     );
        
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
     
     if ($mesg->count() == 0) {
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
     
     if ($mesg->count() > 1) {
@@ -60,7 +60,7 @@ sub get {
     }
         
     # No Attribute has a valid value
-    return $self->_node_not_exists( $args );        
+    return $self->_node_not_exists( \@args );        
 }
 
 sub set {
@@ -68,6 +68,8 @@ sub set {
     my $self = shift;
     my $args = shift;
     my $value = shift;
+
+    my @args = $self->_build_path( $args );
 
     if (!$self->attrs || @{$self->attrs} != 1) {
         $self->log()->error("The attribute list must contain exactly one entry");
@@ -79,16 +81,16 @@ sub set {
     
      # Try to find the entry        
     my $mesg = $ldap->search(
-        $self->_build_search_options( { ARG => $args }, { noattrs => 1} ),
+        $self->_build_search_options( { ARGS => \@args }, { noattrs => 1} ),
     );
     
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
 
     if ($mesg->count() > 1) {
-        $self->log()->error('Set by filter had multiple results: '.$args);
+        $self->log()->error('Set by filter had multiple results: ' . join '|', @args);
         die "More than one entry found - result is not unique."
     }
     
@@ -97,8 +99,8 @@ sub set {
         $self->log()->debug('Entry found ' . $entry->dn());
     } else {
         # Check if autocreate is configured                                 
-        $entry = $self->_triggerAutoCreate( $args );                  
-        return $self->_node_not_exists($args) if (!$entry);
+        $entry = $self->_triggerAutoCreate( \@args );                  
+        return $self->_node_not_exists(\@args) if (!$entry);
     } 
 
     my $action = $self->action();
@@ -121,7 +123,7 @@ sub set {
     $mesg = $entry->update( $ldap );
     if ($mesg->is_error()) {
         $self->log()->error("LDAP update failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
     
     return 1;

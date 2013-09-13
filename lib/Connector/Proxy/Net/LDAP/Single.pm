@@ -49,9 +49,12 @@ sub get_hash {
 
     my $ldap = $self->ldap();
         
+    my @args = $self->_build_path( $args );
+        
+        
     # compose a list of command arguments
     my $template_vars = {
-       ARG => $args,
+       ARGS => \@args,
     };
     
     my $mesg = $ldap->search(
@@ -60,11 +63,11 @@ sub get_hash {
     
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
        
     if ($mesg->count() == 0) {
-        return $self->_node_not_exists($args);
+        return $self->_node_not_exists(\@args);
     }
     
     if ($mesg->count() > 1) {
@@ -106,22 +109,24 @@ sub set {
     my $value = shift;
     my $params = shift;
     
+    my @args = $self->_build_path( $args );    
+    
     my $ldap = $self->ldap();
     my $entry; 
     
-    $self->log()->debug('Set called on ' . $args);
+    $self->log()->debug('Set called on ' . \@args );
     
     # Check if a pkey/dn is passed
     if ($params->{pkey}) {        
         $entry = $self->_getbyDN( $params->{pkey} );
         if (!defined $entry) {
             $self->log()->warn('Set by dn had no result: '.$params->{pkey});            
-            return $self->_node_not_exists($args);
+            return $self->_node_not_exists(\@args);
         }
     } else {
         # Try to find the entry
         
-        my $template_vars = { ARG => $args };
+        my $template_vars = { ARGS => \@args };
     
         my $mesg = $ldap->search(
             $self->_build_search_options($template_vars, { noattrs => 1}),
@@ -129,11 +134,11 @@ sub set {
         
         if ($mesg->is_error()) {
             $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
-            return $self->_node_not_exists( $args );
+            return $self->_node_not_exists( \@args );
         }
     
         if ($mesg->count() > 1) {
-            $self->log()->error('Set by filter had multiple results: '.$args);
+            $self->log()->error('Set by filter had multiple results: ' . join "|", @args );
             die "More than one entry found - result is not unique."
         }
         
@@ -142,8 +147,8 @@ sub set {
             $entry = $mesg->entry(0);        
             $self->log()->debug('Entry found ' . $entry->dn());
         } else {                                 
-            $entry = $self->_triggerAutoCreate( $args );
-            return $self->_node_not_exists($args) if (!$entry);
+            $entry = $self->_triggerAutoCreate( \@args );
+            return $self->_node_not_exists(\@args) if (!$entry);
         } 
     }
 
@@ -182,7 +187,7 @@ sub set {
     my $mesg = $entry->update( $ldap );
     if ($mesg->is_error()) {
         $self->log()->error("LDAP update failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() . ")" );
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
     
     return 1;

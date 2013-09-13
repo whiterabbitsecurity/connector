@@ -11,6 +11,7 @@ use warnings;
 use English;
 use Net::LDAP;
 use Template;
+use Data::Dumper;
 
 use Moose;
 extends 'Connector::Proxy';
@@ -148,6 +149,8 @@ sub _build_search_options {
     # Add the attributes to the query to return only the ones we are asked for
     # Will not work if we allow Filters
     $options{attrs} = $self->attrs unless( $params->{noattrs} );
+     
+    $self->log()->debug('LDAP Search options ' . Dumper %options); 
      
     return %options;
 }
@@ -311,6 +314,9 @@ sub _createPathItem {
     #print "Create Node $newDN \n";
     #print Dumper( $attrib );
     
+    $self->log()->debug("Create Node $newDN  with attributes " . Dumper $attrib);                        
+    
+    
     my $result = $self->ldap()->add( $newDN, attr => $attrib );
     if ($result->is_error()) {
         die $result->error_desc;
@@ -323,12 +329,22 @@ sub _createPathItem {
 sub _triggerAutoCreate {
     
     my $self = shift;    
-    my $value = shift;
+    my $args = shift;
     
     my $create_info = $self->conn()->get_hash('create');
     if (!$create_info) {
         $self->log()->warn('Auto-Create not configured');                        
         return undef; 
+    }
+
+    my $value;
+    # build create value from template
+    if ($create_info->{value}) {       
+        my $template = Template->new({});         
+        $template->process(\$create_info->{value}, $args, \$value) || die "Error processing argument template.";               
+    } else {
+        # Fallback to first argument = legacy config
+        $value = $args->[0];
     }
             
     my $nodeDN = sprintf '%s=%s,%s', $create_info->{rdnkey}, $value, $create_info->{basedn};
@@ -378,7 +394,7 @@ external functionality but bundles common configuration options.
     my $conn = Connector::Proxy::Net::LDAP->new({ 
 	   LOCATION  => 'ldap://localhost:389', 
 	   base      => 'dc=example,dc=org', 
-	   filter  => '(cn=[% ARG %])',       
+	   filter  => '(cn=[% ARGS.0 %])',       
     });    
 
     $conn->get('John Doe');
@@ -391,7 +407,7 @@ using an anonymous bind.
     my $conn = Connector::Proxy::Net::LDAP->new( {
     	LOCATION  => 'ldap://localhost:389',
     	base      => 'dc=example,dc=org',
-    	filter  => '(cn=[% ARG.0 %])',
+    	filter  => '(cn=[% ARGS.0 %])',
     	binddn    => 'cn=admin,dc=openxpki,dc=org',
         password  => 'admin',
         attrs => ['usercertificate;binary','usercertificate'],                
@@ -459,7 +475,7 @@ to copy the attribute value within the object. The values section is optional.
     class = Connector::Proxy::Net::LDAP
     LOCATION = ldap://ldaphost:389
     base     = dc=openxpki,dc=org
-    filter   = (cn=[% ARG.0 %])
+    filter   = (cn=[% ARGS.0 %])
     attrs    = userCertificate;binary
     binddn   = cn=admin,dc=openxpki,dc=org
     password = admin
@@ -468,6 +484,7 @@ to copy the attribute value within the object. The values section is optional.
     [connectors.ldap.create]
     basedn: ou=Webservers,ou=Server CA3,dc=openxpki,dc=org
     rdnkey: cn
+    value: [% ARGS.0 %]
     
     [connectors.ldap.schema.cn] 
     objectclass: inetOrgPerson

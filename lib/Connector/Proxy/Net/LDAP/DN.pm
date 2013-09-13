@@ -27,23 +27,23 @@ extends 'Connector::Proxy::Net::LDAP';
 sub get_list {
     
     my $self = shift;    
-    my $args = shift;
+    my @args = $self->_build_path( shift );
 
     my $ldap = $self->ldap();
      
     my $mesg = $ldap->search(
-        $self->_build_search_options( { ARG => $args } ),
+        $self->_build_search_options( { ARGS => \@args } ),
     );
     
      if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
      
     my @list;  
        
     if ($mesg->count() == 0) {
-        $self->_node_not_exists( $args );
+        $self->_node_not_exists( \@args );
         return @list;
     }
     
@@ -58,12 +58,12 @@ sub get_list {
 sub get_size {
 
     my $self = shift;    
-    my $args = shift;
+    my @args = $self->_build_path( shift );
 
     my $ldap = $self->ldap();
      
     my $mesg = $ldap->search(
-        $self->_build_search_options( { ARG => $args } ),
+        $self->_build_search_options( { ARGS => \@args } ),
     );     
     return $mesg->count();
 }
@@ -75,6 +75,9 @@ sub set {
     my $value = shift;
     my $params = shift;
     
+    my @args = $self->_build_path( $args );
+    
+    
     my $ldap = $self->ldap();
     
     if (!$params->{pkey}) {
@@ -83,16 +86,16 @@ sub set {
     }     
          
     my $mesg = $ldap->search(
-        $self->_build_search_options( { ARG => $args }, { noattrs => 1} ),
+        $self->_build_search_options( { ARGS => \@args }, { noattrs => 1} ),
     );
     
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
-        return $self->_node_not_exists( $args );
+        return $self->_node_not_exists( \@args );
     }
            
     if ($mesg->count() == 0) {
-        $self->_node_not_exists( $args );
+        $self->_node_not_exists( \@args );
         return undef;
     }
     
@@ -105,7 +108,7 @@ sub set {
             my $mesg = $entry->update( $ldap );
             if ($mesg->is_error()) {
                 $self->log()->error("LDAP update failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() . ")");
-                return $self->_node_not_exists( $args );
+                return $self->_node_not_exists( \@args );
             }
             $self->log()->debug('Delete LDAP entry by DN: '.$params->{pkey});
             return 1;
@@ -113,7 +116,7 @@ sub set {
     }        
          
     $self->log()->warn('DN to delete not found in result: '.$params->{pkey});            
-    return $self->_node_not_exists($args);
+    return $self->_node_not_exists( \@args );
            
 }
 
