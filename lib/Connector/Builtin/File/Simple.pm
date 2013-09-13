@@ -1,6 +1,6 @@
 # Connector::Builtin::File::Simple
 #
-# Proxy class for accessing simple filex
+# Proxy class for accessing simple file
 #
 # Written by Martin Bartosch for the OpenXPKI project 2012
 #
@@ -25,9 +25,9 @@ sub _build_config {
     return 1;
 }
 
-# this method always returns the file contents, regardless of the specified
-# key
+
 sub get {
+    
     my $self = shift;
     my $arg = shift;
 
@@ -45,6 +45,11 @@ sub get {
     return $content;
 }
 
+sub get_meta {    
+    my $self = shift;
+    return {TYPE  => "scalar", VALUE => $self->get() };    
+}   
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -56,4 +61,7 @@ __END__
 Connector::Builtin::File::Simple
 
 =head 1 Description
+
+Return the contents of the file given by the LOCATION parameter.
+The path argument is discarded.
 

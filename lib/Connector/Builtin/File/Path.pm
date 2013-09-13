@@ -47,9 +47,8 @@ sub _build_config {
 sub get {
     
     my $self = shift;
-    my $file = shift;
    
-    my $filename = $self->_sanitize_path( $file );
+    my $filename = $self->_sanitize_path( shift );
 
     my $content;
     if (-r $filename) {
@@ -114,17 +113,20 @@ sub set {
 sub _sanitize_path {
 
     my $self = shift;
-    my $arg = shift;
+    my $inargs = shift;
     my $data = shift;
+
+    my @args = $self->_build_path_with_prefix( $inargs );
+
 
     my $file;
     if ($self->file()) {
         my $pattern = $self->file();
         my $template = Template->new({});
         $self->log()->debug('Process template ' . $pattern);  
-        $template->process( \$pattern, { ARGS => $arg, DATA => $data }, \$file) || die "Error processing argument template.";
+        $template->process( \$pattern, { ARGS => \@args, DATA => $data }, \$file) || die "Error processing argument template.";
     } else {
-        $file = $arg;
+        $file = join $self->DELIMITER(), @args;
     }
 
     $file =~ s/[^\s\w\.]//g;
@@ -204,7 +206,7 @@ Fetch data from a file. See the file parameter how to control the filename.
 
     my $conn = Connector::Builtin::File::Path->new({
        LOCATION: /var/data/
-       file: [% ARGS %].txt
+       file: [% ARGS.0 %].txt
        content: Hello [% NAME %]
     });
 

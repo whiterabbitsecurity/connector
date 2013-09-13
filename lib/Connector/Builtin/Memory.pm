@@ -123,6 +123,34 @@ sub get_hash {
     return $node;   
 } 
 
+sub get_meta {
+    
+    my $self = shift;
+    
+    my $node = $self->_get_node( shift );
+
+    if (!defined $node) {
+        return undef;
+    }
+
+    my $meta = {};
+
+    if (ref $node eq '') {
+        $meta = {TYPE  => "scalar", VALUE => $node };        
+    } elsif (ref $node eq "SCALAR") {
+        $meta = {TYPE  => "reference", VALUE => $$node };        
+    } elsif (ref $node eq "ARRAY") {
+        $meta = {TYPE  => "list", VALUE => $node };
+    } elsif (ref $node eq "HASH") {
+        my @keys = keys(%{$node});
+        $meta = {TYPE  => "hash", VALUE => \@keys };        
+    } else {
+        die "Unsupported node type";
+    }    
+    return $meta;
+}
+
+
 sub set {
     
     my $self = shift;
