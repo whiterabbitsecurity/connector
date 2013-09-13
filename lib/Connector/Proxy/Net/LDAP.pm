@@ -179,7 +179,7 @@ sub _init_bind {
 	);
 
     if (! $ldap) {
-	   die "Could not instantiate ldap object.";
+	   die "Could not instantiate ldap object ($@)";
     }
 
     my $mesg;

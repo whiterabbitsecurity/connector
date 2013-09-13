@@ -7,23 +7,22 @@ use English;
 use Data::Dumper;
 
 use Log::Log4perl qw( :easy ); 
-
 BEGIN {
-    use Test::More tests => 27;
+    use Test::More;
 
-    use vars qw( $req_net_ldap_err );
-    eval 'require Net::LDAP;';
-    $req_net_ldap_err = $@;
-    if ( $req_net_ldap_err ) {
-    plan skip_all => 'Net::LDAP not installed';
+    unless ( $ENV{CONN_HAVE_LDAP_SERVER} ) {
+        plan skip_all => "Skipping LDAP tests because there might be no server";
+        exit;
     }
 
+    use_ok( 'Net::LDAP' );
     use_ok( 'Config::Versioned' );
     use_ok( 'Connector::Multi' );
     use_ok( 'Connector::Proxy::Config::Versioned' );
-    use_ok( 'Connector::Proxy::Net::LDAP' ) if not $req_net_ldap_err;
+    use_ok( 'Connector::Proxy::Net::LDAP' );
 }
 
+require_ok( 'Net::LDAP' );
 require_ok( 'Config::Versioned' );
 require_ok( 'Connector::Multi' );
 require_ok( 'Connector::Proxy::Config::Versioned' );
@@ -115,3 +114,6 @@ is ( $conn->set( ['test','dn', $sSubject] , undef, { pkey => shift @dn }), 1, 'D
 is ( $conn->get(['test','basic', $sSubject]), undef, 'Node was deleted');
 
 }
+
+done_testing;
+
