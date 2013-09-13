@@ -72,12 +72,12 @@ SKIP: {
 
     ####
     # argument passing tests
-    $conn->args( ['abc[% ARG.0 %]123'] );
+    $conn->args( ['abc[% ARGS.0 %]123'] );
     is( $conn->get('foo'), 'abcfoo123',
         'Passing parameters from get arguments' );
 
-    $conn->args( ['abc[% ARG.0 %]123[% ARG.1 %]xyz'] );
-    is( $conn->get( 'foo', 'bar' ),
+    $conn->args( ['abc[% ARGS.0 %]123[% ARGS.1 %]xyz'] );
+    is( $conn->get( [ 'foo', 'bar' ] ),
         'abcfoo123barxyz', 'Multiple parameters from get arguments' );
 
     ###
@@ -95,7 +95,7 @@ SKIP: {
     is( $conn->get('foo'), '1234',
         'Environment variable test: internally set to static value' );
 
-    $conn->env( { MYVAR => '1234[% ARG.0 %]', } );
+    $conn->env( { MYVAR => '1234[% ARGS.0 %]', } );
     is( $conn->get('foo'), '1234foo',
         'Environment variable test: internally set with template' );
 
@@ -106,12 +106,12 @@ SKIP: {
     is( $conn->get('foo'), '54321', 'Passing scalar data via STDIN 1/2' );
     is( $conn->get('bar'), '54321', 'Passing scalar data via STDIN 2/2' );
 
-    $conn->stdin('54321[% ARG.0 %]abc');
+    $conn->stdin('54321[% ARGS.0 %]abc');
     is( $conn->get('foo'), '54321fooabc',
         'Passing data via STDIN with template' );
 
-    $conn->stdin( [ '1234[% ARG.0 %]abc', '4321[% ARG.1 %]def' ] );
-    is( $conn->get( 'foo', 'bar' ), '1234fooabc
+    $conn->stdin( [ '1234[% ARGS.0 %]abc', '4321[% ARGS.1 %]def' ] );
+    is( $conn->get( [ 'foo', 'bar' ] ), '1234fooabc
 4321bardef', 'Passing multiple lines via STDIN'
     );
 

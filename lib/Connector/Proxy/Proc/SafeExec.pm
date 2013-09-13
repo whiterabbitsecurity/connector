@@ -62,17 +62,18 @@ sub _build_config {
 sub get {
     my $self = shift;
 
+    my @args = $self->_build_path( shift );     
     my $template = Template->new(
 	{
 	});
 
     # compose a list of command arguments
-    my $template_vars = {
-	ARG => \@_,
+    my $template_vars = { 
+        ARGS => \@args, 
     };
 
     # process configured system command arguments and replace templates
-    # in it with the passed arguments, accessible via [% ARG.0 %]
+    # in it with the passed arguments, accessible via [% ARGS.0 %]
     my @cmd_args;
     foreach my $item (@{$self->args()}) {
 	my $value;
@@ -173,9 +174,10 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
-=head 1 Name
+=head1 Name
 
 Connector::Builtin::System::Exec
 
-=head 1 Description
+=head1 Description
+
 
