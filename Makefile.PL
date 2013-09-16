@@ -22,6 +22,8 @@ build_requires 'Test::More';
 test_requires 'Test::More';
 test_requires 'Config::Versioned';
 test_requires 'Config::Std';
+test_requires 'YAML';
+test_requires 'Template';
 
 auto_install;
 
