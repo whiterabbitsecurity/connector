@@ -110,7 +110,7 @@ sub _route_call {
 
     $self->log()->debug('Call '.$call.' in Multi to '. join('.', @suffix));
     
-    while ( @suffix > 1 ) { # always treat the last section as non-symlink
+    while ( @suffix > 0 ) { 
         my $node = shift @suffix;
         push @prefix, $node;
 
