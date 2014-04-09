@@ -95,9 +95,9 @@ $conn = Connector::Multi->new( {
 
 my @leaf = sort $conn->get_keys('smartcards');
 is($leaf[0], 'owners', 'check that we even get a record with the symlink layout');
-is(scalar @leaf, 2, 'should have received two records');
-$sym = $conn->get('smartcards.tokens');
-is(ref($sym), 'SCALAR', 'check that we even get a record with the symlink layout');
+is(scalar @leaf, 3, 'should have received three records');
+
+is($conn->get('smartcards.puk'), '007', 'check that we even get a record with a symlink leaf');
 
 is($conn->get('smartcards.tokens.token_1.status'), 'ACTIVATED',
     'multi with symlink config (1)');
@@ -116,8 +116,7 @@ is($conn->get([ 'smartcards','tokens','token_1','status' ]), 'ACTIVATED',
 use Data::Dumper;
 
 # diag "Testing Meta Data";
-
-is( $conn->get_meta('smartcards.tokens')->{TYPE} , 'reference', 'scalar reference');
+is( $conn->get_meta('smartcards.puk')->{TYPE} , 'scalar', 'scalar reference');
 
 is( $conn->get_meta('meta.inner' )->{TYPE} , 'hash', 'inner hash node');
 is( $conn->get_meta('meta.inner.hash' )->{TYPE} , 'hash', 'outer hash node');
