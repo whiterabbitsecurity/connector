@@ -130,6 +130,24 @@ sub set {
            
 }
 
+sub get_meta {
+
+    my $self = shift;
+    my $path = shift;
+
+    # If we have no path, we tell the caller that we are a connector
+    if (!$path || (scalar @{$path}) == 0) {
+        return { TYPE  => "connector" };
+    }
+
+    my $value = $self->get( $path );
+    if (defined $value) {
+        return { TYPE  => "scalar", VALUE => $value };
+    }
+
+    return undef;
+}
+
 
 1;
 __END__
@@ -162,6 +180,13 @@ space delimited string or array ref in the I<attrs> parameter.
 The attrs list must contain at least one argument. You can specify multiple
 attributes but you will receive only the first non undef value which is found. 
 If the attribute itself is multivalued, only the first value is returned.
+
+=head2 get_meta
+
+If called with an empty path, returns { TYPE => "connector" }.
+Otherwise calls get internally and returns undef if not found
+or the value accompanied with TYPE => scalar.
+
 
 =head2 get_list / get_size / get_hash / get_keys
 
