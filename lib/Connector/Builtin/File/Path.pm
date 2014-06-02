@@ -129,7 +129,7 @@ sub _sanitize_path {
         $file = join $self->DELIMITER(), @args;
     }
 
-    $file =~ s/[^\s\w\.]//g;
+    $file =~ s/[^\s\w\.-]//g;
     my $filename = $self->{LOCATION}.'/'.$file;
 
     $self->log()->debug('Filename evaluated to ' . $filename);
