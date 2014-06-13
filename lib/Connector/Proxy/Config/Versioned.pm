@@ -53,8 +53,10 @@ sub get {
 
     # We need a change to C:V backend to check if this is a node or not    
     my $val = $self->_config()->get( $path, $self->version() );
-    
-    return $val;    
+
+    $self->_node_not_exists( $path ) unless (defined $val);
+
+    return $val;
 }
 
 sub get_size { 
