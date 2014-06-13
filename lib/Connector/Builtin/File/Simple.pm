@@ -15,32 +15,21 @@ use Data::Dumper;
 use Moose;
 extends 'Connector::Builtin';
 
-sub _build_config {
-    my $self = shift;
-
-    if (! -r $self->{LOCATION}) {
-	   confess("Cannot open input file " . $self->{LOCATION} . " for reading.");
-    }
-
-    return 1;
-}
-
-
 sub get {
 
     my $self = shift;
-    my $arg = shift;
 
     my $filename = $self->{LOCATION};
 
-    my $content;
-    if (-r $filename) {
-	$content = do {
-	  local $INPUT_RECORD_SEPARATOR;
-	  open my $fh, '<', $filename;
-	  <$fh>;
-      };
+    if (! -r $filename) {
+        return $self->_node_not_exists( );
     }
+
+    my $content = do {
+      local $INPUT_RECORD_SEPARATOR;
+      open my $fh, '<', $filename;
+      <$fh>;
+    };
 
     return $content;
 }

@@ -47,18 +47,19 @@ sub _build_config {
 sub get {
 
     my $self = shift;
+    my $path = shift;
 
-    my $filename = $self->_sanitize_path( shift );
+    my $filename = $self->_sanitize_path( $path );
 
-    my $content;
-    if (-r $filename) {
-	  $content = do {
+    if (! -r $filename) {
+        return $self->_node_not_exists( $path );
+    }
+
+	my $content = do {
 	  local $INPUT_RECORD_SEPARATOR;
 	  open my $fh, '<', $filename;
 	  <$fh>;
-      };
-    }
-
+    };
     return $content;
 }
 
