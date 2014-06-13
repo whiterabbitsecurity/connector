@@ -1,6 +1,6 @@
 # Connector::Builtin::Authentication::Password
 #
-# Simple connector returning a static value for all requests
+# Check passwords against a unix style password file
 #
 package Connector::Builtin::Authentication::Password;
 
@@ -18,7 +18,7 @@ sub _build_config {
     if (! -r $self->{LOCATION}) {
        confess("Cannot open input file " . $self->{LOCATION} . " for reading.");
     }
-    
+
     return 1;
 }
 
@@ -26,10 +26,10 @@ sub get {
     my $self = shift;
     my $arg = shift;
     my $params = shift;
-    
+
     my @path = $self->_build_path( $arg );
     my $user = shift @path;
-    
+
     my $password = $params->{password};
 
 
@@ -37,42 +37,42 @@ sub get {
         $self->log()->error('No username');
         die "no username given";
     }
-    
+
     if (!$password) {
         $self->log()->error('No password');
         die "no password given";
     }
-    
-    
+
+
     $self->log()->debug('verify password for ' . $user );
-        
+
     if ($user =~ /[^a-zA-Z0-9_\-\.]/) {
         $self->log()->error('Invalid chars in username ('.$user.')');
         return $self->_node_not_exists( $user );
     }
-    
+
     my $filename = $self->{LOCATION};
 
     if (! -r $filename || ! open FILE, "$filename") {
         $self->log()->error('Can\'t open/read from file ' . $filename);
         die 'Can\'t open/read from file ' . $filename;
-    } 
-    
-    while (<FILE>) {           
+    }
+
+    while (<FILE>) {
         if (/^$user:/) {
             chomp;
-            my @t = split(/:/, $_, 3);            
+            my @t = split(/:/, $_, 3);
             $self->log()->trace('found line ' . Dumper @t);
-            #if ($password eq $t[1]) {                
-            if (crypt($password, $t[1]) eq $t[1]) {                                
+            #if ($password eq $t[1]) {
+            if (crypt($password, $t[1]) eq $t[1]) {
                 $self->log()->info('Password accepted for ' . $user);
-                return 1;        
+                return 1;
             } else {
                 $self->log()->info('Password mismatch for ' . $user);
                 return 0;
             }
         }
-    }    
+    }
     return $self->_node_not_exists( $user );
 }
 
@@ -97,19 +97,19 @@ The username is the first component of the path, the password needs to be
 passed in the extended parameters using the key password.
 
 Example:
- 
+
    $connector->get('username', {  password => 'mySecret' } );
-   
+
 =head2 Return values
 
-1 if the password matches, 0 if the user is found but the password does not 
+1 if the password matches, 0 if the user is found but the password does not
 match and undef if the user is not found.
 
 The connector will die if the password file is not readable or if one of
-the parameters is missing. 
+the parameters is missing.
 
 =head2 Limitations
 
-Usernames are limited to [a-zA-Z0-9_\-\.], invalid names are treated as not 
-found.   
-  
+Usernames are limited to [a-zA-Z0-9_\-\.], invalid names are treated as not
+found.
+

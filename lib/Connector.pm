@@ -16,7 +16,7 @@ use English;
 use Data::Dumper;
 
 use Log::Log4perl;
-    
+
 use Moose;
 use Connector::Types;
 
@@ -38,7 +38,7 @@ has PREFIX => (
             $self->__prefix_path(\@path);
         } else {
             $self->__prefix_path([]);
-        }   
+        }
     }
     );
 
@@ -109,36 +109,36 @@ around BUILDARGS => sub {
 
         my $conn = $args->{CONNECTOR};
         delete $args->{CONNECTOR};
-        
+
         my @targ = $conn->_build_path( $args->{TARGET} );
         delete $args->{TARGET};
-        
+
         my $meta = $class->meta;
-        
-        my $log = Log::Log4perl->get_logger("connector");        
-        $log->trace( 'Wrapping connector - config at ' . join ".", @targ ) ;                        
-                
+
+        my $log = Log::Log4perl->get_logger("connector");
+        $log->trace( 'Wrapping connector - config at ' . join ".", @targ ) ;
+
         for my $attr ( $meta->get_all_attributes ) {
-            my $attrname = $attr->name();            
+            my $attrname = $attr->name();
             next if $attrname =~ m/^_/; # skip apparently internal params
             # allow caller to override params in CONNECTOR
-            if ( not exists($args->{$attrname}) ) {                
+            if ( not exists($args->{$attrname}) ) {
                 my $meta = $conn->get_meta( [ @targ , $attrname ] );
-                $log->trace( ' Check for ' . $attrname . ' - meta is ' . Dumper $meta );                
+                $log->trace( ' Check for ' . $attrname . ' - meta is ' . Dumper $meta );
                 next unless($meta);
                 if ($meta->{TYPE} eq 'scalar') {
-                    $args->{$attrname} = $meta->{VALUE};                    
+                    $args->{$attrname} = $meta->{VALUE};
                 } elsif ($meta->{TYPE} eq 'list') {
                 my @tmp = $conn->get_list( [ @targ , $attrname ] );
                     $args->{$attrname} = \@tmp;
                 } elsif ($meta->{TYPE} eq 'hash') {
-                    $args->{$attrname} = $conn->get_hash( [ @targ , $attrname ] );                
+                    $args->{$attrname} = $conn->get_hash( [ @targ , $attrname ] );
                 }
-                                              
+
             }
         }
-        
-        $log->trace( 'Wrapping connector - arglist ' .Dumper @_ ) ;        
+
+        $log->trace( 'Wrapping connector - arglist ' .Dumper @_ ) ;
     }
     return $class->$orig(@_);
 };
@@ -147,7 +147,7 @@ around BUILDARGS => sub {
 # subclasses must implement this to initialize _config
 sub _build_config { return undef };
 
-sub _build_logger { 
+sub _build_logger {
 
     return Log::Log4perl->get_logger("connector");
 
@@ -157,7 +157,7 @@ sub _build_logger {
 # helper function: build a path from the given input. does not take PREFIX
 # into account
 sub _build_path {
-    
+
     my $self = shift;
     my @arg = @_;
 
@@ -168,7 +168,7 @@ sub _build_path {
     if (scalar @arg > 1) {
         die "Sorry, we changed the API (pass scalar or array ref but not array)";
     }
-    
+
     my $location = shift @arg;
 
     if (not $location) {
@@ -176,59 +176,59 @@ sub _build_path {
     } elsif (ref $location eq '') {
         # String path - split at delimiter
         my $delimiter = $self->DELIMITER();
-        @path = split(/[$delimiter]/, $location);    
+        @path = split(/[$delimiter]/, $location);
     } elsif (ref $location ne "ARRAY") {
         # Nothing else than arrays allowed beyond this point
         die "Invalid data type passed in argument to _build_path";
     } elsif ($self->RECURSEPATH()) {
         foreach my $item (@{$location}) {
-            push @path, $self->_build_path( $item );    
+            push @path, $self->_build_path( $item );
         }
-    } else {    
+    } else {
         # Atomic path, the array is the result
-        @path = @{$location};       
+        @path = @{$location};
     }
-    
+
     $self->log()->trace( Dumper @path );
-    
+
     if (wantarray) {
         return @path;
     } elsif ($self->RECURSEPATH()) {
         return join $self->DELIMITER(), @path;
     } else {
         die "Sorry, we changed the API, request a list and join yourself or set RECURSEPATH in constructor";
-    }    
-    
+    }
+
 }
 
 # same as _build_config, but prepends PREFIX
 sub _build_path_with_prefix {
     my $self = shift;
     my $location = shift;
-    
+
     if (not $location) {
         return @{$self->_prefix_path()};
-    } else {        
+    } else {
         return (@{$self->_prefix_path()}, ($self->_build_path( $location )));
     }
-    
+
 }
 
 # This is a helper to handle non exisiting nodes
 # By default we just return undef but you can configure the connector
-# to die with an error  
-sub _node_not_exists {    
+# to die with an error
+sub _node_not_exists {
     my $self = shift;
     my $path = shift;
-        
-    $path = join ("|", @{$path}) if (ref $path eq "ARRAY"); 
-    
+
+    $path = join ("|", @{$path}) if (ref $path eq "ARRAY");
+
     $self->log()->debug('Node does not exist at  ' . $path );
     
     if ($self->die_on_undef()) {
         confess("Node does not exist at " . $path );
     }
-    
+
     return undef;
 }
 
@@ -291,13 +291,13 @@ Usually this class should not be instantiated directly.
 
 =head2 die_on_undef
 
-Set to true if you want the connector to die when a query reaches a non-exisiting 
+Set to true if you want the connector to die when a query reaches a non-exisiting
 node. This will affect only calls to get/get_list/get_hash and will not affect
-values that are explicitly set to undef (if supported by the connector!). 
+values that are explicitly set to undef (if supported by the connector!).
 
 =head 1 Accessor Methods
 
-Each accessor method is valid only special types of nodes. If you call them 
+Each accessor method is valid only special types of nodes. If you call them
 on a wrong type of node, the connector dies.
 
 =head2 get
@@ -305,52 +305,52 @@ on a wrong type of node, the connector dies.
 Basic method to obtain a scalar value at the leaf of the config tree.
 
   my $value = $connector->get('smartcard.owners.tokenid.bob');
-  
-Each implementation must also accept an arrayref as path. The path is 
-contructed from the elements. The default behaviour allows strings using 
+
+Each implementation must also accept an arrayref as path. The path is
+contructed from the elements. The default behaviour allows strings using
 the delimiter character inside an array element. If you want each array
-element to be parsed, you need to pass "RECURSEPATH => 1" to the constructor.   
+element to be parsed, you need to pass "RECURSEPATH => 1" to the constructor.
 
   my $value = $connector->get( [ 'smartcard','owners','tokenid','bob.builder' ] );
-  
+
 Some implementations accept control parameters, which can be passed by
 I<params>, which is a hash ref of key => value pairs.
-  
+
   my $value = $connector->get( 'smartcard.owners.tokenid.bob' , { version => 1 } );
- 
+
 =head2 get_list
 
-This method is only valid if it is called on a "n-1" depth node representing 
-an ordered list of items (array). The return value is an array with all 
+This method is only valid if it is called on a "n-1" depth node representing
+an ordered list of items (array). The return value is an array with all
 values present below the node.
-  
+
   my @items = $connector->get_list( 'smartcard.owners.tokenid'  );
- 
+
 
 =head2 get_size
 
-This method is only valid if it is called on a "n-1" depth node representing 
+This method is only valid if it is called on a "n-1" depth node representing
 an ordered list of items (array). The return value is the number of elements
 in this array (including undef elements if they are explicitly given).
-  
+
   my $count = $connector->get_size( 'smartcard.owners.tokens.bob' );
-  
+
 If the node does not exist, 0 is returned.
- 
+
 =head2 get_hash
 
-This method is only valid if it is called on a "n-1" depth node representing 
-a key => value list (hash). The return value is a hash ref. 
-  
+This method is only valid if it is called on a "n-1" depth node representing
+a key => value list (hash). The return value is a hash ref.
+
   my %data = %{$connector->get_hash( 'smartcard.owners.tokens.bob' )};
- 
- 
+
+
 =head2 get_keys
 
-This method is only valid if it is called on a "n-1" depth node representing 
+This method is only valid if it is called on a "n-1" depth node representing
 a key => value list (hash). The return value is an array holding the
 values of all keys (including undef elements if they are explicitly given).
-  
+
   my @keys = $connector->get_keys( 'smartcard.owners.tokens.bob' );
 
 If the node does not exist, an empty list is returned.

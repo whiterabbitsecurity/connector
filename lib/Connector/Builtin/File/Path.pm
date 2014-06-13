@@ -39,15 +39,15 @@ sub _build_config {
     if (! -d $self->{LOCATION}) {
 	   confess("Cannot open directory " . $self->{LOCATION} );
     }
-    
+
     return 1;
 }
 
 # return the content of the file
 sub get {
-    
+
     my $self = shift;
-   
+
     my $filename = $self->_sanitize_path( shift );
 
     my $content;
@@ -64,20 +64,20 @@ sub get {
 
 # return the content of the file
 sub set {
-    
+
     my $self = shift;
     my $file = shift;
     my $data = shift;
-   
+
     my $filename = $self->_sanitize_path( $file, $data );
 
     my $content;
     if ($self->content()) {
         $self->log()->debug('Process template for content ' . $self->content());
-        my $template = Template->new({});        
-        
+        my $template = Template->new({});
+
         $data = { DATA => $data } if (ref $data eq '');
-                
+
         $template->process( \$self->content(), $data, \$content) || die "Error processing content template.";
     } else {
         if (ref $data ne '') {
@@ -90,23 +90,23 @@ sub set {
     if ($mode eq 'fail' && -f $filename) {
         die "File $filename exists";
     }
-    
+
     if ($mode eq 'silent' && -f $filename) {
         return;
     }
-    
+
     if ($mode eq 'append' && -f $filename) {
         open FILE, ">>$filename" || die "Unable to open file for appending";
     } else {
         open FILE, ">$filename" || die "Unable to open file for writing";
     }
-    
+
     print FILE $content;
     close FILE;
-    
+
     #FIXME - some error handling might not hurt
-    
-    return 1;    
+
+    return 1;
 }
 
 
@@ -123,7 +123,7 @@ sub _sanitize_path {
     if ($self->file()) {
         my $pattern = $self->file();
         my $template = Template->new({});
-        $self->log()->debug('Process template ' . $pattern);  
+        $self->log()->debug('Process template ' . $pattern);
         $template->process( \$pattern, { ARGS => \@args, DATA => $data }, \$file) || die "Error processing argument template.";
     } else {
         $file = join $self->DELIMITER(), @args;
@@ -133,7 +133,7 @@ sub _sanitize_path {
     my $filename = $self->{LOCATION}.'/'.$file;
 
     $self->log()->debug('Filename evaluated to ' . $filename);
-        
+
     return $filename;
 }
 
@@ -154,20 +154,20 @@ Highly configurable file writter/reader.
 =head1 Parameters
 
 =over
- 
+
 =item LOCATION
 
 The base directory where the files are located. This parameter is mandatory.
 
 =item file
 
-Pattern for Template Toolkit to build the filename. 
+Pattern for Template Toolkit to build the filename.
 The path components are available in the key ARGS. In set mode the unfiltered
 data is available in key DATA.
 
 =item content
 
-Pattern for Template Toolkit to build the content. The data is passed 
+Pattern for Template Toolkit to build the content. The data is passed
 "as is". If data is a scalar, it is wrapped into a hash using DATA as key.
 
 =item ifexists
@@ -188,13 +188,13 @@ Pattern for Template Toolkit to build the content. The data is passed
 
 =head2 set
 
-Write data to a file.  
+Write data to a file.
 
     $conn->set('filename', { NAME => 'Oliver', 'ROLE' => 'Administrator' });
 
-See the file parameter how to control the filename. 
-By default, files are silently overwritten if they exist. See the I<ifexists> 
-parameter for an alternative behaviour. 
+See the file parameter how to control the filename.
+By default, files are silently overwritten if they exist. See the I<ifexists>
+parameter for an alternative behaviour.
 
 =head2 get
 
@@ -211,6 +211,6 @@ Fetch data from a file. See the file parameter how to control the filename.
     });
 
     $conn->set('test', { NAME => 'Oliver' });
-    
-Results in a file I</var/data/test.txt> with the content I<Hello Oliver>.    
+
+Results in a file I</var/data/test.txt> with the content I<Hello Oliver>.
 

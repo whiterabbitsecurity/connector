@@ -21,13 +21,13 @@ sub _build_config {
     if (! -r $self->{LOCATION}) {
 	   confess("Cannot open input file " . $self->{LOCATION} . " for reading.");
     }
-    
+
     return 1;
 }
 
 
 sub get {
-    
+
     my $self = shift;
     my $arg = shift;
 
@@ -45,10 +45,10 @@ sub get {
     return $content;
 }
 
-sub get_meta {    
+sub get_meta {
     my $self = shift;
-    return {TYPE  => "scalar", VALUE => $self->get() };    
-}   
+    return {TYPE  => "scalar", VALUE => $self->get() };
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -64,4 +64,3 @@ Connector::Builtin::File::Simple
 
 Return the contents of the file given by the LOCATION parameter.
 The path argument is discarded.
-
