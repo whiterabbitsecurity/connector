@@ -84,15 +84,15 @@ has _prefix_path => (
     writer   => '__prefix_path',
     lazy => 1
     );
-    
+
 # weather to die on undef or just fail silently
 # implemented in _node_not_exists
 has 'die_on_undef' => (
     is  => 'rw',
-    isa => 'Bool',    
+    isa => 'Bool',
     default => 0,
 );
-    
+
 
 # This is the foo that allows us to just milk the connector config from
 # the settings fetched from another connector.
@@ -115,7 +115,7 @@ around BUILDARGS => sub {
 
         my $meta = $class->meta;
 
-        my $log = Log::Log4perl->get_logger("connector");
+        my $log = $conn->log(); # Logs to the parent that is initialising us
         $log->trace( 'Wrapping connector - config at ' . join ".", @targ ) ;
 
         for my $attr ( $meta->get_all_attributes ) {
@@ -125,20 +125,21 @@ around BUILDARGS => sub {
             if ( not exists($args->{$attrname}) ) {
                 my $meta = $conn->get_meta( [ @targ , $attrname ] );
                 $log->trace( ' Check for ' . $attrname . ' - meta is ' . Dumper $meta );
-                next unless($meta);
+                next unless($meta && $meta->{TYPE});
                 if ($meta->{TYPE} eq 'scalar') {
-                    $args->{$attrname} = $meta->{VALUE};
+                    $args->{$attrname} = $conn->get( [ @targ , $attrname ] );
                 } elsif ($meta->{TYPE} eq 'list') {
-                my @tmp = $conn->get_list( [ @targ , $attrname ] );
+                    my @tmp = $conn->get_list( [ @targ , $attrname ] );
                     $args->{$attrname} = \@tmp;
                 } elsif ($meta->{TYPE} eq 'hash') {
                     $args->{$attrname} = $conn->get_hash( [ @targ , $attrname ] );
+                } else {
+                    $log->warn( ' Unexpected type '.$meta->{TYPE}.' for attribute ' . $attrname  );
                 }
-
             }
         }
 
-        $log->trace( 'Wrapping connector - arglist ' .Dumper @_ ) ;
+        $log->trace( 'Wrapping connector - arglist ' .Dumper \@_ );
     }
     return $class->$orig(@_);
 };
@@ -189,7 +190,7 @@ sub _build_path {
         @path = @{$location};
     }
 
-    $self->log()->trace( Dumper @path );
+    $self->log()->trace( 'path created ' . Dumper \@path );
 
     if (wantarray) {
         return @path;
@@ -224,7 +225,7 @@ sub _node_not_exists {
     $path = join ("|", @{$path}) if (ref $path eq "ARRAY");
 
     $self->log()->debug('Node does not exist at  ' . $path );
-    
+
     if ($self->die_on_undef()) {
         confess("Node does not exist at " . $path );
     }
@@ -233,13 +234,11 @@ sub _node_not_exists {
 }
 
 # subclasses must implement get and/or set in order to do something useful
-sub get { shift; die "No get() method defined at " . shift;  };
-sub get_list { shift; die "No get_list() method defined at " . shift;  };
-sub get_size { shift; die "No get_size() method defined at " . shift;  };
-sub get_hash { shift; die "No get_hash() method defined at " . shift;  };
-sub get_keys { shift; die "No get_keys() method defined at " . shift;  };
-sub set { shift;  die "No set() method defined at " . shift;  };
-sub get_meta { shift; die "No get_meta() method defined as " . shift;  };
+sub get { shift; die "No get() method defined";  };
+sub get_list { shift; die "No get_list() method defined";  };
+sub get_hash { shift; die "No get_hash() method defined";  };
+sub get_meta { shift; die "No get_hash() method defined";  };
+sub set { shift;  die "No set() method defined";  };
 
 no Moose;
 __PACKAGE__->meta->make_immutable;
@@ -362,40 +361,56 @@ of value. If the value is not a scalar, it must be passed by reference.
 
   $connector->set('smartcard.owners.tokenid.bob', $value, $params);
 
-The I<value> parameter holds a scalar or ref to an array/hash with the data to 
-be written. I<params> is a hash ref which holds additional parameters for the 
+The I<value> parameter holds a scalar or ref to an array/hash with the data to
+be written. I<params> is a hash ref which holds additional parameters for the
 operation and can be undef if not needed.
 
 =head1 STRUCTURAL METHODS
- 
+
 =head2 get_meta
 
-This method returns some structural information about the current node as  
+This method returns some structural information about the current node as
 hash ref. At minimum it must return the type of node at the current path.
 
 Valid values are I<scalar, list, hash, reference>. Reference is a scalar
-reference which is used e.g. in Connector::Multi. The others correspond 
-to the accessor methods given above.    
+reference which is used e.g. in Connector::Multi. The others correspond
+to the accessor methods given above.
+Valid values for data structures are I<scalar, list, hash>.
+which correspond to the accessor methods given above.
 
     my $meta = $connector->get_meta( 'smartcard.owners' );
-    my $type = $meta->{TYPE};  
+    my $type = $meta->{TYPE};
 
 =head1 IMPLEMENTATION GUIDELINES
 
-If the node does not exist, undef is returned. C<get_meta> will B<NOT> die
-even if C<die_on_undef> is set, therefore you can use it to probe for a node. 
+You SHOULD use the _node_not_exists method if the requested path does not exist
+or has an undefined value. This will internally take care of the I<die_on_undef>
+setting and throw an exception or return undef. So you can just write:
+
+    if (path not exists || not defined val) {
+        return $self->_node_not_exists( pathspec );
+    }
 
 =head2 path building
 
-You should always pass the first parameter to the private C<_build_path> 
+You should always pass the first parameter to the private C<_build_path>
 method. This method converts any valid path spec representation to a valid
-path. It takes care of the RECURSEPATH setting and returns the path 
-elements as list.  
+path. It takes care of the RECURSEPATH setting and returns the path
+elements as list.
 
 =head2 Supported methods
 
-The methods get, get_list, get_size, get_hash, get_keys, set, meta are routed 
-to the appropriate connector. 
+The methods get, get_list, get_size, get_hash, get_keys, set, get_meta are
+routed to the appropriate connector.
+
+You MUST implement at minimum one of the three data getters, if get_list/get_keys
+is omited, the base class will do a get_list/get_keys call and return the info
+which will be a correct result but might be expensive, so you can provide your
+own implementiation if required.
+
+You MUST also implement the get_meta method. If you have a connector with a
+fixed type, you MAY check if the particular path exists and return
+the result of I<_node_not_exists>.
 
 =head1 AUTHORS
 

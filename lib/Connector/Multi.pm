@@ -144,6 +144,7 @@ sub _route_call {
                     if ( ! $conn ) {
                         die "Connector::Multi: error creating connector for '$target': $@";
                     }
+                    $self->log()->debug("Dispatch to connector at $target");
                     # Push path on top of the argument array
                     unshift @args, \@suffix;
                     return $conn->$call( @args );
@@ -152,7 +153,9 @@ sub _route_call {
                 }
             } else {
                 # redirect
-                @prefix = split(/[$delim]/, $meta->{VALUE});
+                @prefix = ();
+                @suffix = split(/[$delim]/, $meta->{VALUE});
+                $self->log()->debug("Plain redirect to " . join ".", @suffix);
             }
         } else {
             $ptr_cache->{$path} = 1;
@@ -185,10 +188,10 @@ sub get_connector {
     if ( ! $conn ) {
         # use the 'root' connector instance
         my @path = $self->_build_path_with_prefix( $target );
-        my $class = $self->BASECONNECTOR()->get( [ @path, 'class' ] );
+        my $class = $self->get( [ @path, 'class' ] );
         eval "use $class;1" or die "Error use'ing $class: $@";
         $self->log()->debug("Initialize connector $class at $target");
-        $conn = $class->new( { CONNECTOR => $self->BASECONNECTOR(), TARGET => $target } );
+        $conn = $class->new( { CONNECTOR => $self, TARGET => $target } );
         $self->_config()->{$target} = $conn;
     }
     return $conn;
