@@ -227,6 +227,20 @@ sub get_hash {
     return $result;
 }
 
+sub get_meta {
+    my $self = shift;
+    # FIXME
+    die "Sorry that is not supported, yet";
+}
+
+sub exists {
+
+    my $self = shift;
+
+    # FIXME
+    die "Sorry that is not supported, yet";
+
+}
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
