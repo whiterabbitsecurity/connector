@@ -128,7 +128,6 @@ sub get_hash {
     return $data;
 };
 
-
 # This can be a very expensive method and includes some guessing
 sub get_meta {
 
@@ -137,10 +136,9 @@ sub get_meta {
 
     my @keys = $self->_config()->get( $path, $self->version() );
 
-    return unless( @keys );
+    return $self->_node_not_exists( $path ) unless( @keys );
 
     my $meta = {
-        ITEMS => \@keys,
         TYPE => "hash"
     };
 

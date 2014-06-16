@@ -21,7 +21,7 @@ sub get {
 sub get_meta {
 
     my $self = shift;
-    return {TYPE  => "scalar", VALUE => $self->{LOCATION} };
+    return { TYPE  => "scalar", VALUE => $self->{LOCATION} };
 }
 
 no Moose;

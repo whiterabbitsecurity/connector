@@ -143,7 +143,7 @@ sub get_meta {
         $node = $self->_config()->{$section}->{$key};
 
         if (!defined $node) {
-            return undef;
+            return $self->_node_not_exists( \@path );
         }
         if (ref $node eq '') {
             $meta = {TYPE  => "scalar", VALUE => $node };
@@ -156,8 +156,7 @@ sub get_meta {
             die "Unsupported node type";
         }
     } elsif (ref $node eq "HASH") {
-        my @keys = keys(%{$node});
-        $meta = {TYPE  => "hash", VALUE => \@keys };
+        $meta = {TYPE  => "hash" };
     } else {
         die "Unsupported node type";
     }

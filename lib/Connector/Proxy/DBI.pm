@@ -41,7 +41,7 @@ has condition => (
     is  => 'rw',
     isa => 'Str',
 );
- 
+
 has _dbi => (
     is  => 'ro',
     isa => 'Object',
@@ -102,10 +102,10 @@ sub get {
     return $rows->[0]->[0];
     
 }
-     
-sub get_list { 
 
-    my $self = shift;    
+sub get_list {
+
+    my $self = shift;
     my @path = $self->_build_path( shift );
     
     my $query = sprintf "SELECT %s FROM %s WHERE %s", 
@@ -138,7 +138,20 @@ sub get_list {
     return @result;
     
 }
-  
+
+sub get_meta {
+
+    my $self = shift;
+
+    # If we have no path, we tell the caller that we are a connector
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return { TYPE  => "connector" };
+    }
+
+    return { TYPE => 'list' };
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -177,8 +190,13 @@ more than one row is found, undef is returned (dies if die_on_undef is set).
 Will return the selected column of all matching lines as a list. If no match is
 found undef is returned (dies if die_on_undef is set).
 
-=head2 get_size/get_meta/get_hash 
+=head2 get_meta
 
-not supported, yet
+Will return scalar if the query has one result or list if the query has
+multiple rows. Returns undef if no rows are found.
+
+=head2 get_keys/get_hash
+
+not supported
 
 

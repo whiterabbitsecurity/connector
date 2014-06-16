@@ -133,19 +133,15 @@ sub set {
 sub get_meta {
 
     my $self = shift;
-    my $path = shift;
 
     # If we have no path, we tell the caller that we are a connector
-    if (!$path || (scalar @{$path}) == 0) {
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
         return { TYPE  => "connector" };
     }
 
-    my $value = $self->get( $path );
-    if (defined $value) {
-        return { TYPE  => "scalar", VALUE => $value };
-    }
+    return { TYPE  => "scalar" };
 
-    return undef;
 }
 
 

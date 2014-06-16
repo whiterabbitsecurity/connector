@@ -5,12 +5,12 @@ use strict;
 use warnings;
 use English;
 use Log::Log4perl qw(:easy);
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 # diag "LOAD MODULE\n";
 
 BEGIN {
-    use_ok( 'Connector::Builtin::Authentication::Password' ); 
+    use_ok( 'Connector::Builtin::Authentication::Password' );
 }
 
 require_ok( 'Connector::Builtin::Authentication::Password' );
@@ -34,6 +34,10 @@ ok(!defined $conn->get('foo:', {password => 'wrong'}), 'invalid char in user');
 
 eval { $conn->get('bar'); };
 ok($EVAL_ERROR ne '', 'no password');
+
+is($conn->get_meta()->{TYPE}, 'connector', 'Identifies as connector');
+is($conn->get_meta('foo')->{TYPE}, 'scalar', 'Identifies as scalar');
+
 
 
 

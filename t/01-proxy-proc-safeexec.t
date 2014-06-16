@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Try::Tiny;
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 
 #diag "LOAD MODULE\n";
 
@@ -115,5 +115,8 @@ SKIP: {
 4321bardef', 'Passing multiple lines via STDIN'
     );
 
+
+    is($conn->get_meta()->{TYPE}, 'connector', 'Identifies as connector');
+    is($conn->get_meta('foo')->{TYPE}, 'scalar', 'Identifies as scalar');
 }
 

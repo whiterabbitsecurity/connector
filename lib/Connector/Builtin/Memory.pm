@@ -130,6 +130,7 @@ sub get_meta {
     my $node = $self->_get_node( shift );
 
     if (!defined $node) {
+        # die_on_undef already handled by get_node
         return undef;
     }
 

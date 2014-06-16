@@ -5,14 +5,14 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 
 # diag "LOAD MODULE\n";
 
 Log::Log4perl->easy_init( { level   => 'DEBUG' } );
 
 BEGIN {
-    use_ok( 'Connector::Builtin::File::Path' ); 
+    use_ok( 'Connector::Builtin::File::Path' );
 }
 
 require_ok( 'Connector::Builtin::File::Path' );
@@ -60,3 +60,6 @@ eval {
 };
 is( $EVAL_ERROR, '', 'silent fail');
 is($conn->get('test'), "Hello - Alice\nHello - Bob\n");
+
+is($conn->get_meta()->{TYPE}, 'connector', 'Identifies as connector');
+is($conn->get_meta('test')->{TYPE}, 'scalar', 'Identifies as scalar');

@@ -266,6 +266,7 @@ sub get { shift; die "No get() method defined";  };
 sub get_list { shift; die "No get_list() method defined";  };
 sub get_hash { shift; die "No get_hash() method defined";  };
 sub get_meta { shift; die "No get_hash() method defined";  };
+sub get_reference { shift; die "No get_hash() method defined";  };
 sub set { shift;  die "No set() method defined";  };
 
 no Moose;
@@ -319,7 +320,7 @@ Usually this class should not be instantiated directly.
 =head2 die_on_undef
 
 Set to true if you want the connector to die when a query reaches a non-exisiting
-node. This will affect only calls to get/get_list/get_hash and will not affect
+node. This will affect calls to get/get_list/get_hash and will not affect
 values that are explicitly set to undef (if supported by the connector!).
 
 =head 1 Accessor Methods
@@ -382,6 +383,13 @@ values of all keys (including undef elements if they are explicitly given).
 
 If the node does not exist, an empty list is returned.
 
+=head2 get_reference
+
+Rarely used, returns the value of a reference node. Currently used by
+Connector::Multi in combination with Connector::Proxy::Config::Versioned
+to create internal links and cascaded connectors. See Connector::Multi
+for details.
+
 =head2 set
 
 The set method is a "all in one" implementation, that is used for either type
@@ -400,14 +408,15 @@ operation and can be undef if not needed.
 This method returns some structural information about the current node as
 hash ref. At minimum it must return the type of node at the current path.
 
-Valid values are I<scalar, list, hash, reference>. Reference is a scalar
-reference which is used e.g. in Connector::Multi. The others correspond
-to the accessor methods given above.
-Valid values for data structures are I<scalar, list, hash>.
-which correspond to the accessor methods given above.
+Valid values are I<scalar, list, hash, reference>. The types match the
+accessor methods given above (use C<get> for I<scalar>).
 
     my $meta = $connector->get_meta( 'smartcard.owners' );
     my $type = $meta->{TYPE};
+
+When you call a proxy connector without sufficient arguments to perform the
+query, you will receive a value of I<connector> for type. Running a get_*
+method against such a node will cause the connector to die!
 
 =head1 IMPLEMENTATION GUIDELINES
 
