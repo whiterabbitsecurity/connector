@@ -139,6 +139,25 @@ sub get_list {
 
 }
 
+sub get_size {
+
+    my $self = shift;
+    my @path = $self->_build_path( shift );
+
+    my $query = sprintf "SELECT COUNT(*) as count FROM %s WHERE %s",
+        $self->table(), $self->condition();
+
+    $self->log()->debug('Query is ' . $query);
+
+    my $sth = $self->_dbi()->prepare($query);
+    $sth->execute( @path );
+
+    my $rows = $sth->fetchall_arrayref();
+
+    return $rows->[0]->{count};
+
+}
+
 sub get_meta {
 
     my $self = shift;

@@ -28,7 +28,7 @@ my $conn = Connector::Builtin::File::Path->new(
 ok($conn->set('test.txt', 'Hello'),'write file');
 is($conn->get('test.txt'), 'Hello');
 
-$conn->file('[% ARGS %].txt');
+$conn->file('[% ARGS.0 %].txt');
 # diag "Use dynamic filename";
 ok($conn->set('test', 'Hello Alice'),'write file');
 ok(-f 't/config/test.txt', 'file exists');

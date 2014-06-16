@@ -33,6 +33,11 @@ sub _get_node {
 
     my $ptr = $self->_config();
 
+    # Top Level Node requested
+    if (!@path) {
+        return $ptr;
+    }
+
     while ( scalar @path > 1 ) {
         my $entry = shift @path;
         if ( exists $ptr->{$entry} ) {

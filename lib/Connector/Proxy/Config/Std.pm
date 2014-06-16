@@ -41,9 +41,7 @@ sub _get_node {
 
     my $self = shift;
     my @path = $self->_build_path_with_prefix( shift );
-
     my $fullpath = $self->_build_section_name_from_path( @path);
-
     return $self->_config()->{$fullpath};
 }
 
@@ -129,7 +127,12 @@ sub get_meta {
     # We dont have a real tree, so we look if there is a config entry
     # that has the full path as key
 
-    my $section = $self->_build_section_name_from_path( @path);
+    my $section = $self->_build_section_name_from_path( @path );
+
+    # As top node iteration is not supported we report a connector
+    if (!$section) {
+        return { 'TYPE' => 'connector'};
+    }
 
     # This is either a hash or undef
     my $node = $self->_config()->{$section};
