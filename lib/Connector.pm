@@ -233,6 +233,34 @@ sub _node_not_exists {
     return undef;
 }
 
+# Subclasses can implement these to save resources
+sub get_size {
+
+    my $self = shift;
+    my @node = $self->get_list( shift );
+
+    if (!@node) {
+        return 0;
+    }
+    return scalar @node;
+}
+
+sub get_keys {
+
+    my $self = shift;
+    my $node = $self->get_hash( shift );
+
+    if (!defined $node) {
+        return @{[]};
+    }
+
+    if (ref $node ne "HASH") {
+       die "requested path looks not like a hash";
+    }
+
+    return keys (%{$node});
+}
+
 # subclasses must implement get and/or set in order to do something useful
 sub get { shift; die "No get() method defined";  };
 sub get_list { shift; die "No get_list() method defined";  };
