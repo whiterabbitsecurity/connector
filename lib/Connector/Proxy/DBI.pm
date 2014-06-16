@@ -51,38 +51,38 @@ has _dbi => (
 
 
 sub _dbi_handle {
-    
+
     my $self = shift;
 
     my $dsn = $self->LOCATION();
-    
-    my $dbh = DBI->connect($dsn, $self->dbuser(), $self->password(), 
+
+    my $dbh = DBI->connect($dsn, $self->dbuser(), $self->password(),
         { RaiseError => 1, LongReadLen => 1024 });
 
     if (!$dbh) {
         $self->log()->error('DBI connect failed. DSN: '.$dsn. ' - Error: ' . $! );
         die "DBI connect failed: $!"
-    }    
-    return $dbh;    
+    }
+    return $dbh;
 
 }
 
-sub get { 
+sub get {
 
-    my $self = shift;    
+    my $self = shift;
     my @path = $self->_build_path( shift );
-    
-    
-    my $query = sprintf "SELECT %s FROM %s WHERE %s", 
+
+
+    my $query = sprintf "SELECT %s FROM %s WHERE %s",
         $self->column(), $self->table(), $self->condition();
-    
+
     $self->log()->debug('Query is ' . $query);
-        
+
     my $sth = $self->_dbi()->prepare($query);
     $sth->execute( @path );
 
     my $rows = $sth->fetchall_arrayref();
-    
+
     # hmpf
     unless (ref $rows eq 'ARRAY') {
        $self->log()->error('DBI did not return an arrayref');
@@ -90,53 +90,53 @@ sub get {
     }
 
     $self->log()->trace('result is ' . Dumper $rows );
-       
+
     if (scalar @{$rows} == 0) {
         return $self->_node_not_exists( @path );
     } elsif (scalar @{$rows} > 1) {
         $self->log()->error('Ambiguous (multi-valued) result');
         return $self->_node_not_exists( @path );
     }
-    
+
     $self->log()->debug('Valid return: ' . $rows->[0]->[0]);
     return $rows->[0]->[0];
-    
+
 }
 
 sub get_list {
 
     my $self = shift;
     my @path = $self->_build_path( shift );
-    
-    my $query = sprintf "SELECT %s FROM %s WHERE %s", 
+
+    my $query = sprintf "SELECT %s FROM %s WHERE %s",
         $self->column(), $self->table(), $self->condition();
-    
+
     $self->log()->debug('Query is ' . $query);
-        
+
     my $sth = $self->_dbi()->prepare($query);
     $sth->execute( @path );
 
     my $rows = $sth->fetchall_arrayref();
-    
+
     # hmpf
     unless (ref $rows eq 'ARRAY') {
        $self->log()->error('DBI did not return an arrayref');
        die "DBI did not return an arrayref.";
     }
-       
+
     if (scalar @{$rows} == 0) {
         return $self->_node_not_exists( @path );
     }
     my @result;
-    foreach my $row (@{$rows}) {        
-       push @result, $row->[0];  
+    foreach my $row (@{$rows}) {
+       push @result, $row->[0];
     }
-       
+
     $self->log()->trace('result ' . Dumper \@result);
-       
+
     $self->log()->debug('Valid return, '. scalar @result .' lines');
     return @result;
-    
+
 }
 
 sub get_meta {
@@ -169,15 +169,15 @@ Use DBI to make a query to a database, supports calls to a single column only.
 
 =head1 Usage
 
-=head2 Configuration 
-    
+=head2 Configuration
+
     my $con = Connector::Proxy::DBI->new({
         LOCATION => 'DBI:mysql:database=openxpki;host=localhost',
         dbuser => 'queryuser',
-        password => 'verysecret',    
-        table => 'mytable',    
+        password => 'verysecret',
+        table => 'mytable',
         column => 1,
-        condition => 'id = ?',         
+        condition => 'id = ?',
     });
 
 =head2 get
