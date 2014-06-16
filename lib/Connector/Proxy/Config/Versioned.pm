@@ -128,6 +128,24 @@ sub get_hash {
     return $data;
 };
 
+
+sub get_reference {
+    my $self = shift;
+    my $path = $self->_build_delimited_cv_path( shift );
+
+    # We need a change to C:V backend to check if this is a node or not
+    my $val = $self->_config()->get( $path, $self->version() );
+
+    $self->_node_not_exists( $path ) unless (defined $val);
+
+    if (ref $val ne "SCALAR") {
+        die "requested path looks not like a reference";
+    }
+
+    return $$val;
+};
+
+
 # This can be a very expensive method and includes some guessing
 sub get_meta {
 

@@ -5,10 +5,10 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 20;
+use Test::More tests => 22;
 my $gittestdir = qw( t/config/01-proxy-config-versioned.git );
 
-my $cv_ver2 = 'bd88045b48d3b4daf4c6c621f4a7265a072c299c';
+my $cv_ver2 = '23a1c83c1b43333c146e58fbde269dc7dd87ce8e';
 my $cv_ver1 = '6eebdec25d3cbf23d725c4aa48d473943e4a85f3';
 
 # diag "LOAD MODULE\n";
@@ -86,7 +86,11 @@ my @keys = $conn->get_keys('group1.ldap');
 is( ref \@keys, 'ARRAY', 'Check if get_keys is array ');
 is( ref $conn->get_hash('group1.ldap'), 'HASH', 'Check if get_hash is hash');
 is( $conn->get_hash('group1.ldap')->{password}, 'secret', 'Check element');
- 
+
+# Test get reference
+is( $conn->get_meta('ref.test.link')->{TYPE}, 'reference', 'Check reference');
+is( $conn->get_reference('ref.test.link'), 'target', 'Check reference value');
+
 # diag "Test version pointer\n";
 is( $conn->get( 'list.test.2'), 'third', 'value from current head');
 ok ( $conn->version($cv_ver1), 'Set default version');
