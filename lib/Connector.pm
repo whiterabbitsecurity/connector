@@ -261,6 +261,40 @@ sub get_keys {
     return keys (%{$node});
 }
 
+# Generic, should be implemented in child classes to save resources
+sub exists {
+
+    my $self = shift;
+    my @args = @_;
+    my @path = $self->_build_path_with_prefix( $args[0] );
+    my $meta;
+    my $result;
+
+    eval {
+
+        $meta = $self->get_meta( @args );
+
+        if (!$meta || !$meta->{TYPE}) {
+            $result = undef;
+        } elsif ($meta->{TYPE} eq 'scalar') {
+            $result = defined $self->get( @args );
+        } elsif ($meta->{TYPE} eq 'list') {
+            my @tmp = $self->get_list( @args );
+            $result = (@tmp && scalar @tmp > 0);
+        } elsif ($meta->{TYPE} eq 'hash') {
+            $result = defined $self->get_hash( @args );
+        } elsif ($meta->{TYPE} eq 'connector') {
+            $result = 1;
+        } elsif ($meta->{TYPE} eq 'reference') {
+            $result = 1;
+        } else {
+            $self->log()->warn( ' Unexpected type '.$meta->{TYPE}.' for exist on path ' . join ".", @path );
+        }
+    };
+
+    return $result;
+}
+
 # subclasses must implement get and/or set in order to do something useful
 sub get { shift; die "No get() method defined";  };
 sub get_list { shift; die "No get_list() method defined";  };
@@ -325,8 +359,10 @@ values that are explicitly set to undef (if supported by the connector!).
 
 =head 1 Accessor Methods
 
-Each accessor method is valid only special types of nodes. If you call them
-on a wrong type of node, the connector dies.
+Each accessor method is valid only on special types of nodes. If you call them
+on a wrong type of node, the connector may retunr unexpected result or simply die.
+
+=head2 exists
 
 =head2 get
 

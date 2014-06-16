@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 34;
+use Test::More tests => 38;
 use Path::Class;
 use DateTime;
 
@@ -133,3 +133,8 @@ is( $conn->get_hash('cascaded.reference')->{bob}, 'token_1', 'reference over con
 my @owners = $conn->get_keys('cascaded.connector.hook.owners');
 ok( grep("joe", @owners), 'Hash contains joe' );
 is( scalar @owners, 2, 'Hash has two items' );
+
+ok ($conn->exists('smartcards.puk'), 'Exists reference');
+ok ($conn->exists('smartcards.owners.joe'), 'connector node exists');
+ok ($conn->exists('smartcards.owners.joe.tokenid'), 'connector leaf exists');
+ok (!$conn->exists('smartcards.owners.jeff'), 'connector node not exists');
