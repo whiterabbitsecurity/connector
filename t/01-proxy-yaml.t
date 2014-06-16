@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 23;
+use Test::More tests => 28;
 
 # diag "LOAD MODULE\n";
 
@@ -54,6 +54,7 @@ is($conn->get( [ ('test','entry'),'bar' ] ), '5678');
 is($conn->get('test1.entry.bar'), undef, 'handle completely wrong entry gracefully');
 
 # diag "Test get_meta functionality\n";
+is($conn->get_meta('')->{TYPE}, 'hash', 'Root');
 is($conn->get_meta('list.test')->{TYPE}, 'list', 'Array');
 is($conn->get_meta('test.entry')->{TYPE}, 'hash', 'Hash');
 is($conn->get_meta('test.entry.foo')->{TYPE}, 'scalar', 'Scalar');
@@ -73,7 +74,11 @@ is( ref \@keys, 'ARRAY', 'keys');
 is( ref $conn->get_hash('test.entry'), 'HASH', 'hash');
 is( $conn->get_hash('test.entry')->{bar}, '5678', 'element');
 
+is_deeply( [ $conn->get_keys('') ], [ 'test', 'list']  , 'top node');
 
+ok ($conn->exists(''), 'Connector exists');
+ok ($conn->exists('test'), 'Node Exists');
+ok ($conn->exists('test.entry'), 'Leaf Exists');
 
 
 

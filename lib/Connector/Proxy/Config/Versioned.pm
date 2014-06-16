@@ -185,6 +185,18 @@ sub get_meta {
     return $meta;
 }
 
+
+sub exists {
+
+    my $self = shift;
+    my $node;
+    eval {
+        $node = $self->_config()->get( shift, $self->version() );
+    };
+    return defined $node;
+
+}
+
 # return the path as string as used in C::V using the delimiter of C::V!
 sub _build_delimited_cv_path {
 

@@ -163,6 +163,34 @@ sub get_meta {
     return $meta;
 }
 
+sub exists {
+
+    my $self = shift;
+
+    my @path = $self->_build_path_with_prefix( shift );
+
+    # No path always exists
+    if (!@path) {
+        return 1;
+    }
+
+    # Test if it is a section
+    my $section = $self->_build_section_name_from_path( @path );
+    if ($self->_config()->{$section}) {
+        return 1;
+    }
+
+    # Test if it is a node
+    my $key = pop @path;
+    $section = $self->_build_section_name_from_path( @path );
+    if (defined $self->_config()->{$section}->{$key}) {
+        return 1;
+    }
+
+    return 0;
+
+}
+
 # might be refined to use a section delimiter different from connector
 sub _build_section_name_from_path {
 

@@ -39,6 +39,14 @@ sub get_meta {
     return { TYPE  => "scalar" };
 }
 
+sub exists {
+
+    my $self = shift;
+
+    my $filename = $self->{LOCATION};
+
+    return -r $filename;
+}
 no Moose;
 __PACKAGE__->meta->make_immutable;
 

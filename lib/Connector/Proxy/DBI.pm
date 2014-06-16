@@ -149,7 +149,24 @@ sub get_meta {
         return { TYPE  => "connector" };
     }
 
+    # can be used as scalar also but list will be fine in any case
     return { TYPE => 'list' };
+}
+
+
+# Will not catch get with an ambigous result :(
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return 1;
+    }
+
+    return $self->get_size( \@path ) > 0;
+
 }
 
 no Moose;

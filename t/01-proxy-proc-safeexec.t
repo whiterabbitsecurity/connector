@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Try::Tiny;
 
-use Test::More tests => 19;
+use Test::More tests => 21;
 
 #diag "LOAD MODULE\n";
 
@@ -118,5 +118,9 @@ SKIP: {
 
     is($conn->get_meta()->{TYPE}, 'connector', 'Identifies as connector');
     is($conn->get_meta('foo')->{TYPE}, 'scalar', 'Identifies as scalar');
+
+    ok ($conn->exists(''), 'Connector exists');
+    ok ($conn->exists('foo'), 'Node Exists');
+
 }
 

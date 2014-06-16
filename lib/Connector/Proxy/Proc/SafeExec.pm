@@ -180,6 +180,22 @@ sub get_meta {
     return {TYPE  => "scalar" };
 }
 
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return 1;
+    }
+    my $val;
+    eval {
+        $val = $self->get( \@path );
+    };
+    return defined $val;
+
+}
 
 no Moose;
 __PACKAGE__->meta->make_immutable;

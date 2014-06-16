@@ -117,6 +117,12 @@ sub get_meta {
     return $self->_route_call( @_ );     
 }
 
+sub exists {
+    my $self = shift;
+    unshift @_, 'exists';
+    return $self->_route_call( @_ );
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 

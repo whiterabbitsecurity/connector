@@ -144,6 +144,22 @@ sub get_meta {
 
 }
 
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return 1;
+    }
+    my $val;
+    eval {
+        $val = $self->get( \@path );
+    };
+    return defined $val;
+
+}
 
 1;
 __END__

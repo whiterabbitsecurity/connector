@@ -151,6 +151,17 @@ sub get_meta {
     return $meta;
 }
 
+sub exists {
+
+    my $self = shift;
+
+    my $value = 0;
+    eval {
+        $value = defined $self->_get_node( shift );
+    };
+    return $value;
+
+}
 
 sub set {
 

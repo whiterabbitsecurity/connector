@@ -114,6 +114,23 @@ sub get_meta {
     return {TYPE  => "hash" };
 }
 
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path( @_ );
+    if (scalar @path == 0) {
+        return 1;
+    }
+    my $val;
+    eval {
+        $val = $self->get_hash( @_ );
+    };
+    return defined $val;
+
+}
+
 sub set {
 
     my $self = shift;

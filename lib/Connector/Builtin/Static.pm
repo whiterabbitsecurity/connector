@@ -24,6 +24,13 @@ sub get_meta {
     return { TYPE  => "scalar", VALUE => $self->{LOCATION} };
 }
 
+sub exists {
+
+    my $self = shift;
+    return 1;
+
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 

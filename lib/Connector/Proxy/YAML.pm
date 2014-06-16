@@ -173,6 +173,17 @@ sub get_meta {
     return $meta;
 }
 
+
+sub exists {
+
+    my $self = shift;
+    my $node;
+    eval {
+        $node = $self->_get_node( shift );
+    };
+    return defined $node;
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 

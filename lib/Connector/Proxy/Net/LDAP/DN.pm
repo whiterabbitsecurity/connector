@@ -76,9 +76,28 @@ sub get_meta {
     if (scalar @path == 0) {
         return { TYPE  => "connector" };
     }
-    
+
     return { TYPE  => "list" };
 }
+
+
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return 1;
+    }
+    my $val;
+    eval {
+        $val = $self->get_size( \@path ) > 0;
+    };
+    return (defined $val && $val > 0);
+
+}
+
 
 sub set {
 

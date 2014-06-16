@@ -139,6 +139,32 @@ sub get_meta {
     return {TYPE  => "scalar" };
 }
 
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return 1;
+    }
+
+    my $user = shift @path;
+
+    my $filename = $self->{LOCATION};
+    if (! -r $filename || ! open FILE, "$filename") {
+        $self->log()->error('Can\'t open/read from file ' . $filename);
+        return 0;
+    }
+
+    while (<FILE>) {
+        if (/^$user:/) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 

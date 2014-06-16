@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 22;
+use Test::More tests => 27;
 my $gittestdir = qw( t/config/01-proxy-config-versioned.git );
 
 my $cv_ver2 = '23a1c83c1b43333c146e58fbde269dc7dd87ce8e';
@@ -96,5 +96,11 @@ is( $conn->get( 'list.test.2'), 'third', 'value from current head');
 ok ( $conn->version($cv_ver1), 'Set default version');
 is( $conn->version(), $cv_ver1, 'check default version (sha1 hash)' );
 is( $conn->get( 'list.test.2'), 'last', 'value from first commit');
+
+is( $conn->get_meta('')->{TYPE}, 'hash', 'Check top node meta');
+ok ($conn->exists(''), 'Connector exists');
+ok ($conn->exists('list.test'), 'Node Exists');
+ok ($conn->exists('list.test.2'), 'Leaf Exists');
+ok (!$conn->exists('list.baz'), 'Not exists');
 
 

@@ -75,6 +75,23 @@ sub get_meta {
     return {TYPE  => "scalar" };
 }
 
+
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path_with_prefix( shift );
+    if (scalar @path == 0) {
+        return 1;
+    }
+
+    my $filename = $self->_sanitize_path( \@path );
+
+    return -r $filename;
+}
+
+
 # return the content of the file
 sub set {
 
