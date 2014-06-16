@@ -237,7 +237,7 @@ sub _getbyDN {
 
     # If autocreation is not requested, return undef
     if (!$params->{create}) {
-        return undef;
+        return;
     }
 
     # No match, so split up the DN and walk upwards
@@ -334,7 +334,7 @@ sub _triggerAutoCreate {
     my $create_info = $self->conn()->get_hash('create');
     if (!$create_info) {
         $self->log()->warn('Auto-Create not configured');
-        return undef;
+        return;
     }
 
     my $value;

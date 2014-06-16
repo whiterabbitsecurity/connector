@@ -146,7 +146,7 @@ around BUILDARGS => sub {
 
 
 # subclasses must implement this to initialize _config
-sub _build_config { return undef };
+sub _build_config { return; };
 
 sub _build_logger {
 
@@ -230,7 +230,7 @@ sub _node_not_exists {
         confess("Node does not exist at " . $path );
     }
 
-    return undef;
+    return;
 }
 
 # Subclasses can implement these to save resources

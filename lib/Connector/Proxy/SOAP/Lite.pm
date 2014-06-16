@@ -177,7 +177,7 @@ sub get {
     my $self = shift;
 
     my $result = $self->_soap_call(@_);
-    return undef if (! defined $result);
+    return if (! defined $result);
 
     if (ref $result ne '') {
 	die "SOAP call result is not a scalar";
@@ -197,7 +197,7 @@ sub get_list {
 
     my $result = $self->_soap_call(@_);
 
-    return undef if (! defined $result);
+    return if (! defined $result);
 
     if (ref $result ne 'ARRAY' ) {
         die "SOAP call result is not a list";
@@ -218,7 +218,7 @@ sub get_hash {
 
     my $result = $self->_soap_call(@_);
 
-    return undef if (! defined $result);
+    return if (! defined $result);
 
     if (ref $result ne 'HASH' ) {
         die "SOAP call result is not a hash";

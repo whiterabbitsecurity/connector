@@ -126,8 +126,7 @@ sub set {
     }
 
     if ($mesg->count() == 0) {
-        $self->_node_not_exists( \@args );
-        return undef;
+        return $self->_node_not_exists( \@args );
     }
 
     my $match_dn = lc($params->{pkey});

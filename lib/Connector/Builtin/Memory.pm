@@ -61,7 +61,7 @@ sub get {
     my $self = shift;
     my $value = $self->_get_node( shift );
 
-    return undef unless (defined $value);
+    return unless (defined $value);
 
     if (ref $value ne '') {
         die "requested value is not a scalar " . Dumper $value;
@@ -76,7 +76,7 @@ sub get_size {
     my $self = shift;
     my $node = $self->_get_node( shift );
 
-    return undef unless(defined $node);
+    return unless(defined $node);
 
     if ( ref $node ne 'ARRAY' ) {
         die "requested value is not a list"
@@ -91,7 +91,7 @@ sub get_list {
     my $self = shift;
     my $node = $self->_get_node( shift );
 
-    return undef unless(defined $node);
+    return unless(defined $node);
 
     if ( ref $node ne 'ARRAY' ) {
         die "requested value is not a list"
@@ -105,7 +105,7 @@ sub get_keys {
     my $self = shift;
     my $node = $self->_get_node( shift );
 
-    return undef unless(defined $node);
+    return unless(defined $node);
 
     if ( ref $node ne 'HASH' ) {
         die "requested value is not a hash"
@@ -119,7 +119,7 @@ sub get_hash {
     my $self = shift;
     my $node = $self->_get_node( shift );
 
-    return undef unless(defined $node);
+    return unless(defined $node);
 
     if ( ref $node ne 'HASH' ) {
         die "requested value is not a hash"
@@ -136,7 +136,7 @@ sub get_meta {
 
     if (!defined $node) {
         # die_on_undef already handled by get_node
-        return undef;
+        return;
     }
 
     my $meta = {};

@@ -98,7 +98,7 @@ sub get_keys {
     my $self = shift;
 
     my $hash = $self->get_hash( @_ );
-    return undef unless($hash);
+    return unless($hash);
     return keys %{ $hash };
 }
 

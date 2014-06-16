@@ -72,7 +72,7 @@ sub get {
     my $self = shift;
     my $value = $self->_get_node( shift );
 
-    return undef unless (defined $value);
+    return unless (defined $value);
 
     if (ref $value ne '') {
         die "requested value is not a scalar"
@@ -153,7 +153,7 @@ sub get_meta {
     my $node = $self->_get_node( shift );
 
     if (!defined $node) {
-        return undef;
+        return;
     }
 
     my $meta = {};
