@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 # diag "LOAD MODULE\n";
 
@@ -45,6 +45,7 @@ is_deeply( \@keys, [ 'bar','foo','use' ] );
 
 ok ($conn->exists(''), 'Base exists');
 ok ($conn->exists('foo'), 'Node Exists');
+ok ($conn->exists( [ 'foo' ] ), 'Node Exists Array');
 ok (!$conn->exists('baz'), 'Not exists');
 
 

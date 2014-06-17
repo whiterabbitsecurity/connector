@@ -189,9 +189,10 @@ sub get_meta {
 sub exists {
 
     my $self = shift;
+    my $path = $self->_build_delimited_cv_path( shift );
     my $node;
     eval {
-        $node = $self->_config()->get( shift, $self->version() );
+        $node = $self->_config()->get( $path, $self->version() );
     };
     return defined $node;
 

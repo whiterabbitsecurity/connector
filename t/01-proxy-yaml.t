@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 28;
+use Test::More tests => 30;
 
 # diag "LOAD MODULE\n";
 
@@ -79,6 +79,6 @@ is_deeply( [ $conn->get_keys('') ], [ 'test', 'list']  , 'top node');
 ok ($conn->exists(''), 'Connector exists');
 ok ($conn->exists('test'), 'Node Exists');
 ok ($conn->exists('test.entry'), 'Leaf Exists');
-
-
+ok ($conn->exists( [ 'test', 'entry' ] ), 'Node Exists Array');
+ok (!$conn->exists('test.entry2'), 'Not Exists');
 

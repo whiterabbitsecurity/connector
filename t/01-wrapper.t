@@ -11,7 +11,7 @@ use Test::More tests => 19;
 
 BEGIN {
     use_ok( 'Connector::Proxy::Config::Std' );
-    use_ok( 'Connector::Multi' ); 
+    use_ok( 'Connector::Multi' );
 }
 
 require_ok( 'Connector::Proxy::Config::Std' );
@@ -36,11 +36,11 @@ my $conn = Connector::Multi->new( {
 =cut
 # diag "Test Connector::Mutli is working\n";
 # Test if multi is good
-is($conn->get('test.entry.foo'), '1234');   
+is($conn->get('test.entry.foo'), '1234');
 is($conn->get('test.entry.bar'), '5678');
 
 =cut
- 
+
 my $wrapper = $conn->get_wrapper( ['test','entry' ]);
 is($wrapper->get('foo'), '1234','Test Wrapper with arrayref path');
 is($wrapper->get('bar'), '5678');

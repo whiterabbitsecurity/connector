@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 27;
+use Test::More tests => 28;
 my $gittestdir = qw( t/config/01-proxy-config-versioned.git );
 
 my $cv_ver2 = '23a1c83c1b43333c146e58fbde269dc7dd87ce8e';
@@ -101,6 +101,7 @@ is( $conn->get_meta('')->{TYPE}, 'hash', 'Check top node meta');
 ok ($conn->exists(''), 'Connector exists');
 ok ($conn->exists('list.test'), 'Node Exists');
 ok ($conn->exists('list.test.2'), 'Leaf Exists');
+ok ($conn->exists( [ 'list','test', 2 ] ), 'Leaf Exists Array');
 ok (!$conn->exists('list.baz'), 'Not exists');
 
 

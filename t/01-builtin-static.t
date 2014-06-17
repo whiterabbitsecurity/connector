@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 # diag "LOAD MODULE\n";
 
@@ -30,4 +30,4 @@ is( $conn->get_meta('bar')->{TYPE}, 'scalar' );
 is( $conn->get_meta('bar')->{VALUE}, '42' );
 
 ok ($conn->exists(''), 'Always exists');
-
+ok ($conn->exists( [] ), 'Exists Array');

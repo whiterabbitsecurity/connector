@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Try::Tiny;
 
-use Test::More tests => 21;
+use Test::More tests => 22;
 
 #diag "LOAD MODULE\n";
 
@@ -121,6 +121,7 @@ SKIP: {
 
     ok ($conn->exists(''), 'Connector exists');
     ok ($conn->exists('foo'), 'Node Exists');
+    ok ($conn->exists( [ 'foo' ] ), 'Node Exists Array');
 
 }
 

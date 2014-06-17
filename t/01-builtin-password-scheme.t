@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 use Log::Log4perl qw(:easy);
-use Test::More tests => 17;
+use Test::More tests => 18;
 
 # diag "LOAD MODULE\n";
 
@@ -42,4 +42,5 @@ is($conn->get_meta('foo')->{TYPE}, 'scalar', 'Identifies as scalar');
 
 ok ($conn->exists(''), 'Connector exists');
 ok ($conn->exists('foo'), 'Node Exists');
+ok ($conn->exists( [ 'foo' ] ), 'Node Exists Array');
 ok (!$conn->exists('baz'), 'Not exists');

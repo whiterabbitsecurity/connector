@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 22;
+use Test::More tests => 23;
 
 # diag "LOAD MODULE\n";
 
@@ -59,6 +59,7 @@ is( $conn->get_hash('test.entry')->{bar}, '5678', 'element');
 #a.very.long.path
 ok ($conn->exists('test.entry'), 'Section Exists');
 ok ($conn->exists('test.entry.foo'), 'Node Exists');
+ok ($conn->exists( [ 'test', 'entry', 'foo' ] ), 'Node Exists Array');
 ok (!$conn->exists('test.noentry'), 'Not exists');
 
 

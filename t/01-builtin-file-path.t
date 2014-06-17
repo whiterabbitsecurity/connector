@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 20;
+use Test::More tests => 21;
 
 # diag "LOAD MODULE\n";
 
@@ -66,4 +66,5 @@ is($conn->get_meta('test')->{TYPE}, 'scalar', 'Identifies as scalar');
 
 ok ($conn->exists(''), 'Connector exists');
 ok ($conn->exists('test'), 'Node Exists');
+ok ($conn->exists( [ 'test' ] ), 'Leaf Exists Array');
 ok (!$conn->exists('test2'), 'Not exists');
