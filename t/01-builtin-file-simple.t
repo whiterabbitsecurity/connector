@@ -5,12 +5,12 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 # diag "LOAD MODULE\n";
 
 BEGIN {
-    use_ok( 'Connector::Builtin::File::Simple' ); 
+    use_ok( 'Connector::Builtin::File::Simple' );
 }
 
 require_ok( 'Connector::Builtin::File::Simple' );
@@ -27,4 +27,5 @@ is($conn->get(), 'test');
 is($conn->get('foo'), 'test');
 is($conn->get('bar'), 'test');
 
-
+ok ($conn->exists(''), 'Always exists');
+ok ($conn->exists( [ ] ), 'Leaf Exists Array');

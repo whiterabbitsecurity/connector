@@ -5,17 +5,17 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 29;
+use Test::More tests => 39;
 use Path::Class;
 use DateTime;
 
 my ($base, $conn);
 
 BEGIN {
-    use_ok( 'Config::Versioned' ); 
-    use_ok( 'Connector::Multi' ); 
-    use_ok( 'Connector::Proxy::YAML' ); 
-    use_ok( 'Connector::Proxy::Config::Versioned' ); 
+    use_ok( 'Config::Versioned' );
+    use_ok( 'Connector::Multi' );
+    use_ok( 'Connector::Proxy::YAML' );
+    use_ok( 'Connector::Proxy::Config::Versioned' );
 }
 
 require_ok( 'Config::Versioned' );
@@ -79,7 +79,7 @@ is($conn->get('smartcards.owners.joe.tokenid'), 'token_1',
     'multi with simple config (2)');
 is($conn->get('smartcards.tokens.token_1.nonexistent'), undef, 'multi with simple config (3)');
 
-# Reuse $base and $conn to ensure we don't accidentally test previous 
+# Reuse $base and $conn to ensure we don't accidentally test previous
 # connectors.
 $base = Connector::Proxy::Config::Versioned->new({
 	LOCATION  => $test_data[1]->{dbpath},
@@ -105,7 +105,7 @@ is($conn->get('smartcards.owners.joe.tokenid'), 'token_1',
     'multi with symlink simple config (2)');
 is($conn->get('smartcards.tokens.token_1.nonexistent'), undef, 'multi with symlink simple config (3)');
 
-# Do Tests using array ref notation 
+# Do Tests using array ref notation
 is($conn->get([ ('smartcards','tokens','token_1'),'status' ]), 'ACTIVATED',
     'multi with symlink config and array ref path (1)');
 is($conn->get([ 'smartcards','tokens','token_1','status' ]), 'ACTIVATED',
@@ -125,3 +125,17 @@ is( $conn->get_meta('meta.inner.list' )->{TYPE} , 'list', 'outer list');
 is( $conn->get_meta('meta.inner.list.0' )->{TYPE} , 'scalar', 'scalar leaf');
 is( $conn->get_meta('meta.inner.single' )->{TYPE} , 'list', 'one item list');
 is( $conn->get_meta('meta.inner.single.0' )->{TYPE} , 'scalar', 'scalar leaf');
+
+is( $conn->get_hash('leafref.hash')->{bob}, '007', 'hash with reference in leaf' );
+is( $conn->get('cascaded.reference.bob'), 'token_1', 'reference over connector' );
+is( $conn->get_hash('cascaded.reference')->{bob}, 'token_1', 'reference over connector with hash' );
+
+my @owners = $conn->get_keys('cascaded.connector.hook.owners');
+ok( grep("joe", @owners), 'Hash contains joe' );
+is( scalar @owners, 2, 'Hash has two items' );
+
+ok ($conn->exists('smartcards.puk'), 'Exists reference');
+ok ($conn->exists('smartcards.owners.joe'), 'connector node exists');
+ok ($conn->exists('smartcards.owners.joe.tokenid'), 'connector leaf exists');
+ok ($conn->exists( [ 'smartcards', 'owners', 'joe' ] ), 'node exists Array');
+ok (!$conn->exists('smartcards.owners.jeff'), 'connector node not exists');

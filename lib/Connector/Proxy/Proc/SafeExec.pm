@@ -53,7 +53,7 @@ sub _build_config {
     if (! -x $self->LOCATION()) {
 	die("Specified system command is not executable: " . $self->LOCATION());
     }
-    
+
     return 1;
 }
 
@@ -62,14 +62,14 @@ sub _build_config {
 sub get {
     my $self = shift;
 
-    my @args = $self->_build_path( shift );     
+    my @args = $self->_build_path( shift );
     my $template = Template->new(
 	{
 	});
 
     # compose a list of command arguments
-    my $template_vars = { 
-        ARGS => \@args, 
+    my $template_vars = {
+        ARGS => \@args,
     };
 
     # process configured system command arguments and replace templates
@@ -96,7 +96,7 @@ sub get {
 	    $template->process(\$line, $template_vars, \$value) || die "Error processing stdin template.";
 	    push @feed_to_stdin, $value;
 	}
-	
+
 	# we have data to pipe to stdin, create a filehandle
 	$filehandles{stdin} = 'new';
     }
@@ -110,7 +110,7 @@ sub get {
 	    }
 	}
     }
-    
+
     my $stdout = File::Temp->new();
     $filehandles{stdout} = \*$stdout;
 
@@ -144,7 +144,7 @@ sub get {
     } finally {
 	alarm 0;
     };
-    
+
     my $stderr_content = do {
 	open my $fh, '<', $stderr->filename;
 	local $INPUT_RECORD_SEPARATOR;
@@ -164,8 +164,37 @@ sub get {
     if ($self->chomp_output()) {
 	chomp $stdout_content;
     }
-    
+
     return $stdout_content;
+}
+
+sub get_meta {
+    my $self = shift;
+
+    # If we have no path, we tell the caller that we are a connector
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return { TYPE  => "connector" };
+    }
+
+    return {TYPE  => "scalar" };
+}
+
+sub exists {
+
+    my $self = shift;
+
+    # No path = connector root which always exists
+    my @path = $self->_build_path( shift );
+    if (scalar @path == 0) {
+        return 1;
+    }
+    my $val;
+    eval {
+        $val = $self->get( \@path );
+    };
+    return defined $val;
+
 }
 
 no Moose;
@@ -179,5 +208,4 @@ __END__
 Connector::Builtin::System::Exec
 
 =head1 Description
-
 

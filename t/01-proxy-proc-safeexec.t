@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Try::Tiny;
 
-use Test::More tests => 17;
+use Test::More tests => 22;
 
 #diag "LOAD MODULE\n";
 
@@ -114,6 +114,14 @@ SKIP: {
     is( $conn->get( [ 'foo', 'bar' ] ), '1234fooabc
 4321bardef', 'Passing multiple lines via STDIN'
     );
+
+
+    is($conn->get_meta()->{TYPE}, 'connector', 'Identifies as connector');
+    is($conn->get_meta('foo')->{TYPE}, 'scalar', 'Identifies as scalar');
+
+    ok ($conn->exists(''), 'Connector exists');
+    ok ($conn->exists('foo'), 'Node Exists');
+    ok ($conn->exists( [ 'foo' ] ), 'Node Exists Array');
 
 }
 

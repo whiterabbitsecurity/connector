@@ -175,9 +175,9 @@ sub _soap_call {
 
 sub get {
     my $self = shift;
-    
+
     my $result = $self->_soap_call(@_);
-    return undef if (! defined $result);
+    return if (! defined $result);
 
     if (ref $result ne '') {
 	die "SOAP call result is not a scalar";
@@ -187,23 +187,23 @@ sub get {
 
 sub get_size {
     my $self = shift;
-    
+
     my $result = $self->get_list(@_);
     return scalar @{$result};
 }
 
 sub get_list {
-    my $self = shift;    
+    my $self = shift;
 
     my $result = $self->_soap_call(@_);
-    
-    return undef if (! defined $result);
-    
+
+    return if (! defined $result);
+
     if (ref $result ne 'ARRAY' ) {
         die "SOAP call result is not a list";
     }
-    
-    return @{$result};    
+
+    return @{$result};
 }
 
 sub get_keys {
@@ -214,19 +214,33 @@ sub get_keys {
 }
 
 sub get_hash {
-    my $self = shift;    
+    my $self = shift;
 
     my $result = $self->_soap_call(@_);
-    
-    return undef if (! defined $result);
-    
+
+    return if (! defined $result);
+
     if (ref $result ne 'HASH' ) {
         die "SOAP call result is not a hash";
     }
-    
+
     return $result;
 }
 
+sub get_meta {
+    my $self = shift;
+    # FIXME
+    die "Sorry that is not supported, yet";
+}
+
+sub exists {
+
+    my $self = shift;
+
+    # FIXME
+    die "Sorry that is not supported, yet";
+
+}
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -238,4 +252,5 @@ __END__
 Connector::Proxy::SOAP::Lite
 
 =head 1 DESCRIPTION
+
 

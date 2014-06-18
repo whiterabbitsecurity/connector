@@ -5,12 +5,12 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 18;
+use Test::More tests => 23;
 
 # diag "LOAD MODULE\n";
 
 BEGIN {
-    use_ok( 'Connector::Proxy::Config::Std' ); 
+    use_ok( 'Connector::Proxy::Config::Std' );
 }
 
 require_ok( 'Connector::Proxy::Config::Std' );
@@ -37,6 +37,7 @@ is($conn->get('test.entry.foo'), '1234');
 is($conn->get('test.entry.bar'), '5678');
 
 # diag "Test get_meta functionality\n";
+is($conn->get_meta('')->{TYPE}, 'connector', 'Toplevel');
 is($conn->get_meta('list.test')->{TYPE}, 'list', 'Array');
 is($conn->get_meta('test.entry')->{TYPE}, 'hash', 'Hash');
 is($conn->get_meta('test.entry.foo')->{TYPE}, 'scalar', 'Scalar');
@@ -44,7 +45,7 @@ is($conn->get_meta('test.entry.nonexisting'), undef, 'undef');
 
 
 # diag "Test List functionality\n";
-my @data = $conn->get_list('list.test'); 
+my @data = $conn->get_list('list.test');
 
 is( $conn->get_size('list.test'), 4, 'size');
 is( ref \@data, 'ARRAY', 'ref');
@@ -55,8 +56,10 @@ my @keys = $conn->get_keys('test.entry');
 is( ref \@keys, 'ARRAY', 'keys');
 is( ref $conn->get_hash('test.entry'), 'HASH', 'hash');
 is( $conn->get_hash('test.entry')->{bar}, '5678', 'element');
-
-
- 
+#a.very.long.path
+ok ($conn->exists('test.entry'), 'Section Exists');
+ok ($conn->exists('test.entry.foo'), 'Node Exists');
+ok ($conn->exists( [ 'test', 'entry', 'foo' ] ), 'Node Exists Array');
+ok (!$conn->exists('test.noentry'), 'Not exists');
 
 

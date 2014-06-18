@@ -1,13 +1,17 @@
-# Connector::Builtin::Authentication::Password
+# Connector::Builtin::Authentication::PasswordScheme
 #
-# Check passwords against a unix style password file
+# Check passwords against a file with salted hashes and scheme prefix
 #
-package Connector::Builtin::Authentication::Password;
+package Connector::Builtin::Authentication::PasswordScheme;
 
 use strict;
 use warnings;
 use English;
 use Data::Dumper;
+
+use MIME::Base64;
+use Digest::SHA;
+use Digest::MD5;
 
 use Moose;
 extends 'Connector::Builtin';
@@ -63,8 +67,55 @@ sub get {
             chomp;
             my @t = split(/:/, $_, 3);
             $self->log()->trace('found line ' . Dumper @t);
-            #if ($password eq $t[1]) {
-            if (crypt($password, $t[1]) eq $t[1]) {
+
+            # This code is mainly a copy of OpenXPKI::Server::Authentication::Password
+            # but we do not support unsalted passwords
+            # digest specified in RFC 2307 userPassword notation?
+            my $encrypted;
+            my $scheme;
+            if ($t[1] =~ m{ \{ (\w+) \} (.+) }xms) {
+                $scheme = lc($1);
+                $encrypted = $2;
+            } else {
+                $self->log()->error('unparsable entry ' . $t[1]);
+                return 0;
+            }
+
+            my ($computed_secret, $salt);
+            eval {
+                if ($scheme eq 'ssha') {
+                    $salt = substr(decode_base64($encrypted), 20);
+                    my $ctx = Digest::SHA->new();
+                    $ctx->add($password);
+                    $ctx->add($salt);
+                    $computed_secret = encode_base64($ctx->digest() . $salt, '');
+                } elsif ($scheme eq 'smd5') {
+                    $salt = substr(decode_base64($encrypted), 16);
+                    my $ctx = Digest::MD5->new();
+                    $ctx->add($password);
+                    $ctx->add($salt);
+                    $computed_secret = encode_base64($ctx->digest() . $salt, '');
+                } elsif ($scheme eq 'crypt') {
+                    $computed_secret = crypt($password, $encrypted);
+                } else {
+                    $self->log()->error('unsupported scheme' . $scheme);
+                    return 0;
+                }
+            };
+
+            $self->log()->debug('eval failed ' . $EVAL_ERROR->message()) if ($EVAL_ERROR);
+
+            if (! defined $computed_secret) {
+                $self->log()->error('unable to compute secret using scheme ' . $scheme);
+                return 0;
+            }
+
+            ##! 2: "ident user ::= $account and digest ::= $computed_secret"
+            $computed_secret =~ s{ =+ \z }{}xms;
+            $encrypted       =~ s{ =+ \z }{}xms;
+
+            ## compare passphrases
+            if ($computed_secret eq $encrypted) {
                 $self->log()->info('Password accepted for ' . $user);
                 return 1;
             } else {
@@ -84,6 +135,7 @@ sub get_meta {
     if (scalar @path == 0) {
         return { TYPE  => "connector" };
     }
+
     return {TYPE  => "scalar" };
 }
 
@@ -121,12 +173,14 @@ __END__
 
 =head 1 Name
 
-Connector::Builtin::Authentication::Password
+Connector::Builtin::Authentication::PasswordScheme
 
 =head 1 Description
 
-Lightweight connector to check passwords against a unix style password file.
-Path to the password file is taken from LOCATION.
+Lightweight connector to check passwords against a password file holding
+username/password pairs where the password is encrypted using a salted hash.
+Password notation follows RFC2307 ({scheme}saltedpassword) but we support
+only salted schemes: smd5, ssha and crypt.
 
 =head2 Usage
 
