@@ -73,10 +73,12 @@ sub get_hash {
 
     # This assumes that all connectors that can handle references
     # use the symlink syntax introduced with Config::Versioned!
+    my @path;
     foreach my $key (keys %{$hash}) {
         # Connector in leaf - resolv it!
         if (ref $hash->{$key} eq 'SCALAR') {
-            $hash->{$key} = $self->get( [ @args, $key ] );
+            @path = $self->_build_path(  $args[0] ) unless(@path);
+            $hash->{$key} = $self->get( [ @path , $key ] );
         }
     }
     return $hash;
