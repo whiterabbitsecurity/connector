@@ -21,8 +21,8 @@ Log::Log4perl->easy_init( { level   => 'DEBUG' } );
 ###########################################################################
 my $conn = Connector::Proxy::YAML->new(
     {
-	LOCATION  => 't/config/config.yaml',
-	PREFIX    => 'test.entry',
+    LOCATION  => 't/config/config.yaml',
+    PREFIX    => 'test.entry',
     });
 
 is($conn->get('foo'), '1234');
@@ -74,7 +74,8 @@ is( ref \@keys, 'ARRAY', 'keys');
 is( ref $conn->get_hash('test.entry'), 'HASH', 'hash');
 is( $conn->get_hash('test.entry')->{bar}, '5678', 'element');
 
-is_deeply( [ $conn->get_keys('') ], [ 'test', 'list']  , 'top node');
+
+is_deeply( [ sort ($conn->get_keys('')) ], [ 'list', 'test' ]  , 'top node');
 
 ok ($conn->exists(''), 'Connector exists');
 ok ($conn->exists('test'), 'Node Exists');
