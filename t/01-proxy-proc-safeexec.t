@@ -24,7 +24,7 @@ BEGIN {
 #diag "Connector::Proxy::Proc::SafeExec\n";
 ###########################################################################
 SKIP: {
-    skip "Proc::SafeExec not installed", 17 if $req_err;
+    skip "Proc::SafeExec not installed", 22 if $req_err;
 
     require_ok('Connector::Proxy::Proc::SafeExec');
     my $conn = Connector::Proxy::Proc::SafeExec->new(
