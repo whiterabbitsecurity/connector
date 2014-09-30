@@ -299,7 +299,7 @@ sub exists {
 sub get { shift; die "No get() method defined";  };
 sub get_list { shift; die "No get_list() method defined";  };
 sub get_hash { shift; die "No get_hash() method defined";  };
-sub get_meta { shift; die "No get_hash() method defined";  };
+sub get_meta { shift; die "No get_meta() method defined";  };
 sub get_reference { shift; die "No get_hash() method defined";  };
 sub set { shift;  die "No set() method defined";  };
 

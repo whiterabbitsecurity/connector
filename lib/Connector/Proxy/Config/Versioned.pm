@@ -160,16 +160,19 @@ sub get_meta {
         TYPE => "hash"
     };
 
-    #print Dumper( @keys );
-
     # Do some guessing
     if (@keys == 1) {
         # a redirector reference
         if (ref $keys[0] eq "SCALAR") {
             $meta->{TYPE} = "reference";
             $meta->{VALUE} = ${$keys[0]};
+
+        # Node with empty value
+        } elsif ($keys[0] eq "") {
+            $meta->{TYPE} = "scalar";
+            $meta->{VALUE} = "";
         } else {
-        # probe if there is something "below"
+            # probe if there is something "below"
             my $val = $self->_config()->get(  $path . $self->DELIMITER() . $keys[0], $self->version() );
             if (!defined $val) {
                 $meta->{TYPE} = "scalar";
