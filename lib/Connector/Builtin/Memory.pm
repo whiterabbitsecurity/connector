@@ -31,6 +31,8 @@ sub _get_node {
     my $self = shift;
     my @path = $self->_build_path_with_prefix( shift );
 
+    $self->log()->trace('get node for path'. Dumper \@path);
+
     my $ptr = $self->_config();
 
     # Top Level Node requested
@@ -125,7 +127,7 @@ sub get_hash {
         die "requested value is not a hash"
     }
 
-    return $node;
+    return { %$node };
 }
 
 sub get_meta {
@@ -133,6 +135,8 @@ sub get_meta {
     my $self = shift;
 
     my $node = $self->_get_node( shift );
+
+    $self->log()->debug('get_node returned '. Dumper $node);
 
     if (!defined $node) {
         # die_on_undef already handled by get_node
