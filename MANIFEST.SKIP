@@ -6,6 +6,7 @@
 ^MANIFEST\.
 ^Makefile$
 ^blib/
+^pm_to_blib
 ^MakeMaker-\d
 
 # Temp files from t/
@@ -24,3 +25,7 @@ t/.*\.git/
 \.old$
 \.bak$
 ^Connector-
+^old/
+
+# OS-specific meta-data files
+.DS_Store
