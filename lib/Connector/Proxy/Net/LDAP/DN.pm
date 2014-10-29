@@ -29,13 +29,9 @@ sub get_list {
     my $self = shift;
     my @args = $self->_build_path( shift );
 
-    my $ldap = $self->ldap();
+    my $mesg = $self->_run_search( { ARGS => \@args } );
 
-    my $mesg = $ldap->search(
-        $self->_build_search_options( { ARGS => \@args } ),
-    );
-
-     if ($mesg->is_error()) {
+    if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
         return $self->_node_not_exists( \@args );
     }
@@ -60,11 +56,7 @@ sub get_size {
     my $self = shift;
     my @args = $self->_build_path( shift );
 
-    my $ldap = $self->ldap();
-
-    my $mesg = $ldap->search(
-        $self->_build_search_options( { ARGS => \@args } ),
-    );
+    my $mesg = $self->_run_search( { ARGS => \@args } );
     return $mesg->count();
 }
 
@@ -108,17 +100,12 @@ sub set {
 
     my @args = $self->_build_path( $args );
 
-
-    my $ldap = $self->ldap();
-
     if (!$params->{pkey}) {
         $self->log()->error('You must pass the pkey as parameter to delete an entry.');
         die 'You must pass the pkey as parameter to delete an entry.';
     }
 
-    my $mesg = $ldap->search(
-        $self->_build_search_options( { ARGS => \@args }, { noattrs => 1} ),
-    );
+    my $mesg = $self->_run_search( { ARGS => \@args }, { noattrs => 1} );
 
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
@@ -135,7 +122,7 @@ sub set {
             $entry->delete();
             #$entry->update( $ldap ); # Looks like delete is effective immediately
 
-            my $mesg = $entry->update( $ldap );
+            my $mesg = $entry->update( $self->ldap() );
             if ($mesg->is_error()) {
                 $self->log()->error("LDAP update failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() . ")");
                 return $self->_node_not_exists( \@args );

@@ -27,16 +27,12 @@ sub get {
     my $self = shift;
     my @args = $self->_build_path( shift );
 
-    my $ldap = $self->ldap();
-
     if (!$self->attrs || @{$self->attrs} != 1) {
         $self->log()->error("The attribute list must contain at least one entry");
         die "The attribute list must contain at least one entry"
     }
 
-    my $mesg = $ldap->search(
-        $self->_build_search_options( { ARGS => \@args } ),
-    );
+    my $mesg = $self->_run_search( { ARGS => \@args } );
 
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
@@ -77,12 +73,9 @@ sub set {
     }
 
     my $entry;
-    my $ldap = $self->ldap();
 
-     # Try to find the entry
-    my $mesg = $ldap->search(
-        $self->_build_search_options( { ARGS => \@args }, { noattrs => 1} ),
-    );
+    # Try to find the entry
+    my $mesg = $self->_run_search( { ARGS => \@args }, { noattrs => 1} );
 
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
@@ -120,7 +113,7 @@ sub set {
         $entry->delete( $attribute => undef );
     }
 
-    $mesg = $entry->update( $ldap );
+    $mesg = $entry->update( $self->ldap() );
     if ($mesg->is_error()) {
         $self->log()->error("LDAP update failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
         return $self->_node_not_exists( \@args );
