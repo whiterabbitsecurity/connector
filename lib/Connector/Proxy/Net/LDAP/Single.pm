@@ -47,19 +47,14 @@ sub get_hash {
     my $args = shift;
     my $params = shift;
 
-    my $ldap = $self->ldap();
-
     my @args = $self->_build_path( $args );
-
 
     # compose a list of command arguments
     my $template_vars = {
        ARGS => \@args,
     };
 
-    my $mesg = $ldap->search(
-        $self->_build_search_options($template_vars),
-    );
+    my $mesg = $self->_run_search($template_vars);
 
     if ($mesg->is_error()) {
         $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
@@ -140,7 +135,6 @@ sub set {
 
     my @args = $self->_build_path( $args );
 
-    my $ldap = $self->ldap();
     my $entry;
 
     $self->log()->debug('Set called on ' . \@args );
@@ -157,9 +151,7 @@ sub set {
 
         my $template_vars = { ARGS => \@args };
 
-        my $mesg = $ldap->search(
-            $self->_build_search_options($template_vars, { noattrs => 1}),
-        );
+        my $mesg = $self->_run_search($template_vars, { noattrs => 1});
 
         if ($mesg->is_error()) {
             $self->log()->error("LDAP search failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() .")" );
@@ -213,7 +205,7 @@ sub set {
         }
     }
 
-    my $mesg = $entry->update( $ldap );
+    my $mesg = $entry->update( $self->ldap() );
     if ($mesg->is_error()) {
         $self->log()->error("LDAP update failed error code " . $mesg->code() . " (error: " . $mesg->error_desc() . ")" );
         return $self->_node_not_exists( \@args );

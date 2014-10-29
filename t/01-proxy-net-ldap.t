@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Data::Dumper;
 
-use Log::Log4perl qw( :easy ); 
+use Log::Log4perl qw( :easy );
 BEGIN {
     use Test::More;
 
@@ -45,11 +45,11 @@ my $cv = Config::Versioned->new(
 Log::Log4perl->easy_init($ERROR);
 
 
-my $base = Connector::Proxy::Config::Versioned->new( {    
+my $base = Connector::Proxy::Config::Versioned->new( {
     LOCATION => 't/config/01-proxy-net-ldap-config.git',
 });
 my $conn = Connector::Multi->new( {
-    BASECONNECTOR => $base,    
+    BASECONNECTOR => $base,
 });
 
 SKIP: {
@@ -57,21 +57,22 @@ SKIP: {
 if (!$conn->get('connectors.do_tests')) {
     skip 'Please setup ldap config in 01-proxy-net-ldap.conf', 11;
 }
-    
-my $sSubject = sprintf "%01x.example.org", rand(10000000);
-# diag "Random Subject: $sSubject\n"; 
 
-# Test if the connector is a symlink 
-is ( ref $conn->get('test.basic'), 'SCALAR', 'connector link is scalar ref' );
-is ( ${$conn->get('test.basic')}, 'connector:connectors.ldap', 'Name of Connector ' );
+my $sSubject = sprintf "%01x.example.org", rand(10000000);
+# diag "Random Subject: $sSubject\n";
 
 # diag "Test with Simple connector";
 is ( $conn->get(['test','basic', $sSubject]), undef, 'Node not found in LDAP');
 is ( $conn->set(['test','basic', $sSubject], 'IT Department'), 1, 'Create Node and Attribute');
 is ( $conn->get(['test','basic', $sSubject]), 'IT Department', 'Attribute found');
 
+# Simulate a timeout / disconnect
+$conn->get_connector('connectors.ldap')->ldap()->disconnect();
+is ( $conn->get(['test','basic', $sSubject]), 'IT Department', 'Attribute found after reconnect');
+
+
 # diag "Test with Single connector";
-# Set uid using Single 
+# Set uid using Single
 is ( $conn->set(['test','single', $sSubject], { 'ntlogin' => ['login1', 'login2'] } ), 1, 'Create Node and Attribute');
 
 # Load connector to manipulate config
