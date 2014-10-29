@@ -56,6 +56,11 @@ has timeout => (
     isa => 'Int',
     );
 
+has keepalive => (
+    is  => 'rw',
+    isa => 'Int',
+    );
+
 has timelimit => (
     is  => 'rw',
     isa => 'Int',
@@ -79,10 +84,11 @@ has capath => (
 
 
 has bind => (
-	is  => 'ro',
+    is  => 'ro',
     isa => 'Net::LDAP',
     reader => '_bind',
     builder => '_init_bind',
+    clearer   => '_purge_bind',
     lazy => 1,
 );
 
@@ -103,16 +109,16 @@ sub _build_options {
 
     my %options;
     foreach my $key (@_) {
-	if (defined $self->$key()) {
-	    $options{$key} = $self->$key();
-	}
+    if (defined $self->$key()) {
+        $options{$key} = $self->$key();
+    }
     }
     return %options;
 }
 
 sub _build_new_options {
     my $self = shift;
-    return $self->_build_options(qw( timeout verify capath ));
+    return $self->_build_options(qw( timeout verify capath keepalive ));
 }
 
 sub _build_bind_options {
@@ -135,12 +141,12 @@ sub _build_search_options {
     # on Net::LDAP::Filter objects
     my $value;
     if (ref $filter eq '') {
-	my $template = Template->new(
-	    {
-	    });
+    my $template = Template->new(
+        {
+        });
 
-	$template->process(\$filter, $arg, \$value) || die "Error processing argument template.";
-	   $options{filter} = $value;
+    $template->process(\$filter, $arg, \$value) || die "Error processing argument template.";
+       $options{filter} = $value;
     } else {
         $options{filter} = $filter;
     }
@@ -172,31 +178,34 @@ sub _convert_attrs {
 sub _init_bind {
 
     my $self = shift;
+
+    $self->log()->debug('Open bind to to ' . $self->LOCATION());
+
     my $ldap = Net::LDAP->new(
         $self->LOCATION(),
         onerror => undef,
-		$self->_build_new_options(),
-	);
+        $self->_build_new_options(),
+    );
 
     if (! $ldap) {
-	   die "Could not instantiate ldap object ($@)";
+       die "Could not instantiate ldap object ($@)";
     }
 
     my $mesg;
     if (defined $self->binddn()) {
-	$mesg = $ldap->bind(
-	    $self->binddn(),
-	    $self->_build_bind_options(),
-	    );
+        $mesg = $ldap->bind(
+            $self->binddn(),
+            $self->_build_bind_options(),
+        );
     } else {
-	# anonymous bind
-	$mesg = $ldap->bind(
-	    $self->_build_bind_options(),
-	    );
+        # anonymous bind
+        $mesg = $ldap->bind(
+            $self->_build_bind_options(),
+        );
     }
 
     if ($mesg->is_error()) {
-	die "LDAP bind failed with error code " . $mesg->code() . " (error: " . $mesg->error_desc() . ")";
+        die "LDAP bind failed with error code " . $mesg->code() . " (error: " . $mesg->error_desc() . ")";
     }
     return $ldap;
 }
@@ -218,6 +227,14 @@ sub _getbyDN {
     my $ldap = $self->ldap();
 
     my $mesg = $ldap->search( base => $dn, scope  => 'base', filter => '(objectclass=*)');
+
+    # Check reconnet - same as in run_search
+    if ($mesg->is_error() && ($mesg->code() == 81 || $mesg->code() == 1)) {
+        $self->log()->debug('Connection lost - try rebind and rerun query');
+        $self->_purge_bind();
+        $mesg = $ldap->search( base => $dn, scope  => 'base', filter => '(objectclass=*)');
+    }
+
 
     if ( $mesg->count() == 1) {
 
@@ -372,6 +389,31 @@ sub _splitDN {
     return @parsed;
 }
 
+sub _run_search {
+
+    my $self = shift;
+    my $arg = shift;
+    my $params = shift;
+
+    my %option = $self->_build_search_options( $arg, $params );
+
+    my $mesg = $self->ldap()->search( %option );
+
+    # Lost connection, try to rebind and rerun query
+    # It looks like a half closed connection (server gone / load balancer etc)
+    # causes an operational error and not a connection error
+    # so the list of codes to use this reconnect foo is somewhat experimental
+    # When changing this code please also check in _getByDN
+    if ($mesg->is_error() && ($mesg->code() == 81 || $mesg->code() == 1)) {
+        $self->log()->debug('Connection lost - try rebind and rerun query ' . $mesg->code());
+        $self->_purge_bind();
+        $mesg = $self->ldap()->search( %option );
+    }
+
+    return $mesg;
+
+}
+
 no Moose;
 __PACKAGE__->meta->make_immutable;
 
@@ -392,9 +434,9 @@ external functionality but bundles common configuration options.
 =head2 minimal setup
 
     my $conn = Connector::Proxy::Net::LDAP->new({
-	   LOCATION  => 'ldap://localhost:389',
-	   base      => 'dc=example,dc=org',
-	   filter  => '(cn=[% ARGS.0 %])',
+       LOCATION  => 'ldap://localhost:389',
+       base      => 'dc=example,dc=org',
+       filter  => '(cn=[% ARGS.0 %])',
     });
 
     $conn->get('John Doe');
@@ -405,10 +447,10 @@ using an anonymous bind.
 =head2 using bind credentials
 
     my $conn = Connector::Proxy::Net::LDAP->new( {
-    	LOCATION  => 'ldap://localhost:389',
-    	base      => 'dc=example,dc=org',
-    	filter  => '(cn=[% ARGS.0 %])',
-    	binddn    => 'cn=admin,dc=openxpki,dc=org',
+        LOCATION  => 'ldap://localhost:389',
+        base      => 'dc=example,dc=org',
+        filter  => '(cn=[% ARGS.0 %])',
+        binddn    => 'cn=admin,dc=openxpki,dc=org',
         password  => 'admin',
         attrs => ['usercertificate;binary','usercertificate'],
     });
@@ -521,3 +563,12 @@ Very simple approch to split a DN path into its components.
 Please B<do not> use quoting of path components, as this is
 not supported. RDNs must be split by a Comma, Comma inside a value
 must be escaped using a backslash character. Multivalued RDNs are not supported.
+
+=head2 _run_search
+
+This is a wrapper for
+
+  my $mesg = $ldap->search( $self->_build_search_options( $args, $param ) );
+
+that will take care of stale/lost connections to the server. The result
+object is returned by the method, the ldap object is taken from the class.
