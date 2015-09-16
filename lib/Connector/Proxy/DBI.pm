@@ -56,12 +56,15 @@ sub _dbi_handle {
 
     my $dsn = $self->LOCATION();
 
-    my $dbh = DBI->connect($dsn, $self->dbuser(), $self->password(),
+    my $dbh;
+    eval {
+        $dbh = DBI->connect($dsn, $self->dbuser(), $self->password(),
         { RaiseError => 1, LongReadLen => 1024 });
+    };
 
-    if (!$dbh) {
-        $self->log()->error('DBI connect failed. DSN: '.$dsn. ' - Error: ' . $! );
-        die "DBI connect failed: $!"
+    if ($EVAL_ERROR || !$dbh) {
+        $self->log()->error('DBI connect failed. DSN: '.$dsn. ' - Error: ' . $EVAL_ERROR );
+        die "DBI connect failed."
     }
     return $dbh;
 
