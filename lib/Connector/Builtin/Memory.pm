@@ -136,7 +136,7 @@ sub get_meta {
 
     my $node = $self->_get_node( shift );
 
-    $self->log()->debug('get_node returned '. Dumper $node);
+    $self->log()->trace('get_node returned '. Dumper $node);
 
     if (!defined $node) {
         # die_on_undef already handled by get_node
