@@ -54,6 +54,12 @@ has use_net_ssl => (
     default => 0,
     );
 
+has ssl_ignore_hostname => (
+    is => 'rw',
+    isa => 'Bool',
+    default => 0,
+    );
+
 has certificate_file => (
     is => 'rw',
     isa => 'Str',
@@ -177,7 +183,7 @@ sub _soap_call {
         $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
         
         my $ssl_opts = { 
-            verify_hostname => 1
+            verify_hostname => ($self->ssl_ignore_hostname ? 0 : 1)
         };
         
         if ($self->certificate_p12_file) {
@@ -384,6 +390,11 @@ IO::Socket::SSL is used). Be aware the Net::SSL does not check the hostname
 of the server certificate so Man-in-the-Middle-Attacks might be possible.
 You should use this only with a really good reason or if you need support
 for PKCS12 containers.
+
+=item ssl_ignore_hostname
+
+Do not validate the hostname of the server certificate (only useful with 
+IO::Socket::SSL as Net::SSL does not check the hostname at all). 
 
 =item certificate_file
 
