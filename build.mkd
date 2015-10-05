@@ -19,10 +19,7 @@ Note: Replace '1.10' in teh examples below with the current version.
 * Finalize release (write the version number in the TAG\_MSG)
 
     git flow release finish '1.10'
-    git push origin develop
-    git checkout master
-    git push origin master
-    git push origin 1.10
+    git push origin develop master 1.10
 
 * Build tarball
 
