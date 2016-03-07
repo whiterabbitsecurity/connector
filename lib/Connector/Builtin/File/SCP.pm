@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use English;
 use File::Spec;
-use File::Temp qw(tempfile);
+use File::Temp qw(tempfile tempdir);
 use Proc::SafeExec;
 use Data::Dumper;
 use Template;
@@ -70,6 +70,12 @@ has _scp_option => (
     builder => '_init_scp_option',
 );
 
+has filemode => (
+    is  => 'rw',
+    isa => 'Str',
+    default => ''
+);
+
 sub _build_config {
 
     my $self = shift;
@@ -101,12 +107,17 @@ sub get {
 
     my $source = $self->_sanitize_path( $path );
 
-    my ($fh, $target) = tempfile();
+    # We need to double encode the backslash escape (for local and remote) 
+    $source =~ s/\\/\\/g;
 
-    my $res = $self->_transfer( $source, $target );
+    my $tmpdir = tempdir( CLEANUP => 1 );    
+    my ($fh, $target) = tempfile( DIR => $tmpdir );
+
+    my $res = $self->_transfer($source, $target );
 
     # soemthing went wrong
     if ($res) {
+        unlink $target if (-e $target);
         return $self->_node_not_exists();
     }
 
@@ -116,6 +127,8 @@ sub get {
       open my $fh, '<', $target;
       <$fh>;
     };
+
+    unlink $target;
 
     return $content;
 }
@@ -171,14 +184,25 @@ sub set {
         $content = $data;
     }
 
-    my ($fh, $source) = tempfile();
+
+    my $tmpdir = tempdir( CLEANUP => 1 );
+    my ($fh, $source) = tempfile( DIR => $tmpdir );
+    
     open FILE, ">$source" || die "Unable to open file for writing";
     print FILE $content;
     close FILE;
+    
+    if ($self->filemode()) {
+        my $mode = $self->filemode();
+        $mode = oct($mode) if $mode =~ /^0/;
+        chmod $mode, $source;
+    }
 
     my $target = $self->_sanitize_path( $file, $data );
 
     my $res = $self->_transfer( $source, $target );
+
+    unlink $target if (-e $target);
 
     if ($res) {
         die "Unable to transfer data";
@@ -273,7 +297,7 @@ sub _sanitize_path {
         die "You must set either file or path or use the noargs option.";
     }
 
-    $file =~ s/[^\s\w\.-\\]//g;
+    $file =~ s/[^\s\w\.\-\\]//g;
 
     my $filename;
     # check if the LOCATION already has a path spec
@@ -353,6 +377,14 @@ Same as file, but allows the directory seperator (slash and backslash)
 in the resulting filename. Use this for the full path including the
 filename as the file parameter is not used, when path is set!
 
+=filemode (set mode only)
+
+By default, the file is created with restrictive permissions of 0600. You 
+can set other permissions using filemode. Due to perls lack for variable
+types, you must give this either as octal number with leading zero or as 
+string without the leading zero. Otherwise you might get wrong permissions.
+
+
 =item content
 
 Pattern for Template Toolkit to build the content. The data is passed
@@ -386,11 +418,9 @@ Abort the transfer after timeout seconds.
 
 Write data to a file.
 
-    $conn->set('filename', { NAME => 'Oliver', 'ROLE' => 'Administrator' });
+    $conn->set('filename', { NAME => 'John Doe', 'ROLE' => 'Administrator' });
 
-See the file parameter how to control the filename.
-By default, files are silently overwritten if they exist. See the I<ifexists>
-parameter for an alternative behaviour.
+See the file parameter how to control the filename. 
 
 =head2 get
 
@@ -401,12 +431,23 @@ Fetch data from a file. See the file parameter how to control the filename.
 =head1 Example
 
     my $conn = Connector::Builtin::File::SCP->new({
-       LOCATION => 'localhost',
+       LOCATION => 'localhost:/var/data',
        file => '[% ARGS.0 %].txt',
        content => ' Hello [% NAME %]',
+       filemode => 0644
     });
 
-    $conn->set('test', { NAME => 'Oliver' });
+    $conn->set('test', { NAME => 'John Doe' });
 
-Results in a file I</var/data/test.txt> with the content I<Hello Oliver>.
+Results in a file I</var/data/test.txt> with the content I<Hello John Doe>.
+
+=head1 A note on security
+
+To enable the scp transfer, the file is created on the local disk using 
+tempdir/tempfile. The directory is created with permissions only for the 
+current user, so no other user than root and yourself is able to see the 
+content. The tempfile is cleaned up immediatly, the directory is handled
+by the internal garbage collection.
+
+ 
 
