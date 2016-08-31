@@ -72,7 +72,7 @@ sub get {
     my $self = shift;
     my $value = $self->_get_node( shift );
 
-    return unless (defined $value);
+    return $self->_node_not_exists() unless (defined $value);
 
     if (ref $value ne '') {
         die "requested value is not a scalar"
