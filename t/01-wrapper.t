@@ -9,6 +9,10 @@ use Test::More tests => 19;
 
 # diag "LOAD MODULE\n";
 
+use Log::Log4perl;
+Log::Log4perl->easy_init( { level   => 'ERROR' } );
+
+
 BEGIN {
     use_ok( 'Connector::Proxy::Config::Std' );
     use_ok( 'Connector::Multi' );

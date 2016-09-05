@@ -9,7 +9,7 @@ use Test::More tests => 21;
 
 # diag "LOAD MODULE\n";
 
-Log::Log4perl->easy_init( { level   => 'DEBUG' } );
+Log::Log4perl->easy_init( { level   => 'ERROR' } );
 
 BEGIN {
     use_ok( 'Connector::Builtin::File::Path' );
