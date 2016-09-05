@@ -220,7 +220,7 @@ sub _build_path_with_prefix {
 # to die with an error
 sub _node_not_exists {
     my $self = shift;
-    my $path = shift;
+    my $path = shift || '';
 
     $path = join ("|", @{$path}) if (ref $path eq "ARRAY");
 
