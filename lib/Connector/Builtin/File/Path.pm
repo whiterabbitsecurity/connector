@@ -126,9 +126,9 @@ sub set {
     }
 
     if ($mode eq 'append' && -f $filename) {
-        open FILE, ">>$filename" || die "Unable to open file for appending";
+        open (FILE, ">>",$filename) || die "Unable to open file for appending";
     } else {
-        open FILE, ">$filename" || die "Unable to open file for writing";
+        open (FILE, ">", $filename) || die "Unable to open file for writing";
     }
 
     print FILE $content;

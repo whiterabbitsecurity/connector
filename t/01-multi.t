@@ -9,6 +9,10 @@ use Test::More tests => 39;
 use Path::Class;
 use DateTime;
 
+
+use Log::Log4perl;
+Log::Log4perl->easy_init( { level   => 'ERROR' } );
+
 my ($base, $conn);
 
 BEGIN {
