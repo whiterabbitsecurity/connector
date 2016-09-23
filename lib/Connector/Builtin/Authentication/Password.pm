@@ -46,7 +46,7 @@ sub get {
 
     $self->log()->debug('verify password for ' . $user );
 
-    if ($user =~ /[^a-zA-Z0-9_\-\.]/) {
+    if ($user =~ /[^a-zA-Z0-9_\-\.\@]/) {
         $self->log()->error('Invalid chars in username ('.$user.')');
         return $self->_node_not_exists( $user );
     }
