@@ -8,7 +8,7 @@ package Connector;
 
 use 5.008_008;  # This is the earliest version we've tested on
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 use strict;
 use warnings;
@@ -220,7 +220,7 @@ sub _build_path_with_prefix {
 # to die with an error
 sub _node_not_exists {
     my $self = shift;
-    my $path = shift;
+    my $path = shift || '';
 
     $path = join ("|", @{$path}) if (ref $path eq "ARRAY");
 

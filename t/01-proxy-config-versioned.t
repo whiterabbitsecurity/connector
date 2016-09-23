@@ -6,6 +6,10 @@ use warnings;
 use English;
 
 use Test::More tests => 28;
+
+use Log::Log4perl;
+Log::Log4perl->easy_init( { level   => 'ERROR' } );
+
 my $gittestdir = qw( t/config/01-proxy-config-versioned.git );
 
 my $cv_ver2 = '23a1c83c1b43333c146e58fbde269dc7dd87ce8e';

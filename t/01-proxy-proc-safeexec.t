@@ -8,6 +8,9 @@ use Try::Tiny;
 
 use Test::More tests => 22;
 
+use Log::Log4perl;
+Log::Log4perl->easy_init( { level   => 'ERROR' } );
+
 #diag "LOAD MODULE\n";
 
 our $req_err;

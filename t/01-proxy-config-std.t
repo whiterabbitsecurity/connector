@@ -7,6 +7,9 @@ use English;
 
 use Test::More tests => 23;
 
+use Log::Log4perl;
+Log::Log4perl->easy_init( { level   => 'ERROR' } );
+
 # diag "LOAD MODULE\n";
 
 BEGIN {
