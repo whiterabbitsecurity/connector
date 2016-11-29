@@ -2,11 +2,19 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 9;
-
 Log::Log4perl->easy_init( { level   => 'ERROR' } );
 
+# The user running this test must be able to connect to localhost
+# using ssh key authentication (ssh localhost) and have access to /tmp");
+
 BEGIN {
+
+    use Test::More;
+    unless ( $ENV{CONN_HAVE_SSH_CONFIG} ) {
+        plan skip_all => "Skipping SCP tests - setup ssh-key auth and set CONN_HAVE_SSH_CONFIG=1";
+        exit;
+    }
+
     use_ok( 'Connector::Builtin::File::SCP' );
 }
 
@@ -59,3 +67,5 @@ like($EVAL_ERROR, "/Unable to transfer data/");
 ok(time() - $start <= 3, 'timeout alarm'); 
 
 is($conn->get('test.txt'), undef);
+
+done_testing;
