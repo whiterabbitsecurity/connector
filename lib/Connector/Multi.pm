@@ -197,6 +197,7 @@ sub get_connector {
         # use the 'root' connector instance
         my @path = $self->_build_path_with_prefix( $target );
         my $class = $self->get( [ @path, 'class' ] );
+        if (!$class) { die "Nested connector without class ($target)"; }
         eval "use $class;1" or die "Error use'ing $class: $@";
         $self->log()->debug("Initialize connector $class at $target");
         $conn = $class->new( { CONNECTOR => $self, TARGET => $target } );
