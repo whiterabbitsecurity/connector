@@ -45,7 +45,7 @@ has identity => (
     default => ''
 );
 
-has config => (
+has sshconfig => (
     is  => 'rw',
     isa => 'Str',
     default => ''
@@ -92,7 +92,7 @@ sub _init_scp_option {
 
     my @options;
     push @options, '-P'. $self->port() if ($self->port());
-    push @options, '-F'. $self->config() if ($self->config());
+    push @options, '-F'. $self->sshconfig() if ($self->sshconfig());
     push @options, '-i'. $self->identity() if ($self->identity());
 
     return \@options;
@@ -236,6 +236,7 @@ sub _transfer {
 
     my $command = Proc::SafeExec->new({
         exec => \@cmd,
+        no_autowait => 1,
         %filehandles,
     });
 
@@ -243,17 +244,20 @@ sub _transfer {
         local $SIG{ALRM} = sub { die "alarm\n" };
         alarm $self->timeout();
         $command->wait();
-
-        if ($command->exit_status() != 0) {
-            $self->log()->error("SCP tranfer failed, exit status was " . $command->exit_status());
-            return 1;
-        }
     };
+
+    alarm 0;
+
     if ($EVAL_ERROR) {
+        $self->log()->debug($EVAL_ERROR);
         $self->log()->error("SCP tranfer timed out");
         return 2;
     }
-    alarm 0;
+
+    if ($command->exit_status() != 0) {
+        $self->log()->error("SCP tranfer failed, exit status was " . $command->exit_status());
+        return 1;
+    }
 
     return 0;
 
