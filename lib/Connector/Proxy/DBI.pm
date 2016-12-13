@@ -11,7 +11,6 @@ use warnings;
 use English;
 use DBI;
 use Data::Dumper;
-use Data::Dumper;
 
 use Moose;
 extends 'Connector::Proxy';
@@ -34,7 +33,7 @@ has table => (
 
 has column => (
     is  => 'rw',
-    isa => 'Str',
+    isa => 'Str|HashRef',
 );
 
 has condition => (
@@ -75,9 +74,13 @@ sub get {
     my $self = shift;
     my @path = $self->_build_path( shift );
 
+    my $column = $self->column();
+    if (!$column || ref $column ne '') {
+        die "column must be a singe column name when using get";
+    } 
 
     my $query = sprintf "SELECT %s FROM %s WHERE %s",
-        $self->column(), $self->table(), $self->condition();
+        $column, $self->table(), $self->condition();
 
     $self->log()->debug('Query is ' . $query);
 
@@ -106,10 +109,57 @@ sub get {
 
 }
 
+sub get_hash {
+    
+    my $self = shift;
+    my @path = $self->_build_path( shift );
+
+    my $column = $self->column();
+    if ($column && ref $column ne 'HASH') {
+        die "column must be a hashref or empty when using get_hash";
+    } 
+
+    my $columns = '*';
+    if (ref $column eq 'HASH') {
+        my @cols;
+        map {
+            push @cols, sprintf( "`%s` as `%s`", $column->{$_}, $_ );      
+        } keys %{$column};
+        $columns = join(",", @cols); 
+    }
+
+    my $query = sprintf "SELECT %s FROM %s WHERE %s",
+        $columns, $self->table(), $self->condition();
+
+    $self->log()->debug('Query is ' . $query);
+
+    my $sth = $self->_dbi()->prepare($query);
+    $sth->execute( @path );
+
+    my $row = $sth->fetchrow_hashref();
+
+    $self->log()->trace('result is ' . Dumper $row );
+
+    if (!$row) {
+        return $self->_node_not_exists( @path );
+    }
+
+    $self->log()->debug('Valid return: ' . Dumper $row);
+    return $row; 
+
+}
+
+
 sub get_list {
 
     my $self = shift;
     my @path = $self->_build_path( shift );
+
+
+    my $column = $self->column();
+    if (!$column || ref $column ne '') {
+        die "column must be a singe column name when using get_list";
+    } 
 
     my $query = sprintf "SELECT %s FROM %s WHERE %s",
         $self->column(), $self->table(), $self->condition();
@@ -155,9 +205,11 @@ sub get_size {
     my $sth = $self->_dbi()->prepare($query);
     $sth->execute( @path );
 
-    my $rows = $sth->fetchall_arrayref();
+    my $row = $sth->fetchrow_arrayref();
 
-    return $rows->[0]->{count};
+    $self->log()->trace('Result is ' . Dumper $row);
+
+    return $row->[0];
 
 }
 
@@ -234,7 +286,18 @@ found undef is returned (dies if die_on_undef is set).
 Will return scalar if the query has one result or list if the query has
 multiple rows. Returns undef if no rows are found.
 
-=head2 get_keys/get_hash
+=head2 get_hash
+
+Return a single row as hashref, by default all columns are returned as 
+retrieved from the database. Pass a hashref to I<column>, where the key
+is the target key and the value is the name of the column you need.
+
+E.g. when your table has the columns id and name but you need the keys
+index and title in your result:
+
+    $con->column({ 'id' => 'id', 'index' => 'id', 'title' => 'name' });
+
+=head2 get_keys 
 
 not supported
 
