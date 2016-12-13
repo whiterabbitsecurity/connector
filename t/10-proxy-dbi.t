@@ -65,7 +65,7 @@ my $res = $conn->get_hash(1);
 is ($res->{id}, 1);
 is ($res->{name}, 'test me');
 
-$conn->column({ 'id' => 'id', 'index' => 'id', 'title' => 'name' });
+$conn->column({ 'id' => 'id', '`index`' => 'id', 'title' => 'name' });
 $res = $conn->get_hash(1);
 
 is ($res->{id}, 1);
