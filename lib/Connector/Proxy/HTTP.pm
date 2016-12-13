@@ -111,7 +111,7 @@ sub _init_agent {
    
     # Force usage of net::ssl 
     if ($self->use_net_ssl()) {
-        use Net::SSL;
+        require Net::SSL;
         $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "Net::SSL";
     
         if ($self->certificate_p12_file) {
