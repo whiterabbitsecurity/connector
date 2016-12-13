@@ -123,7 +123,7 @@ sub get_hash {
     if (ref $column eq 'HASH') {
         my @cols;
         map {
-            push @cols, sprintf( "`%s` as `%s`", $column->{$_}, $_ );      
+            push @cols, sprintf( "%s as %s", $column->{$_}, $_ );      
         } keys %{$column};
         $columns = join(",", @cols); 
     }
@@ -293,9 +293,14 @@ retrieved from the database. Pass a hashref to I<column>, where the key
 is the target key and the value is the name of the column you need.
 
 E.g. when your table has the columns id and name but you need the keys
-index and title in your result:
+index and title in your result.
 
-    $con->column({ 'id' => 'id', 'index' => 'id', 'title' => 'name' });
+    $con->column({ 'id' => 'id', '`index`' => 'id', 'title' => 'name' });
+
+Note: The mapping is set directly on the sql layer and as escaping 
+reserved words is not standardized, we dont do it. You can add escape
+characters yourself to the column map where required, as shown for the
+word "index" in the given example.
 
 =head2 get_keys 
 
