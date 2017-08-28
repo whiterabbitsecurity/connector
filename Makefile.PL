@@ -22,8 +22,10 @@ recommends 'DBI';
 build_requires 'Test::More';
 
 test_requires 'Test::More';
+test_requires 'Config::Merge';
 test_requires 'Config::Versioned';
 test_requires 'Config::Std';
+test_requires 'Proc::SafeExec';
 test_requires 'YAML';
 test_requires 'Template';
 test_requires 'DBI';
