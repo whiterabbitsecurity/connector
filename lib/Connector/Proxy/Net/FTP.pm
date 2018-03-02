@@ -89,7 +89,7 @@ sub get {
 
     my ($dirname, $filename) = $self->_sanitize_path( $path );
 
-    if ($dirname) {
+    if ($dirname && $dirname ne '.') {
         $self->log()->debug('Change dir to ' . $dirname );
         if (!$ftp->cwd($dirname)) {
             $self->log()->info("Cannot change working directory $dirname");
@@ -126,7 +126,7 @@ sub get_keys {
 
     my $ftp = $self->_client();
 
-    if ($dirname) {
+    if ($dirname  && $dirname ne '.') {
         $self->log()->debug('Change dir to ' . $dirname );
         if (!$ftp->cwd($dirname)) {
             $self->log()->info("Cannot change working directory $dirname");
@@ -194,7 +194,7 @@ sub set {
 
     my ($dirname, $filename) = $self->_sanitize_path( $file, $data );
 
-    if ($dirname) {
+    if ($dirname && $dirname ne '.') {
         $self->log()->debug('Change dir to ' . $dirname );
         $ftp->cwd($dirname) or die "Cannot change working directory ", $ftp->message;
     }
