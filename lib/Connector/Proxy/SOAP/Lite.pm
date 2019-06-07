@@ -48,6 +48,13 @@ has named_parameters => (
     trigger => \&_convert_parameters,
     );
 
+has attrmap => (
+    is  => 'rw',
+    isa => 'HashRef',
+    required => 0,
+    predicate => 'has_attrmap'
+);
+
 has use_net_ssl => (
     is => 'rw',
     isa => 'Bool',
@@ -282,9 +289,22 @@ sub get {
     my $result = $self->_soap_call(@_);
     return if (! defined $result);
 
+    if ((ref $result eq 'HASH') && $self->has_attrmap()) {
+        my @keys = keys %{$self->attrmap()};
+        if (scalar @keys != 1) {
+            $self->log()->error('SOAP result is hash but attrmap has more than one item');
+            die 'SOAP result is hash but attrmap has more than one item';
+        }
+        if (!defined $result->{$keys[0]}) {
+            return $self->_node_not_exists();
+        }
+        return $result->{$keys[0]};
+    }
+
     if (ref $result ne '') {
        die "SOAP call result is not a scalar";
     }
+
     return $result;
 }
 
@@ -300,7 +320,7 @@ sub get_list {
 
     my $result = $self->_soap_call(@_);
 
-    return if (! defined $result);
+    return $self->_node_not_exists() if (! defined $result);
 
     if (ref $result ne 'ARRAY' ) {
         die "SOAP call result is not a list";
@@ -321,10 +341,20 @@ sub get_hash {
 
     my $result = $self->_soap_call(@_);
 
-    return if (! defined $result);
+    return $self->_node_not_exists() if (! defined $result);
 
     if (ref $result ne 'HASH' ) {
         die "SOAP call result is not a hash";
+    }
+
+
+    my $res;
+    if ($self->has_attrmap()) {
+        my %map = %{$self->attrmap()};
+        foreach my $key (keys %map) {
+            $res->{ $map{$key} } = $result->{$key};
+        }
+        return $res;
     }
 
     return $result;
@@ -388,6 +418,14 @@ By default, the passed arguments are used as postional arguments in the
 soap call. If you want to use a named parameter, set this to a list of names
 used as keys with the passed parameters. If you pass a string, it is split
 into a list a the whitespace character (usefull with Config::Std, etc).
+
+=item attrmap
+
+Optional, if set keys of the returned hash are mapped from the given hash.
+Keys must be the names of the SOAP response fields, values are the names of
+the keys in the connector response. Can be used with I<get> to extract a
+single field from the response, must contain one element, value is ignored.
+
 
 =back
 
