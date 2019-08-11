@@ -237,7 +237,7 @@ sub _new_ldap {
     $self->log()->debug('Connecting to "' . $ldapuri .'"');
     my $ldap = Net::LDAP->new(
         $ldapuri,
-        onerror => undef,
+        onerror => 'undef',
         $self->_build_new_options(),
     );
     if(defined $ldap) {
