@@ -193,9 +193,11 @@ sub _init_bind {
 
     my $mesg;
     if (defined $self->binddn()) {
+        my %options = $self->_build_bind_options();
+        $self->log()->warn('Binding with DN but without password') if (!defined $options{password});
         $mesg = $ldap->bind(
             $self->binddn(),
-            $self->_build_bind_options(),
+            %options,
         );
     } else {
         # anonymous bind
