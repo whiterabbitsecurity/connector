@@ -233,6 +233,17 @@ sub _node_not_exists {
     return;
 }
 
+sub _log_and_die {
+    my $self = shift;
+    my $message = shift;
+    my $log_message = shift || $message;
+
+   $self->log()->error($log_message);
+   die $message;
+
+}
+
+
 # Subclasses can implement these to save resources
 sub get_size {
 
@@ -463,6 +474,11 @@ setting and throw an exception or return undef. So you can just write:
     if (path not exists || not defined val) {
         return $self->_node_not_exists( pathspec );
     }
+
+As connectors are often used in eval constructs where the error messages
+are swallowed you SHOULD log a verbose error before aborting with
+die/confess. You can use the _log_and_die method for this purpose. It will
+send a message to the logger on error level before calling "die $message".
 
 =head2 path building
 
