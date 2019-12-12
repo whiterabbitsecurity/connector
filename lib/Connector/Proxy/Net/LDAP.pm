@@ -279,7 +279,7 @@ sub _getbyDN {
 
     # Strip the basedn from the dn and tokenize the rest
     my $path = $dn;
-    $path =~ s/\,?$base_dn$//;
+    $path =~ s/$base_dn\z//;
 
     if (!$path) {
         $self->_log_and_die('Request to auto-create empty path');
@@ -327,16 +327,35 @@ sub _getbyDN {
 sub _createPathItem {
 
     my $self = shift;
-    my ($currentPath, $nextComponentKey, $nextComponentValue, $attributes) = @_;
-    $nextComponentKey = lc($nextComponentKey);
+    $self->log()->trace("Create Path called with " . Dumper \@_) if ($self->log()->is_trace);
+
+    my $currentPath = shift;
+    my $nextComponentKey = shift;
+    my $nextComponentValue;
+
+    my $values = {};
+    if (ref $nextComponentKey) {
+        $values = $nextComponentKey;
+    } else {
+        $nextComponentValue = shift;
+        $values = { lc($nextComponentKey) => $nextComponentValue };
+    }
+    my $attributes = shift;
+
+    my $rdnkey = lc(join("+", sort keys %{$values}));
+
+    my $newDN = join( "+", map { sprintf("%s=%s", $_, $values->{$_}) } sort keys %{$values});
+    $newDN .= ','.$currentPath;
 
     my $schema = $self->schema();
-    $self->_log_and_die("No schema data for create path item ($nextComponentKey)") if (!$schema || !$schema->{$nextComponentKey});
-    $schema = $schema->{$nextComponentKey};
+    $self->_log_and_die("No schema data to create nodes") if (!$schema);
+
+    $schema = $schema->{$rdnkey} || $schema->{default};
+    $self->_log_and_die("No schema data for create path item ($rdnkey)") if (!$schema);
 
     my @attrib;
     if (!$schema->{objectclass}) {
-        $self->_log_and_die("No objectclass defined for path item $nextComponentKey");
+        $self->_log_and_die("No objectclass defined for path item $rdnkey");
     }
 
     push @attrib, "objectclass";
@@ -347,32 +366,30 @@ sub _createPathItem {
         push @attrib, \@classnames;
     }
 
-    push @attrib, $nextComponentKey, $nextComponentValue;
-
     # Default Values to push
-    my $values = $schema->{values} || {};
+    $values = { %{$values}, %{$schema->{values} } } if ($schema->{values});
 
     # append attributes to value hash, this will overwrite values from the
-    # config for existing keys
-    map {
-        $values->{$_} = $attributes->{$_};
-    } (keys %{$attributes}) if ($attributes);
+    $values = { %{$attributes}, %{$values} };
 
     foreach my $key ( keys %{$values}) {
         my $val = $values->{$key};
         next unless defined $val;
-        $val = $nextComponentValue if ($val eq 'copy:self');
+        if ($val eq 'copy:self') {
+            die "copy:self does not work with multivalued rdns" unless defined $nextComponentValue;
+            $val = $nextComponentValue;
+        }
         push @attrib, $key, $val;
     }
-
-    my $newDN = sprintf '%s=%s,%s', $nextComponentKey, $nextComponentValue, $currentPath;
 
     #print "Create Node $newDN \n";
     #print Dumper( $attrib );
 
     $self->log()->trace("Create Node $newDN  with attributes " . Dumper \@attrib) if ($self->log()->is_trace);
+    $self->log()->debug("Create Node $newDN  with attributes " . Dumper \@attrib);
 
     my $result = $self->ldap()->add( $newDN, attr => \@attrib );
+
     if ($result->is_error()) {
         $self->_log_and_die($result->error_desc);
     }
@@ -409,10 +426,23 @@ sub _triggerAutoCreate {
         $path = $4;
 
     } elsif ($create_info->{rdn}) {
-        my $rdn;
-        $tt->process(\$create_info->{rdn}, { ARGS => $args, DATA => $data }, \$rdn) || $self->_log_and_die("Error processing argument template for RDN.");
-        @rdn = split("=", $rdn, 2);
-        $self->log()->debug('Auto-Create with RDN template');
+        if (ref $create_info->{rdn}) {
+            my $hash;
+            foreach my $rdtpl (@{$create_info->{rdn}}){
+                my $rdn;
+                $tt->process(\$rdtpl, { ARGS => $args, DATA => $data }, \$rdn) || $self->_log_and_die("Error processing argument template for RDN $rdtpl.");
+                next unless ($rdn);
+                my @t = split("=", $rdn, 2);
+                $hash->{$t[0]} = $t[1];
+            }
+            @rdn = ($hash);
+            $self->log()->debug('Auto-Create with RDN template (Multivalued)');
+        } else {
+            my $rdn;
+            $tt->process(\$create_info->{rdn}, { ARGS => $args, DATA => $data }, \$rdn) || $self->_log_and_die("Error processing argument template for RDN " . $create_info->{rdn});
+            @rdn = split("=", $rdn, 2);
+            $self->log()->debug('Auto-Create with RDN template');
+        }
 
     } elsif ($create_info->{rdnkey}) {
         @rdn = ($create_info->{rdnkey}, $args->[0]);
@@ -620,6 +650,13 @@ leaf, e.g. cn=www.example.org,ou=Webservers,ou=Servers,dc=company,dc=org
 Same result as the first example, the path arguments are all in ARGS,
 additional data (depends on the subclass implementation) are made
 available in the DATA key.
+
+Multivalued RDNs can be constructed using a list:
+
+    create:
+        rdn:
+         - emailAddress=[% ARGS.0 %]
+         - CN=[% ARGS.1 %]
 
 =head3 use temlating for full DN
 
