@@ -152,12 +152,8 @@ sub _build_search_options {
     # on Net::LDAP::Filter objects
     my $value;
     if (ref $filter eq '') {
-    my $template = Template->new(
-        {
-        });
-
-    $template->process(\$filter, $arg, \$value) || $self->_log_and_die("Error processing argument template.");
-       $options{filter} = $value;
+        Template->new()->process(\$filter, $arg, \$value) || $self->_log_and_die("Error processing argument template.");
+        $options{filter} = $value;
     } else {
         $options{filter} = $filter;
     }

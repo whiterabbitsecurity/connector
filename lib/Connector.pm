@@ -238,8 +238,8 @@ sub _log_and_die {
     my $message = shift;
     my $log_message = shift || $message;
 
-   $self->log()->error($log_message);
-   die $message;
+    $self->log()->error($log_message);
+    die $message;
 
 }
 
