@@ -194,7 +194,6 @@ sub _init_bind {
 
     my $ldap = Net::LDAP->new(
         $self->LOCATION(),
-        onerror => 'undef',
         $self->_build_new_options(),
     );
 
