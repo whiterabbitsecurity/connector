@@ -5,13 +5,13 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 39;
+use Test::More tests => 43;
 use Path::Class;
 use DateTime;
 
 
 use Log::Log4perl;
-Log::Log4perl->easy_init( { level   => 'ERROR' } );
+Log::Log4perl->easy_init( { level   => 'WARN' } );
 
 my ($base, $conn);
 
@@ -143,3 +143,14 @@ ok ($conn->exists('smartcards.owners.joe'), 'connector node exists');
 ok ($conn->exists('smartcards.owners.joe.tokenid'), 'connector leaf exists');
 ok ($conn->exists( [ 'smartcards', 'owners', 'joe' ] ), 'node exists Array');
 ok (!$conn->exists('smartcards.owners.jeff'), 'connector node not exists');
+
+$ENV{OXI_TEST_FOOBAR} = "foobar";
+is( $conn->get('envvar.foo.bar'), 'foobar', 'reference from env (regular)' );
+#walk over is accepted but prints a warning
+is( $conn->get('envvar.foo.bar.baz'), 'foobar', 'reference from env (walk over)' );
+# should be undef
+is( $conn->get('envvar.foo.baz'), undef, 'reference from env (undef)' );
+
+# should be empty not undef
+$ENV{OXI_TEST_FOOBAR} = "";
+is( $conn->get('envvar.foo.bar'), '', 'reference from env (empty)' );
