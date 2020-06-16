@@ -506,7 +506,7 @@ sub _run_search {
     # causes an operational error and not a connection error
     # so the list of codes to use this reconnect foo is somewhat experimental
     # When changing this code please also check in _getByDN
-    if ($mesg->is_error() && ($mesg->code() == 81 || $mesg->code() == 1)) {
+    if (ref $mesg && $mesg->is_error() && ($mesg->code() == 81 || $mesg->code() == 1)) {
         $self->log()->debug('Connection lost - try rebind and rerun query ' . $mesg->code());
         $self->_purge_bind();
         $mesg = $self->ldap()->search( %option );
