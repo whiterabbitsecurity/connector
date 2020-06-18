@@ -8,7 +8,7 @@ package Connector;
 
 use 5.008_008;  # This is the earliest version we've tested on
 
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 
 use strict;
 use warnings;
@@ -238,8 +238,8 @@ sub _log_and_die {
     my $message = shift;
     my $log_message = shift || $message;
 
-   $self->log()->error($log_message);
-   die $message;
+    $self->log()->error($log_message);
+    die $message;
 
 }
 

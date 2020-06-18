@@ -156,6 +156,16 @@ sub _route_call {
                     # Push path on top of the argument array
                     unshift @args, \@suffix;
                     return $conn->$call( @args );
+                } elsif ( $schema eq 'env' ) {
+
+                    $self->log()->debug("Fetch from ENV with key $target");
+                    # warn if the path is not empty
+                    $self->log()->warn(sprintf("Call redirected to ENV but path is not final (%s)!", join(".",@suffix))) if (@suffix > 0);
+                    if (!exists $ENV{$target}) {
+                        return $self->_node_not_exists();
+                    }
+                    return $ENV{$target};
+
                 } else {
                     $self->_log_and_die("Connector::Multi: unsupported schema for symlink: $schema");
                 }
@@ -291,6 +301,21 @@ connector configuration is in the 'connectors' namespace of our primary data sou
       uri: ldaps://example.org
       bind_dn: uid=user,ou=Directory Users,dc=example,dc=org
       password: secret
+
+*Redirect to env*
+
+Similar to connector you can define a redirect to read a value from the
+environment.
+
+    node1:
+        key@: env:OPENPKI_KEY_FROM_ENV
+
+calling get('node1.key') will return the value of the environment variable
+`OPENPKI_KEY_FROM_ENV`.
+
+If the environment variable is not set, undef is returned. Walking over such a
+node raises a warning but will silently swallow the remaining path components
+and return the value of the node.
 
 *Inline Redirects*
 

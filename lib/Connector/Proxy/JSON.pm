@@ -1,15 +1,13 @@
-# Connector::Proxy::YAML
+# Connector::Proxy::JSON
 #
-# Proxy class for reading YAML configuration
-#
-# Written by Scott Hardin and Martin Bartosch for the OpenXPKI project 2012
-#
-package Connector::Proxy::YAML;
+# Proxy class for reading a JSON file
+
+package Connector::Proxy::JSON;
 
 use strict;
 use warnings;
 use English;
-use YAML;
+use JSON;
 use Data::Dumper;
 
 use Moose;
@@ -26,17 +24,23 @@ sub _build_config {
     my $config;
     my $file = $self->LOCATION();
     if ( ( -e $file ) && ( -r $file ) )  {
-         eval {
-            $config = YAML::LoadFile( $file );
+
+        my $content = do {
+          local $INPUT_RECORD_SEPARATOR;
+          open my $fh, '<', $file;
+          <$fh>;
         };
-        if ($@) {
-            $self->log()->error('Proxy::Yaml error parsing file '.$file);
+         eval {
+            $config = JSON->new()->decode($content);
+        };
+        if ($@ || !$config || !ref $config) {
+            $self->log()->error('Proxy::JSON error parsing content from file '.$file);
             $self->log()->debug( Dumper( $@ ) );
             return $self->_node_not_exists( $file );
         }
-        $self->log()->debug('Proxy::Yaml loading configuration from file '.$file);
+        $self->log()->debug('Proxy::JSON loading configuration from file '.$file);
     } else {
-        $self->log()->warn('Proxy::Yaml configuration file '.$file.' not found ');
+        $self->log()->warn('Proxy::JSON configuration file '.$file.' not found ');
     }
     $self->_config($config);
 }
@@ -47,20 +51,21 @@ no Moose;
 __PACKAGE__->meta->make_immutable;
 
 1;
+
 __END__
 
 =head1 Name
 
-Connector::Proxy::YAML
+Connector::Proxy::JSON
 
 =head1 Description
 
-Reads a yaml file from the path given as LOCATION and makes its structure
+Reads a json file from the path given as LOCATION and makes its structure
 available via the accessor methods.
 
 If the file could not be loaded this connector returns undef for all requests.
 
-B<Note>: Changes made to the YAML file after the connector was first
+B<Note>: Changes made to the YAML file after the connector was first 
 initialized will not be visible as the file is read once on startup and
 persited into memory.
 
@@ -70,6 +75,6 @@ persited into memory.
 
 =item LOCATION
 
-The location of the yaml file.
+The location of the json file.
 
 =back
