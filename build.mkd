@@ -10,6 +10,15 @@ Note: Replace '1.10' in the examples below with the current version.
     connver=1.10
     git flow release start $connver develop
 
+* Merge in any remote work (optional)
+
+    git remote update
+    git merge <remote-branch>
+
+* Run unit tests
+
+    perl Makefile.PL && make test
+
 * Bump version number in lib/Connector.pm
 
     perl -i -pe "s{our \\\$VERSION = .+}{our \\\$VERSION = '$connver';};" \
