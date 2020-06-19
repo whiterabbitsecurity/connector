@@ -4,6 +4,7 @@
 use strict;
 use warnings;
 use English;
+use Log::Log4perl qw(:easy);
 
 use Test::More tests => 30;
 

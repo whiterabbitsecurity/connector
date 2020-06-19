@@ -17,6 +17,8 @@ recommends 'Text::CSV_XS';
 recommends 'Template';
 recommends 'Proc::SafeExec';
 recommends 'DBI';
+recommends 'IO::Socket::SSL';
+recommends 'JSON';
 
 build_requires 'Test::More';
 
@@ -29,6 +31,8 @@ test_requires 'YAML';
 test_requires 'Template';
 test_requires 'DBI';
 test_requires 'DBD::SQLite';
+test_requires 'IO::Socket::SSL';
+test_requires 'JSON';
 
 auto_install;
 
