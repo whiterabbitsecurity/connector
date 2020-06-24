@@ -16,7 +16,7 @@ BEGIN {
 
 require_ok( 'Connector::Proxy::JSON' );
 
-Log::Log4perl->easy_init( { level   => 'DEBUG' } );
+Log::Log4perl->easy_init( { level   => 'WARN' } );
 
 # diag "Connector::Proxy::YAML tests\n";
 ###########################################################################

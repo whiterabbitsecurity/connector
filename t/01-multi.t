@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 43;
+use Test::More tests => 47;
 use Path::Class;
 use DateTime;
 
@@ -154,3 +154,14 @@ is( $conn->get('envvar.foo.baz'), undef, 'reference from env (undef)' );
 # should be empty not undef
 $ENV{OXI_TEST_FOOBAR} = "";
 is( $conn->get('envvar.foo.bar'), '', 'reference from env (empty)' );
+
+is( $conn->get('foo'), undef, 'Cache with prefix - no prefix' );
+
+$conn->PREFIX('cache_test.branch1');
+is( $conn->get('foo'), 'test1', 'Cache with prefix - branch 1' );
+
+$conn->PREFIX('cache_test.branch2');
+is( $conn->get('foo'), 'test2', 'Cache with prefix - branch 2' );
+
+$conn->PREFIX('');
+is( $conn->get('foo'), undef, 'Cache with prefix - no prefix' );

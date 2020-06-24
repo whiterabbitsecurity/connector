@@ -8,7 +8,7 @@ package Connector;
 
 use 5.008_008;  # This is the earliest version we've tested on
 
-our $VERSION = '1.30';
+our $VERSION = '1.31';
 
 use strict;
 use warnings;
@@ -215,13 +215,18 @@ sub _build_path_with_prefix {
 
 }
 
+# return the prefix as string (using DELIMITER)
+sub _get_prefix {
+    my $self = shift;
+    return join($self->DELIMITER(), @{$self->_prefix_path()});
+}
+
 # This is a helper to handle non exisiting nodes
 # By default we just return undef but you can configure the connector
 # to die with an error
 sub _node_not_exists {
     my $self = shift;
     my $path = shift || '';
-
     $path = join ("|", @{$path}) if (ref $path eq "ARRAY");
 
     $self->log()->debug('Node does not exist at  ' . $path );
@@ -514,4 +519,3 @@ Oliver Welter
 Copyright 2013 OpenXPKI Foundation
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
-
