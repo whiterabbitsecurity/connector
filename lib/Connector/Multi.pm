@@ -214,18 +214,26 @@ sub get_connector {
     my $self = shift;
     my $target = shift;
 
-    my $conn = $self->_config()->{$target};
+    # the cache needs to store the absolute path including the prefix
+    my @path = $self->_build_path( $target );
+    my $cache_id = join($self->DELIMITER(), $self->_build_path_with_prefix( \@path ));
+    my $conn = $self->_config()->{$cache_id};
     if ( ! $conn ) {
-        # use the 'root' connector instance
-        my @path = $self->_build_path_with_prefix( $target );
+        # Note - we will use ourselves to read the connectors instance information
+        # this allows to put other connectors inside a connector definition but
+        # also lets connector definition paths depend on PREFIX!
         my $class = $self->get( [ @path, 'class' ] );
         if (!$class) {
-            $self->_log_and_die("Nested connector without class ($target)");
+            my $prefix = $self->_get_prefix() || '-';
+            $self->_log_and_die("Nested connector without class ($target/$prefix)");
         }
-        eval "use $class;1" or $self->_log_and_die("Error use'ing $class: $@");
         $self->log()->debug("Initialize connector $class at $target");
+        eval "use $class;1" or $self->_log_and_die("Error use'ing $class: $@");
         $conn = $class->new( { CONNECTOR => $self, TARGET => $target } );
-        $self->_config()->{$target} = $conn;
+        $self->_config()->{$cache_id} = $conn;
+        $self->log()->trace("Add connector to cache: $cache_id") if ($self->log()->is_trace());
+    } elsif ($self->log()->is_trace()) {
+        $self->log()->trace("Got connector for $target from cache $cache_id");
     }
     return $conn;
 }
@@ -389,6 +397,38 @@ following options:
 
 This is a reference to the Connector instance that Connector::Multi
 uses at the base of all get() requests.
+
+=item PREFIX
+
+You can set a PREFIX that is prepended to all path. There is one important
+caveat to mention: Any redirects made are relative to the prefix set so you can
+use PREFIX only if the configuration was prepared to work with it (e.g. to split
+differnet domains and switch between them using a PREFIX).
+
+    Example:
+
+      branch:
+        foo@: connector:foobar
+
+        foobar:
+          class: ....
+
+Without a PREFIX set, this will return "undef" as the connector is not defined
+at "foobar".
+
+    my $bar = $multi->get( [ 'branch', 'foo', 'bar' ]);
+
+This will work and return the result from the connector call using "bar" as key:
+
+    my $multi = Connector::Multi->new( {
+      BASECONNECTOR => $base,
+      PREFIX => "branch",
+    });
+    my $bar = $multi->get( [ 'branch', 'foo', 'bar' ]);
+
+Note: It is B<DANGEROUS> to use a dynamic PREFIX in the BASECONNECTOR as
+Connector::Multi stores created sub-connectors in a cache using the path as key.
+It is possible to change the prefix of the class itself during runtime.
 
 =back
 
