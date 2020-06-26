@@ -181,11 +181,13 @@ sub _route_call {
                         shift @target;
                     }
                 } else {
+                    $self->log()->debug(sprintf("Plain redirect at prefix %s to %s", join(".", @prefix), $meta->{VALUE}));
                     @prefix = ();
-                    $self->log()->debug("Plain redirect to " . join ".", @suffix);
                 }
                 unshift @suffix, @target;
-
+                $self->log()->debug("Final redirect target " . join ".", @suffix);
+                unshift @args, [ @prefix, @suffix ];
+                return $self->$call( @args );
             }
         } else {
             $ptr_cache->{$path} = 1;
