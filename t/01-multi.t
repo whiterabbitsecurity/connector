@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 47;
+use Test::More tests => 48;
 use Path::Class;
 use DateTime;
 
@@ -133,6 +133,8 @@ is( $conn->get_meta('meta.inner.single.0' )->{TYPE} , 'scalar', 'scalar leaf');
 is( $conn->get_hash('leafref.hash')->{bob}, '007', 'hash with reference in leaf' );
 is( $conn->get('cascaded.reference.bob'), 'token_1', 'reference over connector' );
 is( $conn->get_hash('cascaded.reference')->{bob}, 'token_1', 'reference over connector with hash' );
+
+is( $conn->get('cascaded.walkover.source.joe.tokenid'), 'token_1', 'reference with walkover' );
 
 my @owners = $conn->get_keys('cascaded.connector.hook.owners');
 ok( grep("joe", @owners), 'Hash contains joe' );

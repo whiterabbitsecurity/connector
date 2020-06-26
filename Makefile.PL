@@ -18,6 +18,7 @@ recommends 'Template';
 recommends 'Proc::SafeExec';
 recommends 'DBI';
 recommends 'IO::Socket::SSL';
+recommends 'LWP::Protocol::https';
 recommends 'LWP::UserAgent';
 recommends 'JSON';
 
@@ -34,6 +35,7 @@ test_requires 'DBI';
 test_requires 'DBD::SQLite';
 test_requires 'IO::Socket::SSL';
 test_requires 'LWP::UserAgent';
+test_requires 'LWP::Protocol::https';
 test_requires 'JSON';
 
 auto_install;

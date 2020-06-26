@@ -18,7 +18,7 @@ use strict;
 use warnings;
 use English;
 use Net::LDAP;
-
+use Data::Dumper;
 
 use Moose;
 extends 'Connector::Proxy::Net::LDAP';

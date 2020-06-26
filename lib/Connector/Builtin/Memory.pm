@@ -158,8 +158,10 @@ sub get_meta {
     } elsif (ref $node eq "HASH") {
         my @keys = keys(%{$node});
         $meta = {TYPE  => "hash", VALUE => \@keys };
+    } elsif (blessed($node) && $node->isa('Connector')) {
+        $meta = {TYPE  => "connector", VALUE => $node };
     } else {
-        die "Unsupported node type";
+        die "Unsupported node type: " . ref $node;
     }
     return $meta;
 }
@@ -196,6 +198,11 @@ sub set {
     }
 
     my $entry = shift @path;
+
+    if (!defined $value) {
+        delete $ptr->{$entry};
+        return;
+    }
 
     if (exists $ptr->{$entry}) {
         if (ref $ptr->{$entry} ne ref $value) {
