@@ -189,6 +189,15 @@ sub _route_call {
                 unshift @args, [ @prefix, @suffix ];
                 return $self->$call( @args );
             }
+        } elsif ( $meta && $meta->{TYPE} eq 'connector' ) {
+
+            my $conn = $meta->{VALUE};
+            $self->log()->debug("Got conncetor reference of type ". ref $conn);
+            $self->log()->debug("Dispatch to connector at " . join(".", @prefix));
+            # Push path on top of the argument array
+            unshift @args, \@suffix;
+            return $conn->$call( @args );
+
         } else {
             $ptr_cache->{$path} = 1;
         }
@@ -260,7 +269,9 @@ source that Multi accesses for get() requests. If the request returns a referenc
 to a SCALAR, Multi interprets this as a symbolic link. The content of the
 link contains an alias and a target key.
 
-=head1 Example
+=head1 Examples
+
+=head2 Connector References
 
 In this example, we will be using a YAML configuration file that is accessed
 via the connector Connector::Proxy::YAML.
@@ -312,7 +323,8 @@ connector configuration is in the 'connectors' namespace of our primary data sou
       bind_dn: uid=user,ou=Directory Users,dc=example,dc=org
       password: secret
 
-*Redirect to env*
+
+=head2 Builtin Environment Connector
 
 Similar to connector you can define a redirect to read a value from the
 environment.
@@ -327,7 +339,7 @@ If the environment variable is not set, undef is returned. Walking over such a
 node raises a warning but will silently swallow the remaining path components
 and return the value of the node.
 
-*Inline Redirects*
+=head2 Inline Redirects
 
 It is also possible to reference other parts of the configuration using a
 kind of redirect/symlink.
@@ -387,6 +399,18 @@ or...
 You can also pass the path as an arrayref, where each element can be a path itself
 
   my $tok = $multi->get( [ 'smartcard.owners', 'bob.tokenid' ]);
+
+*Preset Connector References*
+
+If you create your config inside your code you and have a baseconnector that
+can handle object references (e.g. Connector::Builtin::Memory), you can
+directly set the value of a node to a blessed reference of a Connector class.
+
+    my $sub = Connector::Proxy::Net::LDAP->new( {
+        basedn => "ou=smartcards,dc=example,dc=org"
+    });
+
+    $base->set('smartcard.tokens',  $sub )
 
 =head1 OPTIONS
 
