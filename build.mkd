@@ -43,6 +43,8 @@ Note: Replace '1.10' in the examples below with the current version.
 
 * Upload tarball to https://pause.perl.org
 
+    cpan-upload Connector-$connver.tar.gz
+
 # If the build env is not already set up, run the following:
 
     curl -L http://install.perlbrew.pl | bash
