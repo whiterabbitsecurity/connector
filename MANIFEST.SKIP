@@ -29,3 +29,9 @@ t/.*\.git/
 
 # OS-specific meta-data files
 .DS_Store
+
+# Vagrant stuff
+Vagrantfile
+.vagrant
+vag-.*\.sh
+
