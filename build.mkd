@@ -42,9 +42,7 @@ Note: Replace '1.10' in the examples below with the current version.
 
 * Build tarball
 
-    perl Makefile.PL
-    make manifest
-    make dist
+    perl Makefile.PL && make manifest && make dist
 
 * Upload tarball to https://pause.perl.org
 
