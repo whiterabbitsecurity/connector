@@ -50,6 +50,19 @@ has http_auth => (
     isa => 'HashRef',
     );
 
+has undef_on_404 => (
+    is  => 'ro',
+    isa => 'Bool',
+    default => 0,
+    );
+
+has chomp_result => (
+    is  => 'ro',
+    isa => 'Bool',
+    default => 0,
+    );
+
+
 # If named_parameters is set using a string (necessary atm for Config::Std)
 # its converted to an arrayref. Might be removed if Config::* improves
 # This might create indefinite loops if something goes wrong on the conversion!
@@ -92,6 +105,10 @@ sub get {
     my $response = $self->agent()->request($req);
     
     if (!$response->is_success) {
+        if ( $response->code == 404 && $self->undef_on_404()) {
+            $self->log()->warn("Resource not found");
+            return $self->_node_not_exists();
+        }
         $self->log()->error($response->status_line);
         die "Unable to retrieve data from server";
     }
@@ -181,7 +198,10 @@ sub _parse_result {
 
     my $self  = shift;
     my $response = shift;
-    return $response->decoded_content;
+
+    my $res = $response->decoded_content;
+    chomp $res if ($self->chomp_result());
+    return $res;
 }
 
 
@@ -227,6 +247,18 @@ A HashRef, the key/value pairs are set as HTTP headers.
 
 A HashRef with I<user> and I<pass> used as credentials to perform a
 HTTP Basic Authentication.
+
+=item chomp_result
+
+When working with text documents the transport layer adds a trailing
+newline which might be unhandy when working with scalar values. If
+set to a true value, a trailing newline will be removed by calling C<chomp>.
+
+=item undef_on_404
+
+By default, the connector will die if a resource is not found. If set
+to a true value the connector returns undef, note that die_on_undef
+will be obeyed.
 
 =back
 
