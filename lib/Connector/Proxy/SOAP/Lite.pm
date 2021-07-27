@@ -391,11 +391,11 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
-=head 1 NAME
+=head1 NAME
 
 Connector::Proxy::SOAP::Lite
 
-=head 1 DESCRIPTION
+=head1 DESCRIPTION
 
 Make a SOAP call using the SOAP::Lite package. Use get if your SOAP call
 expects a scalar result or get_hash for a hashref. get_meta, get_list and

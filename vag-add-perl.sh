@@ -14,5 +14,5 @@ perlbrew use $latest
 cpanm Module::Install
 cpanm --installdeps --notest /vagrant
 
-perlbrew --notest install perl-5.8.9
-perlbrew use perl-5.8.9
+perlbrew --notest install perl-5.10.1
+perlbrew use perl-5.10.1
