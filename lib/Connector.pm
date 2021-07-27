@@ -10,7 +10,7 @@ package Connector;
 # because of the '//' operator in one of the sub-modules.
 use 5.10.1;
 
-our $VERSION = '1.39';
+our $VERSION = '1.40';
 
 use strict;
 use warnings;
