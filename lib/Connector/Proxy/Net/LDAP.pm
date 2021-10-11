@@ -71,6 +71,12 @@ has sizelimit => (
     isa => 'Int',
     );
 
+has raw => (
+    is  => 'rw',
+    isa => 'RegexpRef|Undef',
+    default => sub { return qr/(?i:;binary)/; },
+    );
+
 has debug => (
     is  => 'rw',
     isa => 'Int',
@@ -126,16 +132,16 @@ sub _build_options {
 
     my %options;
     foreach my $key (@_) {
-    if (defined $self->$key()) {
-        $options{$key} = $self->$key();
-    }
+        if (defined $self->$key()) {
+            $options{$key} = $self->$key();
+        }
     }
     return %options;
 }
 
 sub _build_new_options {
     my $self = shift;
-    return $self->_build_options(qw( timeout verify capath keepalive debug ));
+    return $self->_build_options(qw( timeout verify capath keepalive debug raw ));
 }
 
 sub _build_bind_options {
@@ -586,6 +592,12 @@ with the same name, see Net::LDAP for details.
 =item verify
 
 =item capath
+
+=item raw
+
+Enables utf8 for returned attribute values. The default value is
+qr/;binary/, set this to a Regex reference to change the attribute
+pattern for utf8 conversion or set I<undef> to disable it.
 
 =back
 
