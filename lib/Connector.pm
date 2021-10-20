@@ -310,7 +310,7 @@ sub exists {
         }
     };
 
-    $self->log()->debug('Got eval error ($EVAL_ERROR) for exist on path ' . join ".", @path ) if ($EVAL_ERROR);
+    $self->log()->debug("Got eval error ($EVAL_ERROR) for exist on path " . join ".", @path ) if ($EVAL_ERROR);
 
     return $result;
 }
