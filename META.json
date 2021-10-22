@@ -76,7 +76,7 @@
          "requires" : {
             "Log::Log4perl" : "0",
             "Moose" : "0",
-            "perl" : "v5.10.1"
+            "perl" : "5.010001"
          }
       }
    },
