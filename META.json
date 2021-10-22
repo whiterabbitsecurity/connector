@@ -76,7 +76,7 @@
          "requires" : {
             "Log::Log4perl" : "0",
             "Moose" : "0",
-            "perl" : "v5.10.1"
+            "perl" : "5.010001"
          }
       }
    },
@@ -92,7 +92,7 @@
          "web" : "https://github.com/mrscotty/connector"
       }
    },
-   "version" : "1.42",
+   "version" : "1.43",
    "x_contributors" : [
       "Martin Bartosch <m.bartosch@cynops.de>",
       "Martin Bartosch <mbartosch@whiterabbitsecurity.com>",
