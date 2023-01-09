@@ -203,9 +203,8 @@ sub set {
     my $target = $self->_sanitize_path( $file, $data );
 
     my $res = $self->_transfer( $source, $target );
-
     if ($res) {
-        die "Unable to transfer data";
+        die sprintf("Unable to transfer data (EC %01d)", $res);
     }
 
     return 1;
