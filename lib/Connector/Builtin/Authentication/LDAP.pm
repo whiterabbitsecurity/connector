@@ -137,6 +137,10 @@ sub _check_user_password {
         }
     }
 
+    # purge last binding information to enforce use of search bind user
+    # when indirect mode is enabled
+    $self->_purge_bind() if $self->indirect();
+
     if(!defined $userdn) {
       $self->log()->warn('Authentication failed');
       return 0;
