@@ -8,6 +8,7 @@ use File::Temp qw(tempfile tempdir);
 use File::Basename;
 use Net::SFTP;
 use Template;
+use Data::Dumper;
 use Syntax::Keyword::Try;
 
 use Moose;
@@ -54,6 +55,20 @@ has debug => (
     default => 0,
 );
 
+has ssh_args => (
+    is => 'rw',
+    isa => 'HashRef',
+    lazy => 1,
+    default => sub { return {} }
+);
+
+has _client => (
+    is  => 'ro',
+    isa => 'Net::SFTP',
+    lazy => 1,
+    builder => '_init_client',
+);
+
 # return the content of the file
 sub get {
 
@@ -64,7 +79,7 @@ sub get {
 
     my $filename = $self->_sanitize_path( $path );
     $self->log()->debug('Fetch '. $filename );
-    
+
     my $content = $sftp->get( $filename );
     return $content if (defined $content);
 
@@ -188,20 +203,24 @@ sub _sanitize_path {
 
 }
 
-sub _client {
+sub _init_client {
 
     my $self = shift;
     my $sftp;
     try {
-        $sftp  = Net::SFTP->new( $self->LOCATION(),
-            debug => $self->debug(),
+        my %args = (
+            debug => $self->debug() ? 1 : 0,
             user => $self->username(),
+            ssh_args => { %{$self->ssh_args()}, port => $self->port() },
+    	);
+	    $self->log()->trace(Dumper \%args);
+        $sftp = Net::SFTP->new( $self->LOCATION(),
+            %args,
             password => $self->password(),
-            ssh_args => [ port => $self->port() ],
-	    warn => sub { shift; $self->log()->warn('SFTP: ' . join(",", @_)) },
+            'warn' => sub { shift; $self->log()->warn('SFTP: ' . join(",", @_)) }
         );
-    } catch {
-        $self->_log_and_die(sprintf("Cannot connect to %s (%s)", $self->LOCATION(), $_));
+    } catch ($error) {
+        $self->_log_and_die(sprintf("Cannot connect to %s (%s)", $self->LOCATION(), $error));
     }
     return $sftp;
 }
@@ -230,22 +249,7 @@ The DNS name or IP of the target host.
 
 =item port
 
-Port number (Integer), default is 21.
-
-=item file
-
-Pattern for Template Toolkit to build the filename. The connector path
-components are available in the key ARGS. In set mode the unfiltered
-data is also available in key DATA.
-For security reasons, only word, space, dash, underscore and dot are
-allowed in the filename. If you want to include a directory, add the path
-parameter instead!
-
-=item path
-
-Same as file, but allows the directory seperator (slash and backslash)
-in the resulting filename. Use this for the full path including the
-filename as the file parameter is not used, when path is set!
+Port number (Integer), default is 22.
 
 =item basedir
 
@@ -258,27 +262,24 @@ Pattern for Template Toolkit to build the content. The data is passed
 
 =item username
 
-FTP username
+SFTP username
 
 =item password
 
-FTP password
+SFTP password
 
 =item timeout
 
-FTP connection timeout, default is 30 seconds
+SFTP connection timeout, default is 30 seconds
 
 =item debug (Boolean)
 
 Set the debug flag for Net::SFTP
 
-=item active (Boolean)
+=item ssh_args
 
-Use FTP active transfer. The default is to use passive transfer mode.
-
-=item binary (Boolean)
-
-Use binary or ascii transfer mode. Note that binary is the default!
+HashRef holding additional arguments to pass to underlying object.
+@see Net::SFTP / Net::SSH::Perl
 
 =back
 
@@ -317,10 +318,9 @@ Results in a file I</var/data/test.txt> with the content I<Hello John Doe>.
 
 =head1 A note on security
 
-To enable the scp transfer, the file is created on the local disk using
+To enable the transfer, the file is created on the local disk using
 tempdir/tempfile. The directory is created with permissions only for the
 current user, so no other user than root and yourself is able to see the
 content. The tempfile is cleaned up immediatly, the directory is handled
 by the internal garbage collection.
-
 
