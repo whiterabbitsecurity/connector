@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Try::Tiny;
 
-use Test::More tests => 22;
+use Test::More tests => 24;
 
 use Log::Log4perl;
 Log::Log4perl->easy_init( { level   => 'ERROR' } );
@@ -33,6 +33,7 @@ SKIP: {
     my $conn = Connector::Proxy::Proc::SafeExec->new(
         {   LOCATION => 't/config/test.sh',
             args     => ['foo'],
+            content => '[% payload %]',
             timeout  => 2,
         }
     );
@@ -125,6 +126,15 @@ SKIP: {
     ok ($conn->exists(''), 'Connector exists');
     ok ($conn->exists('foo'), 'Node Exists');
     ok ($conn->exists( [ 'foo' ] ), 'Node Exists Array');
+
+
+    # basic tests for set
+    $conn->stdin();
+    $conn->args(['--echo','[% FILE %]']);
+    like( $conn->set('foo', { payload => "Hello World" } ), qr@/tmp/\w+/\w+@ , 'Creating file');
+
+    $conn->args(['--cat','[% FILE %]']);
+    is( $conn->set('foo', { payload => 'Hello World' } ), 'Hello World', 'Writing file');
 
 }
 
