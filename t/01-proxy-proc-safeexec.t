@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 use English;
-use Try::Tiny;
+use Syntax::Keyword::Try;
 
 use Test::More tests => 24;
 
@@ -52,8 +52,8 @@ SKIP: {
     try {
         $conn->get();
     }
-    catch {
-        $exception = $_;
+    catch ($error) {
+        $exception = $error;
     };
     like(
         $exception,
@@ -69,8 +69,8 @@ SKIP: {
     try {
         $conn->get();
     }
-    catch {
-        $exception = $_;
+    catch($error) {
+        $exception = $error;
     };
     like( $exception, qr/^System command timed out/, 'Timeout: triggered' );
 

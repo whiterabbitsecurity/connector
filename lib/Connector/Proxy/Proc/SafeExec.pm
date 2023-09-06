@@ -11,7 +11,7 @@ use warnings;
 use English;
 use Proc::SafeExec;
 use File::Temp qw(tempdir tempfile);
-use Try::Tiny;
+use Syntax::Keyword::Try;
 use Template;
 
 use Data::Dumper;
@@ -175,11 +175,11 @@ sub _run_command {
         }
         alarm $self->timeout();
         $command->wait();
-    } catch {
-        if ($_ eq "alarm\n") {
+    } catch ($error) {
+        if ($error eq "alarm\n") {
             die "System command timed out after " . $self->timeout() . " seconds";
         }
-        die $_;
+        die $error;
     } finally {
         alarm 0;
     };
