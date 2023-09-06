@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 12;
+use Test::More tests => 14;
 
 use Log::Log4perl;
 Log::Log4perl->easy_init( { level   => 'ERROR' } );
