@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Syntax::Keyword::Try;
 
-use Test::More tests => 24;
+use Test::More tests => 23;
 
 use Log::Log4perl;
 Log::Log4perl->easy_init( { level   => 'ERROR' } );
@@ -131,7 +131,11 @@ SKIP: {
     # basic tests for set
     $conn->stdin();
     $conn->args(['--echo','[% FILE %]']);
-    like( $conn->set('foo', { payload => "Hello World" } ), qr@/tmp/\w+/\w+@ , 'Creating file');
+
+    SKIP_CF: {
+        skip "Not supported on MacOS", 1 if $^O eq 'darwin';
+        like( $conn->set('foo', { payload => "Hello World" } ), qr@/tmp/\w+/\w+@ , 'Creating file');
+    }
 
     $conn->args(['--cat','[% FILE %]']);
     is( $conn->set('foo', { payload => 'Hello World' } ), 'Hello World', 'Writing file');
