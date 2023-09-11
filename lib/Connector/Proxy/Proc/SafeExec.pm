@@ -99,7 +99,7 @@ sub set {
     print FILE $content;
     close FILE;
 
-    return $self->_run_command({ ARGS => \@args, FILE => $source });
+    return $self->_run_command({ ARGS => \@args, FILE => $source, DATA => $data });
 
 }
 
