@@ -6,7 +6,7 @@ use warnings;
 use English;
 use Syntax::Keyword::Try;
 
-use Test::More tests => 23;
+use Test::More tests => 24;
 
 use Log::Log4perl;
 Log::Log4perl->easy_init( { level   => 'ERROR' } );
