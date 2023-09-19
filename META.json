@@ -91,7 +91,7 @@
          "web" : "https://github.com/whiterabbitsecurity/connector"
       }
    },
-   "version" : "1.51",
+   "version" : "1.53",
    "x_contributors" : [
       "Martin Bartosch <m.bartosch@cynops.de>",
       "Martin Bartosch <mbartosch@whiterabbitsecurity.com>",
