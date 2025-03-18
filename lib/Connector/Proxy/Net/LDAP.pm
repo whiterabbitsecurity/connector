@@ -279,8 +279,10 @@ sub _init_bind {
 
     $self->log()->debug('Open bind to to ' . $self->LOCATION());
 
+    # LOCATION might contain multiple LDAP URI or hosts. We have to pass them as a array ref to Net::LDAP->new().
+    my @ldap_locations = split(',', $self->LOCATION());
     my $ldap = Net::LDAP->new(
-        $self->LOCATION(),
+        \@ldap_locations,
         $self->_build_new_options(),
     );
 
