@@ -4,13 +4,13 @@
       "Scott Hardin <mrscotty@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v3.1.3, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Minilla/v3.1.26, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "perl_5"
    ],
    "meta-spec" : {
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
-      "version" : "2"
+      "version" : 2
    },
    "name" : "Connector",
    "no_index" : {
@@ -53,7 +53,7 @@
          "requires" : {
             "Test::CPAN::Meta" : "0",
             "Test::MinimumVersion::Fast" : "0.04",
-            "Test::PAUSE::Permissions" : "0.04",
+            "Test::PAUSE::Permissions" : "0.07",
             "Test::Pod" : "1.41",
             "Test::Spellunker" : "v0.2.7"
          }
@@ -87,7 +87,7 @@
       "homepage" : "https://github.com/whiterabbitsecurity/connector",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/whiterabbitsecurity/connector.git",
+         "url" : "https://github.com/whiterabbitsecurity/connector.git",
          "web" : "https://github.com/whiterabbitsecurity/connector"
       }
    },
@@ -104,6 +104,6 @@
       "Scott T. Hardin <scott-1@hnsc.de>",
       "Scott T. Hardin <scott.hardin@hnsc.de>"
    ],
-   "x_serialization_backend" : "JSON::PP version 2.27400_02",
+   "x_serialization_backend" : "JSON::PP version 4.16",
    "x_static_install" : 1
 }
