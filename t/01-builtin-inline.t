@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use English;
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 
 use Log::Log4perl;
 Log::Log4perl->easy_init( { level   => 'ERROR' } );
@@ -34,6 +34,8 @@ is( $conn->get_size(['foo','nofoo']), 0);
 
 is( $conn->get(['foo','foo', 0 ]), 'baz' );
 is( $conn->get(['foo','foo', '0']), 'baz' );
+is( $conn->get('foo.foo.0'), 'baz' );
+is( $conn->get(['foo','foo', 1 ]), 'bar' );
 is( $conn->get(['foo','foo', '8']), undef );
 
 is( $conn->exists('foo.bar'), 1);
