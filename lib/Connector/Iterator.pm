@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use English;
 use Moose;
-use DateTime;
 use Data::Dumper;
 
 extends 'Connector';
