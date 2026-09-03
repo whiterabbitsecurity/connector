@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 use English;
-use Syntax::Keyword::Try;
+use Feature::Compat::Try;
 
 use Test::More tests => 24;
 
