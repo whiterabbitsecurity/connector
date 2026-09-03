@@ -11,7 +11,7 @@ package Connector;
 # use the '//' operator, which needs 5.10.
 use 5.014;
 
-our $VERSION = '1.55';
+our $VERSION = '1.56';
 
 use strict;
 use warnings;
