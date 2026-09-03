@@ -1,8 +1,13 @@
 requires 'Log::Log4perl';
 requires 'Moose';
-requires 'perl', '5.010001';
+requires 'perl', '5.014';
 recommends 'Config::Std';
+
+# DateTime needed for Connector::Iterator
+recommends 'DateTime';
+
 recommends 'DBI';
+recommends 'Feature::Compat::Try';
 recommends 'IO::Socket::SSL';
 recommends 'JSON';
 recommends 'LWP::Protocol::https';
@@ -24,9 +29,8 @@ on build => sub {
     requires 'LWP::Protocol::https';
     requires 'LWP::UserAgent';
     requires 'Proc::SafeExec';
-    requires 'Syntax::Keyword::Try';
+    requires 'Feature::Compat::Try';
     requires 'Template';
-    requires 'Test::More';
     requires 'YAML';
 };
 
@@ -36,4 +40,10 @@ on develop => sub {
     requires 'Test::PAUSE::Permissions', '0.04';
     requires 'Test::Pod', '1.41';
     requires 'Test::Spellunker', 'v0.2.7';
+};
+
+on test => sub {
+    requires 'DateTime';        # Connector::Iterator, t/01-multi.t
+    requires 'Path::Class';     # t/01-iterator.t, t/01-tee.t
+    requires 'Test::More';
 };

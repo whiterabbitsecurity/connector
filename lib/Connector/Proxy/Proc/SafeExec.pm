@@ -11,7 +11,7 @@ use warnings;
 use English;
 use Proc::SafeExec;
 use File::Temp qw(tempdir tempfile);
-use Syntax::Keyword::Try;
+use Feature::Compat::Try;
 use Template;
 
 use Data::Dumper;

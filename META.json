@@ -4,7 +4,7 @@
       "Scott Hardin <mrscotty@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v3.1.26, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Minilla/v3.1.29, CPAN::Meta::Converter version 2.150013",
    "license" : [
       "perl_5"
    ],
@@ -33,14 +33,13 @@
             "DBD::SQLite" : "0",
             "DBI" : "0",
             "ExtUtils::MakeMaker" : "6.59",
+            "Feature::Compat::Try" : "0",
             "IO::Socket::SSL" : "0",
             "JSON" : "0",
             "LWP::Protocol::https" : "0",
             "LWP::UserAgent" : "0",
             "Proc::SafeExec" : "0",
-            "Syntax::Keyword::Try" : "0",
             "Template" : "0",
-            "Test::More" : "0",
             "YAML" : "0"
          }
       },
@@ -62,6 +61,8 @@
          "recommends" : {
             "Config::Std" : "0",
             "DBI" : "0",
+            "DateTime" : "0",
+            "Feature::Compat::Try" : "0",
             "IO::Socket::SSL" : "0",
             "JSON" : "0",
             "LWP::Protocol::https" : "0",
@@ -75,7 +76,14 @@
          "requires" : {
             "Log::Log4perl" : "0",
             "Moose" : "0",
-            "perl" : "5.010001"
+            "perl" : "5.014"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "DateTime" : "0",
+            "Path::Class" : "0",
+            "Test::More" : "0"
          }
       }
    },
@@ -91,7 +99,7 @@
          "web" : "https://github.com/whiterabbitsecurity/connector"
       }
    },
-   "version" : "1.55",
+   "version" : "1.56",
    "x_contributors" : [
       "Martin Bartosch <m.bartosch@cynops.de>",
       "Martin Bartosch <mbartosch@whiterabbitsecurity.com>",

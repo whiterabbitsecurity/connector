@@ -6,11 +6,12 @@
 #
 package Connector;
 
-# This is the earliest version we've tested on and we need at least 5.10
-# because of the '//' operator in one of the sub-modules.
-use 5.010001;
+# Feature::Compat::Try requires 5.14; below that it falls back to
+# Syntax::Keyword::Try, which also requires 5.14. Sub-modules additionally
+# use the '//' operator, which needs 5.10.
+use 5.014;
 
-our $VERSION = '1.55';
+our $VERSION = '1.56';
 
 use strict;
 use warnings;

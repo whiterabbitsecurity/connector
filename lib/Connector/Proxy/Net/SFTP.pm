@@ -9,7 +9,7 @@ use File::Basename;
 use Net::SFTP;
 use Template;
 use Data::Dumper;
-use Syntax::Keyword::Try;
+use Feature::Compat::Try;
 
 use Moose;
 extends 'Connector::Proxy';
