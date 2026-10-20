@@ -39,7 +39,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::Simple
+Connector::Builtin::Simple - Static value connector
 
 =head1 Description
 

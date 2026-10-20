@@ -71,7 +71,7 @@ __DATA__
 
 =head1 Name
 
-Connector::Multi::YAML
+Connector::Multi::YAML - Multi-personality connector YAML backend
 
 =head1 Description
 

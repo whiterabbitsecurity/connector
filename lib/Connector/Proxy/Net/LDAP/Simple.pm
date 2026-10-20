@@ -163,7 +163,7 @@ __END__
 
 =head1 NAME
 
-Connector::Proxy::Net::LDAP::Simple
+Connector::Proxy::Net::LDAP::Simple - LDAP attribute connector
 
 =head1 DESCRIPTION
 

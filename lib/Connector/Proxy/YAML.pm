@@ -51,7 +51,7 @@ __END__
 
 =head1 Name
 
-Connector::Proxy::YAML
+Connector::Proxy::YAML - YAML connector
 
 =head1 Description
 

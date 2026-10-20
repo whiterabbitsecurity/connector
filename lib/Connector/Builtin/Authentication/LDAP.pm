@@ -219,7 +219,7 @@ __END__
 
 =head1 NAME
 
-Connector::Builtin::Authentication::LDAP
+Connector::Builtin::Authentication::LDAP - LDAP authentication connector
 
 =head1 DESCRIPTION
 

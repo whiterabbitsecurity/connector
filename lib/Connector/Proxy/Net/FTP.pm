@@ -274,7 +274,7 @@ __END__
 
 =head1 Name
 
-Connector::Proxy::Net::FTP
+Connector::Proxy::Net::FTP - FTP connector
 
 =head1 Description
 

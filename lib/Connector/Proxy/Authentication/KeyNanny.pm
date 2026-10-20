@@ -118,7 +118,7 @@ __END__
 
 =head1 Name
 
-Connector::Proxy::Authentication::KeyNanny
+Connector::Proxy::Authentication::KeyNanny - Keynanny authentication connector
 
 =head1 Description
 

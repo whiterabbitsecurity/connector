@@ -21,7 +21,7 @@ __END__
 
 =head1 NAME
 
-Connector::Builtin
+Connector::Builtin - Base class for built-in connectors
 
 =head1 DESCRIPTION
 

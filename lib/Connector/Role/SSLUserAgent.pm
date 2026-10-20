@@ -177,7 +177,11 @@ sub _init_agent {
 
 __END__;
 
-=head1 Connector::Role::SSLUserAgent
+=head1 Name
+
+Connector::Role::SSLUserAgent - HTTP UserAgent role
+
+=head1 Description
 
 Setup the HTTP UserAgent object with connection and SSL parameters.
 

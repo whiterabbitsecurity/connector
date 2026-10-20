@@ -270,7 +270,7 @@ __END__
 
 =head1 NAME
 
-Connector::Multi
+Connector::Multi - Multi-personality connector
 
 =head1 DESCRIPTION
 

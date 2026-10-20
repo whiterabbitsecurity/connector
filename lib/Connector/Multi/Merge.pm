@@ -65,7 +65,7 @@ __DATA__
 
 =head1 Name
 
-Connector::Multi::Merge
+Connector::Multi::Merge - Multi-personality connector merge backend
  
 =head1 Description
 

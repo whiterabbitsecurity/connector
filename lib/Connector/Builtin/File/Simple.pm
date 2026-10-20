@@ -55,7 +55,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::File::Simple
+Connector::Builtin::File::Simple - Simple file connector
 
 =head1 Description
 

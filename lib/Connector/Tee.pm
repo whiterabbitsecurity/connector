@@ -127,7 +127,7 @@ __END__
 
 =head1 Name
 
-Connector::Tee
+Connector::Tee - Multiplexing connector
 
 =head1 Description
 

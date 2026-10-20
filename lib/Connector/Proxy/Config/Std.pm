@@ -209,6 +209,6 @@ __END__
 
 =head1 Name
 
-Connector::Proxy::Config::Std
+Connector::Proxy::Config::Std - Config::Std connector
 
 =head1 Description

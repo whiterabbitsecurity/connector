@@ -53,7 +53,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::Null
+Connector::Builtin::Null - Empty connector
 
 =head1 Description
 

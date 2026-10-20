@@ -49,12 +49,16 @@ sub _render_local_path {
 __END__;
 
 
-=head1 Connector::Role::LocalPath
+=head1 Name
+
+Connector::Role::LocalPath - Local file role
+
+=head1 Description
 
 This role is used to generate file or pathnames from a template string
 and the path arguments given. It also accepts additional data as a hash.
 
-=head2 Parameters
+=head1 Parameters
 
 =over
 

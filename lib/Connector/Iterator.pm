@@ -104,7 +104,7 @@ __END__;
 
 =head1 Name
 
-Connector::Iterator
+Connector::Iterator - Connector iterator
 
 =head1 Description
 
@@ -154,4 +154,4 @@ By default, exceptions from the called connectors bubble up, the loop
 over the targets terminate. If set, all connectors are processed and 
 any exceptions are returned in the result.
 
-=back    
+=back

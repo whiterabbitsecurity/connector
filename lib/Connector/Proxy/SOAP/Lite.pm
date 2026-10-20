@@ -392,7 +392,7 @@ __END__
 
 =head1 NAME
 
-Connector::Proxy::SOAP::Lite
+Connector::Proxy::SOAP::Lite - SOAP connector
 
 =head1 DESCRIPTION
 

@@ -323,7 +323,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::File::SCP
+Connector::Builtin::File::SCP - SCP connector
 
 =head1 Description
 

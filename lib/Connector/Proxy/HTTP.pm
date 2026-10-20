@@ -223,7 +223,7 @@ __END__
 
 =head1 NAME
 
-Connector::Proxy::HTTP
+Connector::Proxy::HTTP - HTTP connector
 
 =head1 DESCRIPTION
 

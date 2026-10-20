@@ -126,7 +126,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::Authentication::Password
+Connector::Builtin::Authentication::Password - Unix authentication connector
 
 =head1 Description
 

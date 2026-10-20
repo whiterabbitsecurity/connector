@@ -72,7 +72,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::Env
+Connector::Builtin::Env - Environment connector
 
 =head1 Description
 

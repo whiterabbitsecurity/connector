@@ -51,7 +51,7 @@ __END__
 
 =head1 Name
 
-Connector
+Connector::Proxy - Base class for proxy connectors
 
 =head1 Description
 

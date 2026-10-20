@@ -244,7 +244,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::System::Exec
+Connector::Builtin::System::Exec - System command connector
 
 =head1 Description
 

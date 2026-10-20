@@ -266,7 +266,7 @@ __END__
 
 =head1 NAME
 
-Connector::Proxy::Net::LDAP::Single
+Connector::Proxy::Net::LDAP::Single - LDAP item connector
 
 =head1 DESCRIPTION
 

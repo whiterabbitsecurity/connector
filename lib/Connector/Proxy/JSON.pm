@@ -56,7 +56,7 @@ __END__
 
 =head1 Name
 
-Connector::Proxy::JSON
+Connector::Proxy::JSON - JSON connector
 
 =head1 Description
 

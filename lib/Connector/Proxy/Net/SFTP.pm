@@ -230,7 +230,7 @@ __END__
 
 =head1 Name
 
-Connector::Proxy::Net::SFTP
+Connector::Proxy::Net::SFTP - SFTP connector
 
 =head1 Description
 

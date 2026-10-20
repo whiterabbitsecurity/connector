@@ -643,7 +643,7 @@ __END__
 
 =head1 NAME
 
-Connector::Proxy::Net::LDAP
+Connector::Proxy::Net::LDAP - LDAP connector base class
 
 =head1 DESCRIPTION
 

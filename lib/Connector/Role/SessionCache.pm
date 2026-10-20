@@ -35,6 +35,12 @@ before 'DEMOLISH' => sub {
     }
 };
 
+=head1 Name
+
+Connector::Role::SessionCache - Session cache role
+
+=head1 Description
+
 =head2 attach_session
 
 Reads authid from the class and checks if the session cache has a

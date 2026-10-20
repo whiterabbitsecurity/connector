@@ -137,7 +137,7 @@ __END__
 
 =head1 NAME
 
-Connector::Proxy::Net::LDAP::DN
+Connector::Proxy::Net::LDAP::DN - LDAP directory connector
 
 =head1 DESCRIPTION
 

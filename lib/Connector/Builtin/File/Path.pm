@@ -202,7 +202,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::File::Path
+Connector::Builtin::File::Path - File connector
 
 =head1 Description
 

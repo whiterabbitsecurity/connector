@@ -28,7 +28,7 @@ __END__
 
 =head1 Name
 
-Connector::Builtin::Inline
+Connector::Builtin::Inline - Inline data connector
 
 =head1 Description
 

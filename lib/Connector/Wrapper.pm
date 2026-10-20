@@ -131,7 +131,7 @@ __END__
 
 =head1 Name
 
-Connector
+Connector::Wrapper - Prefix-wrapping connector
 
 =head1 Description
 

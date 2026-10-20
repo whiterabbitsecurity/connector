@@ -267,7 +267,7 @@ __END__
 
 =head1 Name
 
-Connector::Proxy::DBI
+Connector::Proxy::DBI - DBI connector
 
 =head1 Description
 
