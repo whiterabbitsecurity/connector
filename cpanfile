@@ -46,4 +46,5 @@ on test => sub {
     requires 'DateTime';        # Connector::Iterator, t/01-multi.t
     requires 'Path::Class';     # t/01-iterator.t, t/01-tee.t
     requires 'Test::More';
+    requires 'Test::RequiresInternet';
 };

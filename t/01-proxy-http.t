@@ -6,6 +6,7 @@ use warnings;
 use English;
 use Log::Log4perl qw(:easy);
 
+use Test::RequiresInternet ('raw.githubusercontent.com' => 443);
 use Test::More tests => 7;
 
 Log::Log4perl->easy_init($ERROR);
